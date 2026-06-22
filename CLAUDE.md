@@ -25,8 +25,9 @@ python scripts/generate_dataset.py
 
 ## Architecture
 Pipeline: `model` (load features) → `geo` (project lat/lon to blocks) →
-`raster` (2D fill) → `volume` (3D voxels) → `builder` (assemble city) →
-`schematic` / `preview` (export). See README "How it works".
+`terrain` (river-valley heightmap) → `raster` (2D fill) → `volume` (3D voxels)
+→ `builder` (assemble terrain-aware city: roads, buildings, roofs, landmarks,
+furniture) → `schematic` / `preview` (export). See README "How it works".
 
 ## Conventions
 - Keep it dependency-free (stdlib only). `osm.py` uses `urllib` for live OSM.

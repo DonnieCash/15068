@@ -8,12 +8,27 @@ WorldEdit / FAWE.
 It is written in **pure Python (standard library only)** — no `pip install`
 needed to build the twin — and ships with:
 
+- **Real river-valley terrain.** The ground is carved from a Chebyshev
+  distance-to-river field plus value-noise hills, so the city climbs away from
+  the Allegheny the way the real one does.
+- **Detailed buildings** with foundations that follow the slope, per-storey
+  interior floors, windowed facades, glassy commercial storefronts, doors, and
+  two roof systems — flat parapet roofs (with rooftop HVAC) for commercial/civic
+  blocks and stepped **hip roofs** (built from a distance transform) for houses.
+- **Modelled landmarks**: Mount Saint Peter Church (nave, stained glass, bell
+  tower + spire + cross), City Hall (quartz colonnade + copper dome), the
+  Tarentum Bridge (truss towers, deck, piers, suspension cables), and a
+  veterans' monument.
+- **Street life**: sidewalks and curbs around every road, painted centre lines
+  on arterials, street lamps, mixed-species street trees, park flowers and a
+  pond, and the odd parked car.
 - a representative dataset of New Kensington's avenue/street grid, the Allegheny
-  River, the Tarentum Bridge, Memorial Park and named landmarks, anchored to
+  River, Constitution Boulevard, Memorial Park and named landmarks, anchored to
   real latitude/longitude;
 - a **live OpenStreetMap importer** for an exact-footprint twin when you have
   network access;
-- a **WorldEdit-compatible Sponge `.schem`** exporter;
+- a **WorldEdit-compatible Sponge `.schem`** exporter (full block-state palette
+  — stairs, slabs, panes, doors, logs, not just cubes);
 - a **top-down PNG map** renderer so you can preview the twin without launching
   the game.
 
@@ -66,24 +81,28 @@ bundled dataset, so a build always succeeds.
 features (bundled JSON or live OSM)
         │   model.py        load + typed feature model
         ▼
-   projection             geo.py     lat/lon → local metres → block grid
+   projection             geo.py       lat/lon → local metres → block grid
         ▼
-   rasterisation          raster.py  scanline polygon fill, thick polylines, disks
+   terrain heightmap      terrain.py   river-valley elevation (distance + noise)
         ▼
-   voxel volume           volume.py  dense 3D array of palette indices
-        │   builder.py     terrain → water/parks → roads → bridges → buildings → trees → landmarks
+   rasterisation          raster.py    scanline polygon fill, thick polylines, disks
         ▼
-   export                 schematic.py  Sponge Schematic v2 (.schem)  +  preview.py  top-down PNG
+   voxel volume           volume.py    dense 3D array of palette indices
+        │   builder.py     terrain → water/parks → roads+sidewalks → bridges →
+        │                  buildings (facades/floors/roofs) → furniture → landmarks
+        ▼
+   export                 schematic.py  Sponge Schematic v2 (.schem)  +  preview.py  PNG
 ```
 
 | Module | Responsibility |
 | --- | --- |
 | `geo.py` | Local equirectangular projection; lat/lon ↔ block coordinates. |
+| `terrain.py` | River-valley heightmap (two-pass Chebyshev distance transform + value-noise hills). |
 | `model.py` | Feature model (`Building`, `Road`, `Area`, `Point`, `City`) and JSON loader. |
 | `raster.py` | 2D rasterisation: polygon fill, thick polylines, disks. |
 | `volume.py` | Dense voxel grid in Sponge index order. |
-| `blocks.py` | Material → block-id palette. |
-| `builder.py` | Assembles the layered voxel city. |
+| `blocks.py` | Material → block-id palette and block-state helpers (stairs/slabs/doors/…). |
+| `builder.py` | Assembles the layered, terrain-aware voxel city. |
 | `schematic.py` | Writes Sponge Schematic v2; varint block data. |
 | `nbt.py` | Minimal dependency-free NBT reader/writer. |
 | `preview.py` | Hand-rolled PNG encoder for top-down maps. |

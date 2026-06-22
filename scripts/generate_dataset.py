@@ -124,22 +124,42 @@ def build() -> dict:
 
             # Downtown core: low avenue index + central streets -> taller.
             core = (i <= 2) and (abs(j - (N_STREETS - 1) / 2) <= 3)
+            # Fifth Avenue frontage (avenue index 1) is the commercial spine.
+            commercial = core or i == 1
+            if i == 0:
+                use = "industrial"          # riverfront blocks
+            elif commercial:
+                use = "commercial"
+            else:
+                use = "residential"
+            if (i + j) % 17 == 0:
+                use = "civic"
+
             if core:
                 levels = 3 + ((i + j) % 4)         # 3..6 storeys
+            elif use == "industrial":
+                levels = 2 + ((i + j) % 2)
             else:
                 levels = 2 + ((i + j) % 2)         # 2..3 storeys
 
-            material = _wall_for(i, j)
-            roof = "roof_flat" if core else None
+            mat = _wall_for(i, j) if use == "residential" else None
 
             # Split larger blocks into two structures for a finer grain.
             if (bu1 - bu0) > 70:
                 mid = (bu0 + bu1) / 2.0
-                features.append(_building(bu0, mid - 4, bv0, bv1, levels, material, roof))
+                features.append(_building(bu0, mid - 4, bv0, bv1, levels, mat, use))
                 features.append(_building(mid + 4, bu1, bv0, bv1,
-                                          max(2, levels - 1), material, roof))
+                                          max(2, levels - 1), mat, use))
             else:
-                features.append(_building(bu0, bu1, bv0, bv1, levels, material, roof))
+                features.append(_building(bu0, bu1, bv0, bv1, levels, mat, use))
+
+    # --- Constitution Boulevard: a primary arterial along the valley ------
+    features.append({
+        "kind": "road", "name": "Constitution Boulevard", "class": "primary",
+        "width_m": 14,
+        "geometry": [uv_to_lonlat(street_u[1], avenue_v[2] + 20),
+                     uv_to_lonlat(street_u[-2], avenue_v[2] + 20)],
+    })
 
     # --- Tarentum Bridge across the Allegheny -----------------------------
     bridge_u = street_u[3]
@@ -153,29 +173,52 @@ def build() -> dict:
                      uv_to_lonlat(bridge_u, river_outer - 40)],
     })
 
-    # --- Memorial Park ----------------------------------------------------
+    # --- Memorial Park + pond + war monument ------------------------------
     pu0 = street_u[-3]
     features.append({
         "kind": "park",
         "name": "Memorial Park",
         "geometry": rect(pu0, pu0 + 150, avenue_v[4] + 10, avenue_v[6] - 10),
     })
-    # a few trees in the park
-    for k in range(8):
-        tu = pu0 + 20 + (k % 4) * 32
-        tv = avenue_v[4] + 25 + (k // 4) * 60
-        features.append({"kind": "tree", "geometry": uv_to_lonlat(tu, tv)})
+    features.append({
+        "kind": "pond", "name": "Memorial Park Pond",
+        "geometry": rect(pu0 + 95, pu0 + 135, avenue_v[5] - 15, avenue_v[5] + 25),
+    })
+    features.append({
+        "kind": "landmark", "name": "Veterans Memorial", "structure": "monument",
+        "height": 16, "geometry": uv_to_lonlat(pu0 + 40, avenue_v[5] + 5),
+    })
+    # park trees of mixed species
+    species = ["oak", "birch", "spruce", "dark_oak"]
+    for k in range(10):
+        tu = pu0 + 18 + (k % 5) * 28
+        tv = avenue_v[4] + 22 + (k // 5) * 64
+        features.append({"kind": "tree", "species": species[k % 4],
+                         "geometry": uv_to_lonlat(tu, tv)})
 
-    # --- landmarks (approximate positions within the core) ----------------
+    # --- riverwalk along the Allegheny ------------------------------------
+    features.append({
+        "kind": "riverwalk", "name": "Allegheny Riverwalk",
+        "geometry": rect(u_min - 20, u_max + 20, river_inner, river_inner + 8),
+    })
+
+    # --- street trees down Fifth Avenue verge -----------------------------
+    for k in range(12):
+        tu = u_min + 40 + k * 90
+        features.append({"kind": "tree", "species": "oak",
+                         "geometry": uv_to_lonlat(tu, avenue_v[1] + 14)})
+
+    # --- modelled landmarks (approximate positions within the core) -------
     landmarks = [
-        ("Mount Saint Peter Church", street_u[2], avenue_v[5] + 30, 34, "roof_church"),
-        ("New Kensington City Hall", street_u[6], avenue_v[1] + 20, 26, None),
-        ("Citizens General Hospital", street_u[9], avenue_v[3] + 30, 30, None),
-        ("PNC Bank Building", street_u[6] + 10, avenue_v[1] - 10, 28, None),
+        ("Mount Saint Peter Church", street_u[2], avenue_v[5] + 30, 40, "church", 22),
+        ("New Kensington City Hall", street_u[6], avenue_v[1] + 22, 30, "cityhall", 24),
+        ("Citizens General Hospital", street_u[10], avenue_v[3] + 30, 34, "tower", 28),
+        ("PNC Bank Building", street_u[5] + 10, avenue_v[1] - 12, 30, "tower", 16),
     ]
-    for name, u, v, h, _roof in landmarks:
+    for name, u, v, h, structure, fp in landmarks:
         features.append({
             "kind": "landmark", "name": name, "height": h,
+            "structure": structure, "footprint": fp,
             "geometry": uv_to_lonlat(u, v),
         })
 
@@ -190,15 +233,15 @@ def build() -> dict:
     }
 
 
-def _building(u0, u1, v0, v1, levels, material, roof) -> dict:
+def _building(u0, u1, v0, v1, levels, material, use) -> dict:
     feat = {
         "kind": "building",
         "geometry": rect(u0, u1, v0, v1),
         "levels": levels,
-        "material": material,
+        "use": use,
     }
-    if roof:
-        feat["roof"] = roof
+    if material:
+        feat["material"] = material
     return feat
 
 

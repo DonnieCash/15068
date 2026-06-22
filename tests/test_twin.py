@@ -8,8 +8,9 @@ import unittest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from newken_twin import nbt, raster
-from newken_twin.blocks import AIR, Palette, material
-from newken_twin.builder import GROUND_Y, CityBuilder
+from newken_twin.blocks import (AIR, Palette, base_id, door_state, log,
+                                material, slab, stairs, with_states)
+from newken_twin.builder import CityBuilder, _inset_distance
 from newken_twin.data import load_default_city
 from newken_twin.geo import BBox, LatLon, Projection, bbox_around, haversine_m
 from newken_twin.model import Building, City, Road, city_from_dict
@@ -17,6 +18,7 @@ from newken_twin.preview import render_topdown, write_png
 from newken_twin.schematic import (DEFAULT_DATA_VERSION, build_block_data,
                                     decode_varints, encode_varint,
                                     schematic_nbt, write_schematic)
+from newken_twin.terrain import WATER_Y, Heightmap
 from newken_twin.volume import Volume
 
 
@@ -140,6 +142,75 @@ class TestNBT(unittest.TestCase):
             self.assertEqual(parsed["v"], 42)
         finally:
             os.unlink(path)
+
+
+class TestBlockStates(unittest.TestCase):
+    def test_with_states_sorted_and_bools(self):
+        s = with_states("minecraft:oak_stairs", facing="east", waterlogged=False)
+        self.assertEqual(s, "minecraft:oak_stairs[facing=east,waterlogged=false]")
+
+    def test_with_states_empty(self):
+        self.assertEqual(with_states("minecraft:stone"), "minecraft:stone")
+
+    def test_stairs_slab_log(self):
+        self.assertEqual(stairs("minecraft:brick_stairs", "north"),
+                         "minecraft:brick_stairs[facing=north,half=bottom]")
+        self.assertEqual(slab("minecraft:stone_slab", "top"),
+                         "minecraft:stone_slab[type=top]")
+        self.assertEqual(log("minecraft:oak_log", "x"), "minecraft:oak_log[axis=x]")
+
+    def test_door_state(self):
+        d = door_state("minecraft:oak_door", "north", "lower")
+        self.assertEqual(
+            d, "minecraft:oak_door[facing=north,half=lower,hinge=left,open=false]")
+
+    def test_base_id_strips_state(self):
+        self.assertEqual(base_id("minecraft:oak_stairs[facing=east]"),
+                         "minecraft:oak_stairs")
+        self.assertEqual(base_id("minecraft:stone"), "minecraft:stone")
+
+    def test_palette_distinguishes_states(self):
+        pal = Palette()
+        a = pal.id_of("minecraft:oak_stairs[facing=east]")
+        b = pal.id_of("minecraft:oak_stairs[facing=west]")
+        self.assertNotEqual(a, b)
+
+
+class TestTerrain(unittest.TestCase):
+    def test_river_carved_and_inland_rises(self):
+        hm = Heightmap(40, 40)
+        water = {(x, 0) for x in range(40)}  # a river band along z=0
+        hm.build(water)
+        # water cells carved below the surface and flagged
+        self.assertTrue(hm.water(5, 0))
+        self.assertLess(hm.height(5, 0), WATER_Y)
+        # inland (far from the river) is higher than the shoreline
+        near = hm.height(20, 1)
+        far = hm.height(20, 39)
+        self.assertGreaterEqual(far, near)
+        self.assertGreater(far, WATER_Y)
+
+    def test_distance_transform_is_deterministic(self):
+        a = Heightmap(30, 30)
+        b = Heightmap(30, 30)
+        src = {(0, 0), (29, 29)}
+        a.build(src)
+        b.build(src)
+        self.assertEqual(list(a.surface), list(b.surface))
+
+
+class TestRoofGeometry(unittest.TestCase):
+    def test_inset_distance_peaks_in_centre(self):
+        interior = {(x, z) for x in range(7) for z in range(7)}
+        dist = _inset_distance(interior)
+        # boundary cells are 0; the centre is the deepest inset
+        self.assertEqual(dist[(0, 0)], 0)
+        self.assertEqual(dist[(3, 3)], max(dist.values()))
+        # neighbours never differ by more than 1 (clean stepped roof)
+        for (x, z), d in dist.items():
+            for dx, dz in ((1, 0), (0, 1)):
+                if (x + dx, z + dz) in dist:
+                    self.assertLessEqual(abs(dist[(x + dx, z + dz)] - d), 1)
 
 
 class TestPaletteBlocks(unittest.TestCase):
@@ -319,22 +390,25 @@ class TestBuilderIntegration(unittest.TestCase):
             "features": [
                 {"kind": "road", "class": "primary",
                  "geometry": [[-79.7605, 40.5], [-79.7595, 40.5]]},
-                {"kind": "building", "levels": 4,
+                {"kind": "building", "levels": 4, "use": "commercial",
                  "geometry": [[-79.7602, 40.5003], [-79.7599, 40.5003],
                               [-79.7599, 40.5006], [-79.7602, 40.5006]]},
-                {"kind": "landmark", "height": 18, "geometry": [-79.7600, 40.4997]},
+                {"kind": "landmark", "height": 18, "structure": "tower",
+                 "geometry": [-79.7600, 40.4997]},
             ],
         }
         city = city_from_dict(doc)
         result = CityBuilder(city, meters_per_block=1.0).build()
         vol = result.volume
+        hm = result.heightmap
         self.assertGreater(vol.width, 5)
         self.assertGreater(vol.length, 5)
-        # ground layer exists everywhere
-        self.assertNotEqual(vol.get_index(0, 0, 0), 0)             # bedrock
-        self.assertNotEqual(vol.get_index(1, GROUND_Y, 1), 0)     # grass
-        # something was built above ground level (a wall or landmark)
-        above = sum(1 for y in range(GROUND_Y + 1, vol.height)
+        # bedrock everywhere; terrain surface present
+        self.assertNotEqual(vol.get_index(0, 0, 0), 0)
+        gx, gz = 1, 1
+        self.assertNotEqual(vol.get_index(gx, hm.height(gx, gz), gz), 0)
+        # something was built above the local terrain surface
+        above = sum(1 for y in range(hm.max_height() + 1, vol.height)
                     for z in range(vol.length) for x in range(vol.width)
                     if vol.get_index(x, y, z))
         self.assertGreater(above, 0)
@@ -349,6 +423,8 @@ class TestBuilderIntegration(unittest.TestCase):
         data = build_block_data(vol)
         self.assertEqual(len(decode_varints(data)),
                          vol.width * vol.height * vol.length)
+        # palette stays well within single-byte varint range
+        self.assertLess(len(vol.palette), 128)
 
 
 class TestPreview(unittest.TestCase):
@@ -358,7 +434,7 @@ class TestPreview(unittest.TestCase):
         vol = Volume(4, 6, 4, pal)
         for x in range(4):
             for z in range(4):
-                vol.set(x, GROUND_Y, z, "minecraft:grass_block")
+                vol.set(x, 3, z, "minecraft:grass_block")
         pixels, w, h = render_topdown(vol)
         self.assertEqual((w, h), (4, 4))
         self.assertEqual(len(pixels), 3 * 4 * 4)

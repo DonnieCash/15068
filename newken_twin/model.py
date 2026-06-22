@@ -52,6 +52,7 @@ class Building:
     material: Optional[str] = None
     roof: Optional[str] = None
     name: str = ""
+    use: str = "residential"  # residential | commercial | civic | industrial
 
     @property
     def height_blocks(self) -> int:
@@ -88,6 +89,9 @@ class Point:
     kind: str = "landmark"
     name: str = ""
     height: int = 0  # for landmarks; 0 -> use a default
+    structure: str = "tower"  # church | cityhall | monument | tower
+    footprint: int = 16       # plan size in blocks for built landmarks
+    species: Optional[str] = None  # for trees: oak|birch|spruce|dark_oak
 
 
 @dataclass
@@ -145,6 +149,7 @@ def city_from_dict(doc: dict) -> City:
                 material=feat.get("material"),
                 roof=feat.get("roof"),
                 name=feat.get("name", ""),
+                use=feat.get("use", "residential"),
             ))
         elif kind == "road":
             city.roads.append(Road(
@@ -154,7 +159,7 @@ def city_from_dict(doc: dict) -> City:
                 name=feat.get("name", ""),
                 bridge=bool(feat.get("bridge", False)),
             ))
-        elif kind in ("water", "park", "plaza"):
+        elif kind in ("water", "park", "plaza", "pond", "riverwalk"):
             city.areas.append(Area(
                 geometry=_to_latlon_list(geom),
                 kind=kind,
@@ -166,6 +171,9 @@ def city_from_dict(doc: dict) -> City:
                 kind=kind,
                 name=feat.get("name", ""),
                 height=int(feat.get("height", 0)),
+                structure=feat.get("structure", "tower"),
+                footprint=int(feat.get("footprint", 16)),
+                species=feat.get("species"),
             ))
         else:
             raise ValueError(f"Unknown feature kind: {kind!r}")

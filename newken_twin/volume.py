@@ -58,5 +58,19 @@ class Volume:
         for y in range(lo, hi + 1):
             self.data[self._index(x, y, z)] = idx
 
+    def fill_layer(self, y: int, block: str) -> None:
+        """Fill an entire horizontal y-plane (fast contiguous slice)."""
+        if not (0 <= y < self.height):
+            return
+        idx = self.palette.id_of(block)
+        plane = self.width * self.length
+        start = y * plane
+        self.data[start:start + plane] = (array("H", [idx]) * plane)
+
+    @property
+    def stride_y(self) -> int:
+        """Memory stride between consecutive y levels of the same column."""
+        return self.width * self.length
+
     def non_air_count(self) -> int:
         return sum(1 for v in self.data if v)

@@ -13,7 +13,7 @@ from .model import City, load_city
 from .schematic import write_schematic
 from .volume import Volume
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 __all__ = [
     "BuildResult",
