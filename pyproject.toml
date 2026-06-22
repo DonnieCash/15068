@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "newken-twin"
+version = "1.0.0"
+description = "Minecraft digital twin generator for New Kensington, PA (pure stdlib)."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+keywords = ["minecraft", "digital-twin", "schematic", "openstreetmap", "worldedit"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Games/Entertainment",
+]
+dependencies = []
+
+[project.scripts]
+newken-twin = "newken_twin.cli:main"
+
+[tool.setuptools]
+packages = ["newken_twin", "newken_twin.data"]
+
+[tool.setuptools.package-data]
+"newken_twin.data" = ["*.json"]

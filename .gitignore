@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+
+# Build outputs are regenerated; the committed examples under build/ are kept
+# explicitly (see below).
+build/*
+!build/new_kensington.schem
+!build/new_kensington_preview.png
