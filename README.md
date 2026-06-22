@@ -8,6 +8,10 @@ WorldEdit / FAWE.
 It is written in **pure Python (standard library only)** — no `pip install`
 needed to build the twin — and ships with:
 
+- **Real geography from authoritative data.** The Allegheny River's course, the
+  street grid's orientation (~352°), and the city's east-bank offset are all
+  derived from the **US Census TIGER/Line ZCTA boundary for ZIP 15068**
+  (`newken_twin/data/nk_real_geo.json`). The river you see is the real river.
 - **Real river-valley terrain.** The ground is carved from a Chebyshev
   distance-to-river field plus value-noise hills, so the city climbs away from
   the Allegheny the way the real one does.
@@ -127,12 +131,25 @@ the two are interchangeable. Regenerate it with:
 python scripts/generate_dataset.py
 ```
 
-> **Note on fidelity.** This sandbox has no access to OpenStreetMap, so the
-> bundled dataset is a *representative* parametric model of New Kensington's
-> downtown — its real numbered-avenue/street grid, the Allegheny River, the
-> Tarentum Bridge, Memorial Park and several real landmarks, all anchored to the
-> city's true coordinates. For a block-exact reproduction of every footprint,
-> run with `--osm` (or drop a real OSM export in via `--dataset`).
+### What's real vs. modelled
+
+| Layer | Source |
+| --- | --- |
+| Allegheny River course | **Real** — US Census ZCTA 15068 boundary (the river is the ZIP/county line). |
+| Grid orientation & east-bank offset | **Real** — derived from the same Census geometry. |
+| City extent / coordinates | **Real** — anchored to downtown New Kensington (40.5695, −79.7647). |
+| Street grid, building footprints | **Modelled** — a faithful numbered-avenue/street grid; not block-exact OSM footprints. |
+| Terrain relief | **Modelled** — valley shape is data-driven (distance to the real river) + noise. |
+
+`newken_twin/data/nk_real_geo.json` holds the extracted real geometry (river
+polyline, bearing, offset, area), with attribution to the US Census (public
+domain) via the OpenDataDE GeoJSON mirror.
+
+> **Block-exact footprints.** Live OpenStreetMap (and most GIS hosts) are not
+> reachable from the build sandbox, so individual building footprints are
+> modelled rather than traced. For a block-exact reproduction of every real
+> building, run with `--osm` on a networked machine (or feed a real OSM/GeoJSON
+> export via `--dataset`) — the importer emits the same schema this dataset uses.
 
 ---
 

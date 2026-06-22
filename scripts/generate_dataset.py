@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Generate the bundled New Kensington, PA dataset.
 
-Without live OpenStreetMap access we build a *representative* model of the
-city's downtown core, anchored to real-world coordinates and tagged in the same
-GeoJSON-style schema the OSM importer emits.  The result is a believable
-gridded river town: the numbered-avenue / numbered-street grid, the Allegheny
-River, the Tarentum Bridge, Memorial Park and several real landmarks.
+The street grid is anchored to **real geography**: the Allegheny River course,
+the grid's orientation and the city's east-bank offset are all derived from the
+authoritative US Census TIGER/Line ZCTA boundary for ZIP 15068 (see
+``newken_twin/data/nk_real_geo.json``).  Building footprints within that real
+frame are modelled procedurally (block-exact footprints require live OSM, which
+the OSM importer fetches when network is available).
 
 Run from the repo root:
 
@@ -21,27 +22,31 @@ import math
 import os
 from typing import List
 
-# --- real-world anchor ----------------------------------------------------
-# Downtown New Kensington, Westmoreland County, Pennsylvania.
-CENTER_LAT = 40.5695
-CENTER_LON = -79.7647
+HERE = os.path.dirname(__file__)
+REAL_GEO_PATH = os.path.join(HERE, "..", "newken_twin", "data", "nk_real_geo.json")
+OUT_PATH = os.path.join(HERE, "..", "newken_twin", "data", "new_kensington.json")
 
-# Avenue bearing (degrees clockwise from north).  The grid is rotated so the
-# avenues run parallel to the Allegheny River (which flows roughly NW->SE).
-AVENUE_BEARING = 132.0
+with open(os.path.normpath(REAL_GEO_PATH), encoding="utf-8") as _f:
+    REAL = json.load(_f)
 
+# Real Allegheny River centreline (lon/lat) from the Census ZCTA boundary.
+RIVER_POLY: List[List[float]] = REAL["river_polyline_lonlat"]
+# Real grid orientation: avenues run parallel to the river.
+AVENUE_BEARING = REAL["river_bearing_deg"]        # ~352 deg (nearly N-S here)
+DOWNTOWN_LAT, DOWNTOWN_LON = REAL["downtown"]      # [lat, lon]
+
+RIVER_WIDTH_M = 200.0       # rendered width of the Allegheny
+RIVER_TO_FIRST_M = 185.0    # First Avenue's offset inland from the centreline
 AVENUE_SPACING_M = 82.0     # distance between consecutive avenues
 STREET_SPACING_M = 108.0    # distance between consecutive cross-streets
-N_AVENUES = 8               # Fourth Ave .. Eleventh Ave
+N_AVENUES = 9               # First Avenue .. Ninth Avenue (river -> inland)
 N_STREETS = 13              # numbered cross-streets
 SETBACK_M = 9.0             # building setback from the block edge
 
-AVENUE_NAMES = ["Fourth Avenue", "Fifth Avenue", "Sixth Avenue",
-                "Seventh Avenue", "Eighth Avenue", "Ninth Avenue",
-                "Tenth Avenue", "Eleventh Avenue"]
-
-OUT_PATH = os.path.join(os.path.dirname(__file__), "..",
-                        "newken_twin", "data", "new_kensington.json")
+AVENUE_NAMES = ["First Avenue", "Second Avenue", "Third Avenue",
+                "Fourth Avenue", "Fifth Avenue", "Sixth Avenue",
+                "Seventh Avenue", "Eighth Avenue", "Ninth Avenue"]
+COMMERCIAL_AVE = 4          # Fifth Avenue is the historic commercial spine
 
 
 def meters_per_degree(lat_deg: float):
@@ -51,17 +56,23 @@ def meters_per_degree(lat_deg: float):
     return m_lat, m_lon
 
 
-_M_LAT, _M_LON = meters_per_degree(CENTER_LAT)
+_M_LAT, _M_LON = meters_per_degree(DOWNTOWN_LAT)
 _ALPHA = math.radians(AVENUE_BEARING)
+_SIN, _COS = math.sin(_ALPHA), math.cos(_ALPHA)
+
+# Anchor the local frame at the river-centreline point nearest downtown.
+_ANCHOR = min(RIVER_POLY, key=lambda p: ((p[0] - DOWNTOWN_LON) * _M_LON) ** 2
+              + ((p[1] - DOWNTOWN_LAT) * _M_LAT) ** 2)
+_ANCHOR_LON, _ANCHOR_LAT = _ANCHOR
 
 
 def uv_to_lonlat(u: float, v: float) -> List[float]:
-    """Map local grid metres (u along avenues, v across) to [lon, lat]."""
-    east_m = u * math.sin(_ALPHA) + v * math.cos(_ALPHA)
-    north_m = u * math.cos(_ALPHA) - v * math.sin(_ALPHA)
-    lon = CENTER_LON + east_m / _M_LON
-    lat = CENTER_LAT + north_m / _M_LAT
-    return [round(lon, 7), round(lat, 7)]
+    """Local metres (u along the river/avenues, +v inland toward the east
+    bank) -> [lon, lat], anchored on the real river centreline."""
+    east_m = u * _SIN + v * _COS
+    north_m = u * _COS - v * _SIN
+    return [round(_ANCHOR_LON + east_m / _M_LON, 7),
+            round(_ANCHOR_LAT + north_m / _M_LAT, 7)]
 
 
 def rect(u0: float, u1: float, v0: float, v1: float) -> List[List[float]]:
@@ -69,30 +80,45 @@ def rect(u0: float, u1: float, v0: float, v1: float) -> List[List[float]]:
             uv_to_lonlat(u1, v1), uv_to_lonlat(u0, v1)]
 
 
+def _river_polygon(width_m: float) -> List[List[float]]:
+    """Buffer the real river centreline by +/- width/2 along the cross axis."""
+    half = width_m / 2.0
+    # cross-axis (v) unit vector in (east, north): (cos a, -sin a)
+    de_lon = (_COS * half) / _M_LON
+    de_lat = (-_SIN * half) / _M_LAT
+    west = [[round(lon - de_lon, 7), round(lat - de_lat, 7)]
+            for lon, lat in RIVER_POLY]
+    east = [[round(lon + de_lon, 7), round(lat + de_lat, 7)]
+            for lon, lat in RIVER_POLY]
+    return west + list(reversed(east))
+
+
 def build() -> dict:
     features: List[dict] = []
 
     u_min = -(N_STREETS - 1) * STREET_SPACING_M / 2.0
     u_max = +(N_STREETS - 1) * STREET_SPACING_M / 2.0
-    v0 = 0.0  # Fourth Avenue baseline (nearest the river)
 
-    avenue_v = [v0 + i * AVENUE_SPACING_M for i in range(N_AVENUES)]
+    # Avenues march inland (+v) from the real river centreline.
+    avenue_v = [RIVER_TO_FIRST_M + i * AVENUE_SPACING_M for i in range(N_AVENUES)]
     street_u = [u_min + j * STREET_SPACING_M for j in range(N_STREETS)]
 
-    # --- Allegheny River (a wide band on the SW side of the grid) ----------
-    river_outer = -210.0
-    river_inner = -25.0
+    # --- the real Allegheny River (Census-derived centreline, buffered) ---
     features.append({
         "kind": "water",
         "name": "Allegheny River",
-        "geometry": rect(u_min - 260, u_max + 260, river_outer, river_inner),
+        "geometry": _river_polygon(RIVER_WIDTH_M),
     })
 
-    # --- avenues (run along +u) -------------------------------------------
+    # --- avenues (run along +u, parallel to the river) --------------------
     for i, v in enumerate(avenue_v):
         name = AVENUE_NAMES[i] if i < len(AVENUE_NAMES) else f"Avenue {i}"
-        # Fifth Avenue (i == 1) is the commercial spine -> primary road.
-        klass = "primary" if i == 1 else ("secondary" if i in (0, 3) else "residential")
+        if i == COMMERCIAL_AVE:
+            klass = "primary"               # Fifth Avenue, the commercial spine
+        elif i in (COMMERCIAL_AVE - 1, COMMERCIAL_AVE + 1):
+            klass = "secondary"
+        else:
+            klass = "residential"
         features.append({
             "kind": "road",
             "name": name,
@@ -122,11 +148,10 @@ def build() -> dict:
             if bu1 - bu0 < 12 or bv1 - bv0 < 12:
                 continue
 
-            # Downtown core: low avenue index + central streets -> taller.
-            core = (i <= 2) and (abs(j - (N_STREETS - 1) / 2) <= 3)
-            # Fifth Avenue frontage (avenue index 1) is the commercial spine.
-            commercial = core or i == 1
-            if i == 0:
+            # Downtown core: around the commercial spine + central streets.
+            core = (abs(i - COMMERCIAL_AVE) <= 1) and (abs(j - (N_STREETS - 1) / 2) <= 3)
+            commercial = core or i == COMMERCIAL_AVE
+            if i <= 1:
                 use = "industrial"          # riverfront blocks
             elif commercial:
                 use = "commercial"
@@ -137,8 +162,6 @@ def build() -> dict:
 
             if core:
                 levels = 3 + ((i + j) % 4)         # 3..6 storeys
-            elif use == "industrial":
-                levels = 2 + ((i + j) % 2)
             else:
                 levels = 2 + ((i + j) % 2)         # 2..3 storeys
 
@@ -161,16 +184,16 @@ def build() -> dict:
                      uv_to_lonlat(street_u[-2], avenue_v[2] + 20)],
     })
 
-    # --- Tarentum Bridge across the Allegheny -----------------------------
-    bridge_u = street_u[3]
+    # --- Tarentum Bridge across the real Allegheny ------------------------
+    bridge_u = street_u[6]
     features.append({
         "kind": "road",
         "name": "Tarentum Bridge",
         "class": "primary",
         "bridge": True,
         "width_m": 14,
-        "geometry": [uv_to_lonlat(bridge_u, avenue_v[1]),
-                     uv_to_lonlat(bridge_u, river_outer - 40)],
+        "geometry": [uv_to_lonlat(bridge_u, avenue_v[0]),
+                     uv_to_lonlat(bridge_u, -(RIVER_WIDTH_M / 2 + 60))],
     })
 
     # --- Memorial Park + pond + war monument ------------------------------
@@ -196,17 +219,18 @@ def build() -> dict:
         features.append({"kind": "tree", "species": species[k % 4],
                          "geometry": uv_to_lonlat(tu, tv)})
 
-    # --- riverwalk along the Allegheny ------------------------------------
+    # --- riverwalk between the east bank and First Avenue -----------------
+    walk_v = RIVER_WIDTH_M / 2 + 18
     features.append({
         "kind": "riverwalk", "name": "Allegheny Riverwalk",
-        "geometry": rect(u_min - 20, u_max + 20, river_inner, river_inner + 8),
+        "geometry": rect(u_min - 20, u_max + 20, walk_v, walk_v + 8),
     })
 
     # --- street trees down Fifth Avenue verge -----------------------------
     for k in range(12):
         tu = u_min + 40 + k * 90
         features.append({"kind": "tree", "species": "oak",
-                         "geometry": uv_to_lonlat(tu, avenue_v[1] + 14)})
+                         "geometry": uv_to_lonlat(tu, avenue_v[COMMERCIAL_AVE] + 14)})
 
     # --- modelled landmarks (approximate positions within the core) -------
     landmarks = [
@@ -224,11 +248,14 @@ def build() -> dict:
 
     return {
         "name": "New Kensington, Pennsylvania",
-        "description": ("Representative digital-twin model of the downtown "
-                        "core, anchored to real coordinates. Replace with a "
-                        "live OSM export for an exact footprint twin."),
-        "center": [CENTER_LAT, CENTER_LON],
-        "source": "procedural (newken_twin scripts/generate_dataset.py)",
+        "description": ("Digital-twin model anchored to real geography: the "
+                        "Allegheny River course, grid orientation and east-bank "
+                        "offset come from the US Census ZCTA boundary for 15068. "
+                        "Building footprints are modelled; use the OSM importer "
+                        "for block-exact footprints."),
+        "center": [DOWNTOWN_LAT, DOWNTOWN_LON],
+        "source": ("procedural grid on real Census geometry "
+                   "(scripts/generate_dataset.py + data/nk_real_geo.json)"),
         "features": features,
     }
 

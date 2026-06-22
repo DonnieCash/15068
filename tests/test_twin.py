@@ -381,6 +381,26 @@ class TestDataset(unittest.TestCase):
         self.assertAlmostEqual(city.center.lat, 40.5695, places=3)
         self.assertAlmostEqual(city.center.lon, -79.7647, places=3)
 
+    def test_river_uses_real_census_geometry(self):
+        # The Allegheny is built from the real Census ZCTA polyline, so it has
+        # many vertices (a hand-drawn rectangle would have four).
+        city = load_default_city()
+        rivers = [a for a in city.areas if a.kind == "water"]
+        self.assertTrue(rivers)
+        self.assertGreater(len(rivers[0].geometry), 20)
+
+    def test_real_geo_file_present(self):
+        import json
+        import os
+        from newken_twin import data as data_pkg
+        path = os.path.join(os.path.dirname(data_pkg.__file__), "nk_real_geo.json")
+        self.assertTrue(os.path.exists(path))
+        with open(path, encoding="utf-8") as f:
+            doc = json.load(f)
+        self.assertEqual(doc["zcta"], "15068")
+        self.assertIn("Census", doc["source"])
+        self.assertGreater(len(doc["river_polyline_lonlat"]), 10)
+
 
 class TestBuilderIntegration(unittest.TestCase):
     def test_build_small_region_produces_structures(self):
