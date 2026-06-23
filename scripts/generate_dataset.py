@@ -36,12 +36,14 @@ AVENUE_BEARING = REAL["river_bearing_deg"]        # ~352 deg (nearly N-S here)
 DOWNTOWN_LAT, DOWNTOWN_LON = REAL["downtown"]      # [lat, lon]
 
 RIVER_WIDTH_M = 200.0       # rendered width of the Allegheny
-RIVER_TO_FIRST_M = 185.0    # First Avenue's offset inland from the centreline
 AVENUE_SPACING_M = 82.0     # distance between consecutive avenues
 STREET_SPACING_M = 108.0    # distance between consecutive cross-streets
 N_AVENUES = 9               # First Avenue .. Ninth Avenue (river -> inland)
 N_STREETS = 13              # numbered cross-streets
 SETBACK_M = 9.0             # building setback from the block edge
+# First Avenue's offset inland, calibrated so Fourth Avenue lands on the real
+# magisterial court at 1100 Fourth Avenue (from nk_real_geo.json).
+RIVER_TO_FIRST_M = REAL.get("fourth_avenue_offset_m", 570) - 3 * AVENUE_SPACING_M
 
 AVENUE_NAMES = ["First Avenue", "Second Avenue", "Third Avenue",
                 "Fourth Avenue", "Fifth Avenue", "Sixth Avenue",
@@ -78,6 +80,13 @@ def uv_to_lonlat(u: float, v: float) -> List[float]:
 def rect(u0: float, u1: float, v0: float, v1: float) -> List[List[float]]:
     return [uv_to_lonlat(u0, v0), uv_to_lonlat(u1, v0),
             uv_to_lonlat(u1, v1), uv_to_lonlat(u0, v1)]
+
+
+def lonlat_to_uv(lon: float, lat: float):
+    """Inverse of uv_to_lonlat: real [lon, lat] -> local (u, v) metres."""
+    e = (lon - _ANCHOR_LON) * _M_LON
+    n = (lat - _ANCHOR_LAT) * _M_LAT
+    return e * _SIN + n * _COS, e * _COS - n * _SIN
 
 
 def _river_polygon(width_m: float) -> List[List[float]]:
@@ -232,19 +241,34 @@ def build() -> dict:
         features.append({"kind": "tree", "species": "oak",
                          "geometry": uv_to_lonlat(tu, avenue_v[COMMERCIAL_AVE] + 14)})
 
-    # --- modelled landmarks (approximate positions within the core) -------
-    landmarks = [
-        ("Mount Saint Peter Church", street_u[2], avenue_v[5] + 30, 40, "church", 22),
-        ("New Kensington City Hall", street_u[6], avenue_v[1] + 22, 30, "cityhall", 24),
-        ("Citizens General Hospital", street_u[10], avenue_v[3] + 30, 34, "tower", 28),
-        ("PNC Bank Building", street_u[5] + 10, avenue_v[1] - 12, 30, "tower", 16),
-    ]
-    for name, u, v, h, structure, fp in landmarks:
+    # --- one iconic modelled landmark (approximate) -----------------------
+    features.append({
+        "kind": "landmark", "name": "Mount Saint Peter Church",
+        "height": 40, "structure": "church", "footprint": 22,
+        "geometry": uv_to_lonlat(street_u[2], avenue_v[5] + 30),
+    })
+
+    # --- REAL landmarks at exact OpenStreetMap coordinates ----------------
+    # Placed only if they fall inside the downtown build window so the volume
+    # stays tight; their coordinates are real (see nk_real_geo.json).
+    u_lo, u_hi = u_min - 40, u_max + 40
+    v_lo, v_hi = walk_v, avenue_v[-1] + 140
+    placed_real = 0
+    for poi in REAL.get("real_pois", []):
+        lon, lat = poi["lonlat"]
+        u, v = lonlat_to_uv(lon, lat)
+        if not (u_lo <= u <= u_hi and v_lo <= v <= v_hi):
+            continue
         features.append({
-            "kind": "landmark", "name": name, "height": h,
-            "structure": structure, "footprint": fp,
-            "geometry": uv_to_lonlat(u, v),
+            "kind": "landmark", "name": poi["name"],
+            "height": poi.get("height", 24),
+            "structure": poi.get("structure", "tower"),
+            "footprint": poi.get("footprint", 16),
+            "geometry": [round(lon, 7), round(lat, 7)],
+            "real": True,
         })
+        placed_real += 1
+    print(f"  placed {placed_real} real-coordinate POIs in the build window")
 
     return {
         "name": "New Kensington, Pennsylvania",

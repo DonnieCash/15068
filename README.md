@@ -136,14 +136,19 @@ python scripts/generate_dataset.py
 | Layer | Source |
 | --- | --- |
 | Allegheny River course | **Real** — US Census ZCTA 15068 boundary (the river is the ZIP/county line). |
-| Grid orientation & east-bank offset | **Real** — derived from the same Census geometry. |
+| Grid orientation (~352°) | **Real** — derived from the Census river geometry. |
+| Grid distance from the river | **Real** — calibrated so Fourth Avenue lands on the magisterial court at *1100 Fourth Avenue* (OSM). |
+| City limits | **Real** — OpenStreetMap relation 187187 (New Kensington city), 485 vertices. |
+| Landmark coordinates (court, bank, …) | **Real** — exact OpenStreetMap POI coordinates. |
 | City extent / coordinates | **Real** — anchored to downtown New Kensington (40.5695, −79.7647). |
 | Street grid, building footprints | **Modelled** — a faithful numbered-avenue/street grid; not block-exact OSM footprints. |
 | Terrain relief | **Modelled** — valley shape is data-driven (distance to the real river) + noise. |
 
-`newken_twin/data/nk_real_geo.json` holds the extracted real geometry (river
-polyline, bearing, offset, area), with attribution to the US Census (public
-domain) via the OpenDataDE GeoJSON mirror.
+`newken_twin/data/nk_real_geo.json` holds all the extracted real geometry — the
+river polyline, bearing/offset, the Fourth-Avenue calibration point, the OSM
+city-boundary rings, and real POI coordinates — with attribution to the US
+Census (public domain, via OpenDataDE) and OpenStreetMap (ODbL, via the
+missinglink/osm-boundaries mirror).
 
 > **Block-exact footprints.** Live OpenStreetMap (and most GIS hosts) are not
 > reachable from the build sandbox, so individual building footprints are
