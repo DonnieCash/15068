@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Remote Control</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --remote: #1c2230;
+    --remote-2: #232b3d;
+    --edge: #2d3648;
+    --btn: #2a3142;
+    --btn-hover: #343d52;
+    --btn-active: #3f4a63;
+    --accent: #4f8cff;
+    --accent-2: #2f6fe0;
+    --danger: #ff5b5b;
+    --text: #e6edf3;
+    --muted: #8b98a9;
+    --ok: #3fd07f;
+    --shadow: 0 10px 40px rgba(0,0,0,.5);
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: radial-gradient(1200px 800px at 70% -10%, #16203a 0%, var(--bg) 55%);
+    color: var(--text);
+    font: 15px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 44px;
+    padding: 32px;
+    flex-wrap: wrap;
+  }
+
+  /* ------- TV ------- */
+  .tv-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .tv {
+    width: min(560px, 86vw);
+    aspect-ratio: 16/10;
+    background: #05070c;
+    border: 10px solid #0a0d14;
+    border-radius: 14px;
+    box-shadow: var(--shadow), inset 0 0 0 2px #000;
+    position: relative;
+    overflow: hidden;
+  }
+  .screen {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    transition: opacity .35s ease, filter .35s ease;
+  }
+  .screen.off { opacity: 0; filter: brightness(0); }
+  .screen .content {
+    flex: 1;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #12305e 0%, #0b1b38 45%, #241247 100%);
+    position: relative;
+  }
+  .ch-badge {
+    font-size: clamp(48px, 12vw, 96px);
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: #fff;
+    text-shadow: 0 4px 30px rgba(79,140,255,.6);
+  }
+  .ch-name { position: absolute; bottom: 18px; left: 22px; color: #cfe0ff; font-size: 18px; font-weight: 600; opacity: .9; }
+  .osd {
+    position: absolute; top: 16px; right: 18px;
+    display: flex; gap: 10px; align-items: center;
+    background: rgba(0,0,0,.45);
+    border: 1px solid rgba(255,255,255,.12);
+    padding: 8px 12px; border-radius: 999px;
+    font-size: 13px; color: #dbe6f5;
+    backdrop-filter: blur(4px);
+  }
+  .osd .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  .osd .dot.on { background: var(--ok); box-shadow: 0 0 10px var(--ok); }
+  .vol-wrap {
+    position: absolute; left: 18px; bottom: 18px; right: 18px;
+    display: flex; align-items: center; gap: 12px;
+    opacity: 0; transform: translateY(8px); transition: opacity .25s, transform .25s;
+  }
+  .vol-wrap.show { opacity: 1; transform: none; }
+  .vol-ico { font-size: 20px; }
+  .vol-bar { flex: 1; height: 10px; border-radius: 999px; background: rgba(255,255,255,.15); overflow: hidden; }
+  .vol-fill { height: 100%; width: 30%; background: linear-gradient(90deg, var(--accent), #7bb0ff); transition: width .18s ease; }
+  .vol-num { width: 34px; text-align: right; font-variant-numeric: tabular-nums; }
+  .standby {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    color: #26303f; font-size: 13px; letter-spacing: 3px; text-transform: uppercase;
+  }
+  .power-led { width: 9px; height: 9px; border-radius: 50%; background: #6b0f0f; margin-top: 2px; box-shadow: 0 0 6px #400; transition: all .3s; }
+  .power-led.on { background: var(--ok); box-shadow: 0 0 10px var(--ok); }
+  .tv-stand { width: 120px; height: 10px; background: #0a0d14; border-radius: 0 0 8px 8px; }
+  .tv-foot { width: 180px; height: 8px; background: #0a0d14; border-radius: 8px; }
+  .log { color: var(--muted); font-size: 12px; height: 16px; min-height: 16px; font-variant-numeric: tabular-nums; }
+
+  /* ------- Remote ------- */
+  .remote {
+    width: 250px;
+    background: linear-gradient(160deg, var(--remote-2), var(--remote));
+    border: 1px solid var(--edge);
+    border-radius: 34px;
+    padding: 22px 20px 26px;
+    box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,.06);
+    display: flex; flex-direction: column; gap: 16px;
+    user-select: none;
+  }
+  .brand { text-align: center; color: var(--muted); font-size: 11px; letter-spacing: 4px; text-transform: uppercase; }
+  .row { display: flex; gap: 12px; justify-content: center; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+  button.key {
+    appearance: none; border: 1px solid var(--edge);
+    background: linear-gradient(180deg, var(--btn), #232a39);
+    color: var(--text);
+    border-radius: 14px;
+    padding: 12px 0; min-height: 46px;
+    font-size: 14px; font-weight: 600;
+    cursor: pointer;
+    transition: transform .05s ease, background .15s ease, box-shadow .15s ease, border-color .15s;
+    box-shadow: 0 2px 0 rgba(0,0,0,.35);
+  }
+  button.key:hover { background: linear-gradient(180deg, var(--btn-hover), #283044); border-color: #3a465c; }
+  button.key:active, button.key.flash { transform: translateY(2px); background: var(--btn-active); box-shadow: 0 0 0 rgba(0,0,0,.35); }
+  button.key.round { border-radius: 50%; width: 46px; min-height: 46px; padding: 0; }
+  .key.power { border-color: #5a2130; color: #ff8080; }
+  .key.power:hover { background: linear-gradient(180deg, #3a2530, #2a1a20); }
+  .key.small { font-size: 12px; min-height: 40px; padding: 8px 0; }
+  .key.wide { flex: 1; }
+
+  /* D-pad */
+  .dpad {
+    position: relative; width: 180px; height: 180px; margin: 2px auto;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 40%, #2b3346, #1a2030);
+    border: 1px solid var(--edge);
+    box-shadow: inset 0 2px 8px rgba(0,0,0,.4);
+  }
+  .dpad button {
+    position: absolute; border: none; background: transparent; color: var(--text);
+    font-size: 18px; cursor: pointer; width: 60px; height: 60px; border-radius: 12px;
+    transition: background .12s;
+  }
+  .dpad button:hover { background: rgba(255,255,255,.06); }
+  .dpad button:active, .dpad button.flash { background: rgba(79,140,255,.25); }
+  .dpad .up { top: 4px; left: 60px; }
+  .dpad .down { bottom: 4px; left: 60px; }
+  .dpad .left { left: 4px; top: 60px; }
+  .dpad .right { right: 4px; top: 60px; }
+  .dpad .ok {
+    left: 55px; top: 55px; width: 70px; height: 70px; border-radius: 50%;
+    background: linear-gradient(180deg, var(--accent), var(--accent-2));
+    font-weight: 800; font-size: 15px; box-shadow: 0 4px 14px rgba(47,111,224,.5);
+  }
+  .dpad .ok:hover { filter: brightness(1.08); background: linear-gradient(180deg, var(--accent), var(--accent-2)); }
+  .dpad .ok:active, .dpad .ok.flash { transform: translate(0,2px); }
+
+  .rocker { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
+  .rocker .label { font-size: 10px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
+  .rocker .pair { display: flex; flex-direction: column; width: 100%; border-radius: 16px; overflow: hidden; border: 1px solid var(--edge); }
+  .rocker .pair button { border-radius: 0; border: none; box-shadow: none; border-bottom: 1px solid var(--edge); }
+  .rocker .pair button:last-child { border-bottom: none; }
+
+  .hint { text-align: center; color: var(--muted); font-size: 11px; max-width: 300px; line-height: 1.6; }
+  kbd { background: #0b0f16; border: 1px solid var(--edge); border-radius: 5px; padding: 1px 6px; font-size: 11px; color: #b9c6d8; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+
+  <div class="tv-wrap">
+    <div class="tv">
+      <div id="screen" class="screen off">
+        <div class="content">
+          <div>
+            <div id="chBadge" class="ch-badge">7</div>
+          </div>
+          <div id="chName" class="ch-name">Channel 7</div>
+          <div class="osd">
+            <span>INPUT</span>
+            <strong id="osdInput">TV</strong>
+            <span class="dot" id="osdMute" title="mute"></span>
+          </div>
+          <div id="volWrap" class="vol-wrap">
+            <span id="volIco" class="vol-ico">🔊</span>
+            <div class="vol-bar"><div id="volFill" class="vol-fill"></div></div>
+            <span id="volNum" class="vol-num">30</span>
+          </div>
+        </div>
+      </div>
+      <div id="standby" class="standby">Standby</div>
+    </div>
+    <div class="tv-stand"></div>
+    <div class="tv-foot"></div>
+    <div id="log" class="log"></div>
+  </div>
+
+  <div class="remote" id="remote">
+    <div class="brand">◈ ClaudeVision</div>
+
+    <div class="row">
+      <button class="key power round" data-act="power" title="Power (P)">⏻</button>
+      <div style="flex:1"></div>
+      <button class="key small" data-act="input" title="Input source (I)">SRC</button>
+      <button class="key small" data-act="mute" title="Mute (M)">🔇</button>
+    </div>
+
+    <div class="dpad">
+      <button class="up" data-act="up" title="Up (↑)">▲</button>
+      <button class="left" data-act="left" title="Left (←)">◀</button>
+      <button class="ok" data-act="ok" title="OK (Enter)">OK</button>
+      <button class="right" data-act="right" title="Right (→)">▶</button>
+      <button class="down" data-act="down" title="Down (↓)">▼</button>
+    </div>
+
+    <div class="row">
+      <button class="key wide small" data-act="menu">MENU</button>
+      <button class="key wide small" data-act="home">HOME</button>
+      <button class="key wide small" data-act="back">BACK</button>
+    </div>
+
+    <div class="row">
+      <div class="rocker">
+        <div class="pair">
+          <button class="key" data-act="chup" title="Channel up (Page Up)">CH +</button>
+          <button class="key" data-act="chdn" title="Channel down (Page Down)">CH −</button>
+        </div>
+        <div class="label">Channel</div>
+      </div>
+      <div class="rocker">
+        <div class="pair">
+          <button class="key" data-act="volup" title="Volume up (+)">VOL +</button>
+          <button class="key" data-act="voldn" title="Volume down (−)">VOL −</button>
+        </div>
+        <div class="label">Volume</div>
+      </div>
+    </div>
+
+    <div class="grid3" id="numpad">
+      <button class="key" data-num="1">1</button>
+      <button class="key" data-num="2">2</button>
+      <button class="key" data-num="3">3</button>
+      <button class="key" data-num="4">4</button>
+      <button class="key" data-num="5">5</button>
+      <button class="key" data-num="6">6</button>
+      <button class="key" data-num="7">7</button>
+      <button class="key" data-num="8">8</button>
+      <button class="key" data-num="9">9</button>
+      <button class="key small" data-act="prev" title="Last channel">↩</button>
+      <button class="key" data-num="0">0</button>
+      <button class="key small" data-act="enter" title="Enter channel">↵</button>
+    </div>
+  </div>
+
+  <p class="hint" style="flex-basis:100%; margin-top:0">
+    Keys: <kbd>P</kbd> power · <kbd>M</kbd> mute · <kbd>I</kbd> input · arrows + <kbd>Enter</kbd> · <kbd>+</kbd>/<kbd>−</kbd> volume · <kbd>PgUp</kbd>/<kbd>PgDn</kbd> channel · <kbd>0-9</kbd> then <kbd>Enter</kbd>
+  </p>
+
+<script>
+(function () {
+  "use strict";
+
+  var INPUTS = ["TV", "HDMI 1", "HDMI 2", "AV"];
+  var CHANNELS = {
+    2: "News 2", 4: "Sports Central", 5: "MovieMax", 7: "Prime 7",
+    9: "Discovery+", 11: "Kids Zone", 13: "Music Hits", 24: "24h News",
+    42: "Sci-Fi", 88: "Retro TV"
+  };
+
+  var state = {
+    power: false,
+    channel: 7,
+    prevChannel: 2,
+    volume: 30,
+    muted: false,
+    inputIdx: 0,
+    entryBuffer: "",
+    entryTimer: null,
+    volTimer: null
+  };
+
+  var $ = function (id) { return document.getElementById(id); };
+  var el = {
+    screen: $("screen"), standby: $("standby"), chBadge: $("chBadge"),
+    chName: $("chName"), osdInput: $("osdInput"), osdMute: $("osdMute"),
+    volWrap: $("volWrap"), volFill: $("volFill"), volNum: $("volNum"),
+    volIco: $("volIco"), log: $("log")
+  };
+
+  function log(msg) {
+    el.log.textContent = "▸ " + msg;
+    clearTimeout(el.log._t);
+    el.log._t = setTimeout(function () { el.log.textContent = ""; }, 2200);
+  }
+
+  function render() {
+    el.screen.classList.toggle("off", !state.power);
+    el.standby.style.opacity = state.power ? "0" : "1";
+
+    if (state.entryBuffer) {
+      el.chBadge.textContent = state.entryBuffer + "_";
+      el.chName.textContent = "Enter channel…";
+    } else {
+      el.chBadge.textContent = state.channel;
+      el.chName.textContent = CHANNELS[state.channel] || ("Channel " + state.channel);
+    }
+
+    el.osdInput.textContent = INPUTS[state.inputIdx];
+    el.osdMute.classList.toggle("on", !state.muted && state.power);
+
+    var v = state.muted ? 0 : state.volume;
+    el.volFill.style.width = v + "%";
+    el.volNum.textContent = state.muted ? "MUTE" : state.volume;
+    el.volIco.textContent = state.muted ? "🔇" : (v === 0 ? "🔈" : v < 55 ? "🔉" : "🔊");
+  }
+
+  function showVolume() {
+    el.volWrap.classList.add("show");
+    clearTimeout(state.volTimer);
+    state.volTimer = setTimeout(function () { el.volWrap.classList.remove("show"); }, 1600);
+  }
+
+  function requirePower() {
+    if (!state.power) { log("TV is off — press power"); return false; }
+    return true;
+  }
+
+  function setChannel(n) {
+    n = Math.max(1, Math.min(999, n | 0));
+    if (n === state.channel) return;
+    state.prevChannel = state.channel;
+    state.channel = n;
+    log("Channel " + n + (CHANNELS[n] ? " — " + CHANNELS[n] : ""));
+  }
+
+  function nextValidChannel(dir) {
+    var keys = Object.keys(CHANNELS).map(Number).sort(function (a, b) { return a - b; });
+    var i = keys.indexOf(state.channel);
+    if (i === -1) {
+      // not on a named channel — jump to nearest in direction
+      for (var k = 0; k < keys.length; k++) {
+        if (dir > 0 && keys[k] > state.channel) return keys[k];
+        if (dir < 0 && keys[k] < state.channel) { /* keep last smaller */ }
+      }
+      return dir > 0 ? keys[0] : keys[keys.length - 1];
+    }
+    i = (i + dir + keys.length) % keys.length;
+    return keys[i];
+  }
+
+  var actions = {
+    power: function () {
+      state.power = !state.power;
+      log(state.power ? "Power on" : "Power off");
+      if (state.power) showVolume();
+    },
+    mute: function () {
+      if (!requirePower()) return;
+      state.muted = !state.muted;
+      log(state.muted ? "Muted" : "Unmuted");
+      showVolume();
+    },
+    input: function () {
+      if (!requirePower()) return;
+      state.inputIdx = (state.inputIdx + 1) % INPUTS.length;
+      log("Input: " + INPUTS[state.inputIdx]);
+    },
+    volup: function () {
+      if (!requirePower()) return;
+      state.muted = false;
+      state.volume = Math.min(100, state.volume + 2);
+      showVolume(); log("Volume " + state.volume);
+    },
+    voldn: function () {
+      if (!requirePower()) return;
+      state.muted = false;
+      state.volume = Math.max(0, state.volume - 2);
+      showVolume(); log("Volume " + state.volume);
+    },
+    chup: function () { if (!requirePower()) return; setChannel(nextValidChannel(1)); },
+    chdn: function () { if (!requirePower()) return; setChannel(nextValidChannel(-1)); },
+    prev: function () {
+      if (!requirePower()) return;
+      var p = state.prevChannel; setChannel(p); log("Last channel");
+    },
+    up: function () { if (requirePower()) log("▲ Up"); },
+    down: function () { if (requirePower()) log("▼ Down"); },
+    left: function () { if (requirePower()) log("◀ Left"); },
+    right: function () { if (requirePower()) log("▶ Right"); },
+    ok: function () { if (requirePower()) log("OK / Select"); },
+    menu: function () { if (requirePower()) log("Menu"); },
+    home: function () { if (requirePower()) log("Home"); },
+    back: function () { if (requirePower()) log("Back"); },
+    enter: function () { commitEntry(); }
+  };
+
+  function pushDigit(d) {
+    if (!requirePower()) return;
+    state.entryBuffer = (state.entryBuffer + d).slice(-3);
+    clearTimeout(state.entryTimer);
+    state.entryTimer = setTimeout(commitEntry, 1600);
+    render();
+  }
+
+  function commitEntry() {
+    clearTimeout(state.entryTimer);
+    if (state.entryBuffer) {
+      setChannel(parseInt(state.entryBuffer, 10));
+      state.entryBuffer = "";
+    }
+    render();
+  }
+
+  function doAction(act) {
+    if (actions[act]) { actions[act](); render(); }
+  }
+
+  function flash(btn) {
+    if (!btn) return;
+    btn.classList.add("flash");
+    setTimeout(function () { btn.classList.remove("flash"); }, 120);
+  }
+
+  // Click handling (event delegation)
+  $("remote").addEventListener("click", function (e) {
+    var btn = e.target.closest("button");
+    if (!btn) return;
+    flash(btn);
+    if (btn.dataset.num != null) pushDigit(btn.dataset.num);
+    else if (btn.dataset.act) doAction(btn.dataset.act);
+  });
+
+  // Keyboard shortcuts
+  var keyMap = {
+    "p": "power", "P": "power",
+    "m": "mute", "M": "mute",
+    "i": "input", "I": "input",
+    "ArrowUp": "up", "ArrowDown": "down", "ArrowLeft": "left", "ArrowRight": "right",
+    "Enter": "ok",
+    "+": "volup", "=": "volup", "-": "voldn", "_": "voldn",
+    "PageUp": "chup", "PageDown": "chdn",
+    "Backspace": "back"
+  };
+
+  document.addEventListener("keydown", function (e) {
+    if (/[0-9]/.test(e.key)) {
+      pushDigit(e.key);
+      flash(document.querySelector('[data-num="' + e.key + '"]'));
+      e.preventDefault();
+      return;
+    }
+    // Enter commits a pending channel entry, otherwise acts as OK
+    if (e.key === "Enter" && state.entryBuffer) {
+      commitEntry();
+      flash(document.querySelector('[data-act="enter"]'));
+      e.preventDefault();
+      return;
+    }
+    var act = keyMap[e.key];
+    if (act) {
+      doAction(act);
+      flash(document.querySelector('[data-act="' + act + '"]'));
+      e.preventDefault();
+    }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
