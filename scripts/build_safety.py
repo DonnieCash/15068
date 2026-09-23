@@ -351,6 +351,9 @@ class Geocoder:
         pname = inc.get("place_name")
         anchor = Point(inc["lon"], inc["lat"]) if inc.get("lat") is not None and inc.get("lon") is not None else None
         coarse = 0.0
+        if anchor is None and inc.get("anchor"):
+            # a withheld place, stored only as a ~100 m anchor: bin it along the street too
+            anchor, coarse = Point(*inc["anchor"]), 0.0015
         if anchor is None and pname:
             anchor = self.place_anchor(pname, town)
             if policy == "use_street_only":

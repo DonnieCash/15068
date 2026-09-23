@@ -309,7 +309,7 @@
       ${fbi.gaps ? `<li><b>Gaps:</b> ${esc(fbi.gaps)}</li>` : ""}
       <li><b>Rates</b> are per 1,000 residents using the population the FBI published for that department and year. Small towns swing a lot from year to year: a handful of incidents moves the rate.</li>
       <li><b>Mapped incidents</b> are ones local news reported with a street location, verified against their source. They are a sample, not a complete record. Locations are rounded to the hundred-block (${fmt(pc.block || 0)}), an intersection (${fmt(pc.intersection || 0)}) or a named place (${fmt(pc.place || 0)}); ${fmt(pc.street || 0)} are placed on the street only, shown with a dashed ring.${safety.unplaced ? ` ${fmt(safety.unplaced)} verified incidents couldn't be placed and are left off.` : ""}</li>
-      <li><b>Left out on purpose:</b> names of suspects, victims and line officers (public officials such as chiefs and mayors may be named); exact house numbers; anything identifying a juvenile. Individual sexual-offense incidents are never mapped or listed; the FBI totals above include them. An arrest or charge is not a conviction.</li>
+      <li><b>Left out on purpose:</b> names of suspects, victims and line officers (public officials such as chiefs and mayors may be named); exact house numbers; anything identifying a juvenile. Individual sexual-offense incidents are never mapped or listed; the FBI totals above include them. An arrest or charge is not a conviction. The linked source articles are the original news reports and may name people; this site does not.</li>
       ${pol.notes ? `<li><b>Policing research notes:</b> ${esc(pol.notes)}</li>` : ""}`;
   }
 

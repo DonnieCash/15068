@@ -315,15 +315,19 @@
    "municipality": "Lower Burrell",
    "street": "Leechburg Road",
    "number": null,
-   "cross_street": "Wildlife Lodge Road",
-   "place_name": "Mogie's Irish Pub",
+   "cross_street": null,
+   "place_name": null,
    "summary": "A man was fatally shot outside a business on Leechburg Road in Lower Burrell just after 9 a.m. on Dec. 21, 2023. Police said a Lower Burrell man came to City Hall minutes later and was charged with criminal homicide.",
    "police_involved": false,
    "label_policy": "use_street_only",
    "source": "https://triblive.com/local/valley-news-dispatch/1-dead-in-shooting-outside-mogies-irish-pub-in-lower-burrell/",
    "n_sources": 2,
    "corroborated_by_both_sweeps": true,
-   "confidence": "high"
+   "confidence": "high",
+   "anchor": [
+    -79.71,
+    40.585
+   ]
   },
   {
    "date": "2024-01",
@@ -331,7 +335,7 @@
    "municipality": "Arnold",
    "street": "Fourth Avenue",
    "number": 1600,
-   "cross_street": "Cherry Alley",
+   "cross_street": null,
    "place_name": null,
    "summary": "The district attorney said three people broke into a home in the 1600 block of Fourth Avenue on a Friday evening in January 2024, and a resident fired a gun; one of the intruders, a man, was found fatally wounded in Cherry Alley behind the home around 6 p.m. The resident was later charged with firearms, drug and receiving-stolen-property offenses.",
    "police_involved": false,
@@ -348,7 +352,7 @@
    "street": "Freeport Street",
    "number": null,
    "cross_street": null,
-   "place_name": "RC Firearms",
+   "place_name": null,
    "summary": "Around 3:30 a.m. on Jan. 22, 2024, burglars drove a pickup truck stolen from another local business through the front door of a gun store on Freeport Street and took 24 firearms, according to authorities. Two men were arrested within two days and were later indicted by a federal grand jury.",
    "police_involved": false,
    "label_policy": "use_street_only",
@@ -444,7 +448,7 @@
    "street": "Leechburg Road",
    "number": 2700,
    "cross_street": null,
-   "place_name": "Exxon",
+   "place_name": null,
    "summary": "On Oct. 25, 2024, Lower Burrell police searched a gas station convenience store in the 2700 block of Leechburg Road as part of an undercover investigation into alleged illegal THC vape sales, seizing items suspected of containing marijuana and Delta-8 and Delta-9 THC, along with cash. Several people were later charged in the investigation, according to the district attorney's office.",
    "police_involved": true,
    "label_policy": "use_street_only",
@@ -460,14 +464,18 @@
    "street": "Leechburg Road",
    "number": null,
    "cross_street": null,
-   "place_name": "Discount Vape and More, Hillcrest Shopping Center",
+   "place_name": null,
    "summary": "Lower Burrell police searched a vape shop on Leechburg Road on Oct. 25, 2024, one of several businesses searched in an undercover investigation into THC vape sales. Police said products bought there undercover tested positive for Schedule I substances, and several people were charged in the investigation.",
    "police_involved": true,
    "label_policy": "use_street_only",
    "source": "https://crimewatch.net/us/pa/westmoreland/da/177666/cases/lower-burrell-police-charge-several-part-undercover-vape-shop-investigation",
    "n_sources": 2,
    "corroborated_by_both_sweeps": true,
-   "confidence": "high"
+   "confidence": "high",
+   "anchor": [
+    -79.709,
+    40.584
+   ]
   },
   {
    "date": "2024-10-25",
@@ -476,7 +484,7 @@
    "street": "Leechburg Road",
    "number": 3000,
    "cross_street": null,
-   "place_name": "Burrell Tobacco and Vape",
+   "place_name": null,
    "summary": "Police served a search warrant at a vape shop in the 3000 block of Leechburg Road in Lower Burrell on Oct. 25, 2024, as part of an undercover investigation into alleged sales of illegal THC vape products. Police said products and cash were seized.",
    "police_involved": true,
    "label_policy": "use_street_only",
@@ -651,15 +659,19 @@
    "municipality": "Lower Burrell",
    "street": "Leechburg Road",
    "number": null,
-   "cross_street": "Wildlife Lodge Road",
-   "place_name": "Mogie's Irish Pub",
+   "cross_street": null,
+   "place_name": null,
    "summary": "Police said two men assaulted a man in his 70s during a dispute at a bar on Leechburg Road. Both were charged with robbery, simple assault, theft and related counts, and the charges were held for court.",
    "police_involved": false,
    "label_policy": "use_street_only",
    "source": "https://crimewatch.net/us/pa/westmoreland/da/177666/cases/lower-burrell-police-charge-two-men-robbery-following-motorcycle-gang-assault",
    "n_sources": 1,
    "corroborated_by_both_sweeps": false,
-   "confidence": "medium"
+   "confidence": "medium",
+   "anchor": [
+    -79.71,
+    40.585
+   ]
   },
   {
    "date": "2026-02-14",
@@ -684,14 +696,18 @@
    "street": "5th Avenue",
    "number": 1100,
    "cross_street": null,
-   "place_name": "Valley Royal Court Apartments",
+   "place_name": null,
    "summary": "A man in his 30s was shot in the leg in the 1100 block of Fifth Avenue around 9:15 p.m. on a Tuesday and went to a hospital on his own, where he was in stable condition. The person who fired the shot fled.",
    "police_involved": false,
    "label_policy": "use_street_only",
    "source": "https://www.wpxi.com/news/local/man-hospitalized-after-being-shot-new-kensington/4ZTZ2PJH7VAU5BEFPH3NIRDV6Q/",
    "n_sources": 1,
    "corroborated_by_both_sweeps": false,
-   "confidence": "medium"
+   "confidence": "medium",
+   "anchor": [
+    -79.768,
+    40.57
+   ]
   }
  ]
 }
