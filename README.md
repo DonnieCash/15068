@@ -1,13 +1,17 @@
 # NK15068
 
-**New Kensington · Arnold · Lower Burrell.** A website and map of ZIP 15068,
-built entirely from open data. It includes every building, road, address point
-and business listing in the ZIP, draped over real terrain, alongside sourced
-news, crime data, history, a civic directory, local picks and a lost & found
-pets board.
+**New Kensington · Arnold · Lower Burrell.** A local guide and map of ZIP 15068,
+built entirely from open data and published reporting: lost and found pets,
+the phone numbers people need, what's coming up, plain answers on crime and
+crashes, the three towns' history, and a map drawn from every building, road,
+address point and business listing in the ZIP.
 
-The site is static HTML/JS in `site/`, with no framework and no build step. It
-draws its own map from the scraped data, so it needs no tile server or API key.
+The site is static. `scripts/build_pages.py` writes every page as plain HTML
+from the data files (Python standard library only), so the text is readable
+without JavaScript and each topic has its own address. JavaScript only
+refreshes the live parts: the lost-pets board, relative dates, filters and the
+map. The site draws its own map from the scraped data, so it needs no tile
+server or API key.
 
 | What | How much (built 2026-09-23) |
 | --- | --- |
@@ -18,71 +22,106 @@ draws its own map from the scraped data, so it needs no tile server or API key.
 | Terrain | 30 m grid, Allegheny about 220 m, ridges about 430 m |
 | History | 61 dated timeline entries, 18 landmarks, 9 neighborhoods, 21 people |
 | Civic / culture / news | 21 offices, 32 local spots, 10 parks, 23 news items (2025–26) |
-| Lost & found pets | 18 sourced contacts (dog warden, shelters, police non-emergency lines, emergency vets, licensing, online boards) and 6 tips, plus a live board |
-| Crime & policing | FBI UCR counts, arrests, clearances and staffing for the 3 police departments (2000–2024); 43 mapped incidents (2018–26): 41 verified news incidents from 2022–26 plus 2 fatal police shootings; 146 police-reported fatal/serious crashes (PennDOT, 2005–2024) |
+| Lost & found pets | 18 sourced contacts and 6 tips, plus a live board |
+| Crime & policing | FBI UCR counts, arrests, clearances and staffing for the 3 police departments (2000–2024); 43 mapped incidents (2018–26); 150 fatal/serious crashes (PennDOT, 2005–2024) |
 
-## What's on the page
+## Pages
 
-The page is laid out like a small regional daily: a utility strip, a
-left-aligned nameplate with an "ear", and a sticky maroon section bar. Type is
-Newsreader (headlines and text) and Radio Canada (tables, credits, map UI), and
-each section uses its own grid rather than one repeated card template.
+| Address | What it is |
+| --- | --- |
+| `/` | This week: the lost-pets box, the next three dates, numbers to keep, the crime answer, latest news |
+| `/lost-pets/` | Who to call first, the board, the first-48-hours checklist; `post/` and `flyer/` |
+| `/numbers/` | Every police, city hall, library, school and animal number, tap to call, prints on one sheet |
+| `/calendar/` | Fridays on Fifth, council nights, deadlines and yearly events, sorted by next date |
+| `/crime/`, `/crime/<town>/` | Is crime going up? Plain answers from each department's FBI reports |
+| `/crime/blotter/` | News-reported incidents, on the block, filterable by town, year and street |
+| `/crashes/` | PennDOT's fatal and serious crashes by town, year and road |
+| `/towns/`, `/towns/<town>/` | Each city's hall, police, parks, neighborhoods, history and figures |
+| `/news/`, `/history/`, `/history/people/`, `/eat/` | Credited news briefs, the history, notable people, where to eat |
+| `/map/`, `/map/3d/` | The map explorer (search, layers, deep links) and the 3D view |
+| `/poster/` | Every road in 15068 as a free poster, including a "your street" version |
+| `/directory/`, `/search/` | Places and streets A to Z; site search |
+| `/whats-new/`, `/about/`, `/privacy/`, `/contact/`, `/sources/` | Changelog, about, privacy, contact and sources |
 
-- **Front:** a still drawing of the ZIP's roads (state routes in orange), the
-  lead, and a rail with "15068 by the count", the latest headlines and a count
-  of open lost-pet listings.
-- **Map explorer:** pan, zoom and pinch; search 1,256 places and 790 streets
-  (state routes 56, 366, 380 and 780 get keystone shields); filter by category.
-  A **Layers** menu toggles buildings, terrain relief, 3D, crime incidents,
-  serious crashes and lost pets, and jumps to downtown or the whole ZIP.
-  - **3D mode:** real elevation (1.5× vertical exaggeration) with every
-    building extruded to its height.
-- **News:** a three-column river of credited summaries, newest first.
-- **Lost & found pets:** classified-style listings pinned on the map, a
-  "place a free listing" box, and who to call in 15068 (see below).
-- **Towns:** a street map, incorporation dates and figures for each city.
-- **Crime & safety:**
-  - A box score of the latest FBI rates per department, then small-multiple
-    trends for violent crime, property crime and arrests. Partial-year
-    reports are flagged.
-  - Clearances, assaults on officers, staffing and a rail on each department.
-  - Police shootings, lawsuits and policy changes, and a filterable **police
-    blotter** of news-reported incidents that doubles as a map layer.
-  - PennDOT's police-reported fatal and serious-injury crashes.
-- **History:** a chronology from 1769 to 2026, a population chart, and
-  neighborhoods and landmarks.
-- **Eat & drink** (grouped like a dining guide), a **community calendar**,
-  **People**, a **business directory** (places, streets, public offices), and
-  **Sources**. Credits name the outlet ("Source: WPXI") and dates are AP style.
-- Light and dark themes, keyboard and touch support, reduced-motion aware,
-  and a print stylesheet.
+Credits name the outlet ("Source: WPXI") and dates are AP style. Light and
+dark themes, keyboard and touch support, reduced-motion aware, print styles.
+
+## Build and run locally
+
+```bash
+python scripts/build_pages.py            # regenerate site/ after any change to data, research or templates
+python scripts/build_pages.py --check    # exit 1 if the committed site/ is out of date (CI runs this)
+python -m unittest discover -s tests
+cd site && python -m http.server 8000    # open http://localhost:8000
+```
+
+Generated files (every `index.html`, `404.html`, `assets/app.js`,
+`assets/nk.css`, `assets/pubs.js`, the SVG map art, `data/search.json`,
+`sitemap.xml`, …) are listed in `site/data/build.json`. Edit the templates in
+`scripts/nkpages/`, the styles in `site/assets/css/` and the scripts in
+`site/assets/js/`, never the generated files. `tests/ui_check.mjs` runs the
+browser checks by hand (see its header).
+
+### Configuration: `data/site.json`
+
+| Field | Meaning |
+| --- | --- |
+| `site_url`, `base_path` | Canonical URLs, sitemap and the 404 page's `<base>` |
+| `owner_name` | Who runs the site, shown on About. Required before ads can be turned on |
+| `contact_email` | Optional; shown on Contact and the post-a-pet page only when set |
+| `adsense_client`, `adsense_slots` | Ads switch (see below). Empty means no ad code anywhere |
+| `repo` | GitHub repo for the pets board, issue forms and corrections |
+| `privacy_effective` | The privacy policy's effective date |
+
+## Deploy
+
+`.github/workflows/pages.yml` runs the tests, snapshots the open lost-pet
+issues (`scripts/snapshot_pets.py`), rebuilds with `--snapshot` and publishes
+`site/` to GitHub Pages. It runs on every push to `main`, whenever an issue
+changes, and daily at 09:15 UTC so "This week" rolls forward. The snapshot,
+the per-listing pages and the listings feed are built at deploy only and never
+committed.
+
+One-time setup:
+
+- *Settings → Pages → Source: GitHub Actions.*
+- Set the custom domain in *Settings → Pages* (the deploy action ignores `CNAME` files).
+- Create the `pet-listing` and `correction` labels (the issue forms apply them).
+- Submit `https://nk15068.com/sitemap.xml` in Google Search Console.
+
+`.github/workflows/refresh.yml` re-pulls the data on the 3rd of each month,
+rebuilds, records a What's new entry (`build_pages.py --log`) and opens a pull
+request for review. It never merges on its own.
+
+### Ads (off)
+
+Ads are off until `adsense_client` is set (and the build refuses to turn them
+on while `owner_name` is empty). When on, the AdSense script and at most two
+server-rendered slots appear only on the nine long-form pages (`/crime/`, the
+three department pages, `/crashes/`, the three town pages and `/history/`),
+always after the emergency and contact blocks and at least 250 words in. Never
+on the front page, the pets pages, the numbers, calendar, map or trust pages.
+
+In the AdSense dashboard keep Auto ads, anchor ads and vignettes off, and turn
+on the EEA/UK consent message. Resubmit for review only after the pages are
+deployed and indexed and What's new shows at least three real data updates
+spread over three to four weeks.
 
 ### Lost & found pets board
 
-The board picks its backend at run time:
-
-- **On GitHub Pages** it lists open issues made with the
-  [lost or found pet form](.github/ISSUE_TEMPLATE/lost-found-pet.yml),
-  read through GitHub's public API. Posting a listing means filling in that
-  form, and closing the issue takes it down.
+- **On GitHub Pages** the board lists open issues made with the
+  [lost or found pet form](.github/ISSUE_TEMPLATE/lost-found-pet.yml). The
+  deploy snapshot puts them in the HTML; the page asks GitHub's API only when
+  the snapshot is missing or more than a day old. Posting means filling in that
+  form (the site's post page fills it in for you), and closing the issue takes
+  the listing down.
 - **In the Claude artifact preview** it uses the artifact's shared `db`: each
   viewer can write only their own document (`pets/<their id>`), everyone can
   read all of them, and owners can mark a post reunited.
 
 Locations are a street and cross street, placed on the site's own road data.
-House numbers are stripped, and a spot picked on the map is rounded to 10 m.
-
-## Run it locally
-
-```bash
-cd site && python -m http.server 8000   # open http://localhost:8000
-```
-
-## Deploy
-
-`.github/workflows/pages.yml` runs the tests and publishes `site/` to GitHub
-Pages on every push to `main`. Enable it once under *Settings → Pages →
-Source: GitHub Actions*.
+House numbers are stripped. A post that names only a street highlights the
+street instead of showing a precise-looking dot.
 
 ## Rebuild the data
 
@@ -93,44 +132,35 @@ python scripts/fetch_terrain.py    # AWS Terrain Tiles (z13) → data/raw/terrai
 python scripts/build_data.py       # clip to 15068, project, compress → site/data/
 python scripts/fetch_crime.py      # FBI UCR per-department CSVs + PennDOT serious crashes → data/research/crime/
 python scripts/build_safety.py     # geocode incidents + stats → site/data/safety.json
+python scripts/build_pages.py --log  # regenerate pages and record a What's new entry
 python -m unittest discover -s tests
 ```
+
+The curated research lives in `data/research/*.json`. Edit it by hand, then run
+`python scripts/build_pages.py` (it syncs the research into `site/data/`).
 
 ### Crime & policing data: rules
 
 - **FBI statistics** come from each department's own Uniform Crime Reporting
   submissions (Return A offenses and clearances, arson, LEOKA staffing and
-  assaults on officers, arrests). They are read directly from Jacob Kaplan's
-  per-agency files in
+  assaults on officers, arrests), read from Jacob Kaplan's per-agency files in
   [crimedatatool_helper](https://github.com/jacobkap/crimedatatool_helper).
   Years a department didn't report stay blank; nothing is interpolated.
-- **Incidents** are a news-reported sample. Each one was gathered by
-  independent search sweeps, then checked by two separate review lenses
-  (evidence consistency, privacy/framing), and any disputes went to an
-  arbiter.
+  Partial years are compared as monthly averages.
+- **Incidents** are a news-reported sample, each checked for evidence
+  consistency and privacy before publishing.
 - **Location precision:** locations are geocoded against the ZIP's address
-  points and street centerlines. Every point except a named public place sits
-  on the street centerline:
-  - a hundred-block becomes the stretch of road beside that block;
-  - an intersection is where the two centerlines meet;
-  - "street only" is flagged on the map as approximate.
-
-  The build refuses to publish a point within 6 m of any address point.
-  Exact house numbers, article headlines and raw coordinates never ship, and
-  the tests enforce all of this.
+  points and street centerlines. A hundred-block becomes the stretch of road
+  beside that block, an intersection is where two centerlines meet, and
+  "street only" is flagged as approximate. The build refuses to publish a
+  point within 6 m of any address point. Exact house numbers, article
+  headlines and raw coordinates never ship, and the tests enforce all of this.
 - **Crashes:** PennDOT's fatal and suspected-serious-injury crash records
-  (via the [bencarneiro/ntsb](https://github.com/bencarneiro/ntsb) mirror).
-  Spot-checked against PennDOT's full statewide crash files, and assigned to
-  a town by its boundary polygon.
+  (via the [bencarneiro/ntsb](https://github.com/bencarneiro/ntsb) mirror),
+  assigned to a town by its boundary polygon.
 - **Privacy:** no names of suspects, victims or line officers. Individual
   sexual-offense incidents and anything identifying a juvenile are never
   published; FBI aggregate totals include sexual offenses.
-
-- `fetch_overture.py` reads only the parquet row groups whose bounding box
-  touches 15068, so a full refresh takes about 90 seconds. Set
-  `OVERTURE_RELEASE` to pull a newer release.
-- The curated research lives in `data/research/*.json`. Edit it by hand and
-  re-run `build_data.py`.
 
 ### Data format
 
@@ -148,8 +178,7 @@ is an RGB heightmap: elevation in decimetres = R×256 + G.
 - US Census TIGER/Line ZCTA5 boundary for 15068 (public domain).
 - [Terrain Tiles on AWS](https://registry.opendata.aws/terrain-tiles/)
   (USGS 3DEP / SRTM).
-- History, civic, news and pets entries each cite their own source. These were
-  compiled from search results on 2026-09-23, so verify anything important.
+- History, civic, news and pets entries each cite their own source.
 
 The earlier Minecraft digital-twin experiment lives on the
 `claude/minecraft-new-kensington-twin-jnri2p` branch.
