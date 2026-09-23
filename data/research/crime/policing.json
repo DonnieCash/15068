@@ -1,0 +1,327 @@
+{
+ "agencies": [
+  {
+   "name": "New Kensington Police Department",
+   "municipality": "New Kensington",
+   "covers": "City of New Kensington",
+   "address": "301 11th St, New Kensington, PA 15068",
+   "phone_nonemergency": null,
+   "chief": null,
+   "officers": 24,
+   "officers_year": 2023,
+   "budget": null,
+   "notes": "Authorized for 27 full-time officers; 24 were on the roster in spring 2023 after council hired three to ease a staffing shortage, with 3 to 6 officers on patrol per shift. Runs a K-9 unit. Robert Deringer was named chief in 2016; not re-confirmed for 2026.",
+   "sources": [
+    "https://www.facebook.com/NewKenPD/",
+    "https://triblive.com/local/valley-news-dispatch/new-kensington-beefs-up-police-department-with-hiring-of-3-full-time-officers/",
+    "https://triblive.com/local/valley-news-dispatch/resignations-retirement-leave-new-kensington-police-short-staffed/",
+    "https://archive.triblive.com/local/valley-news-dispatch/new-kensingtons-new-police-chief-det-bob-deringer/",
+    "https://www.wpxi.com/news/local/new-kensington-police-department-introduces-newest-member-k9-unit/Z4XB6SMKVBAM3GRENZXOJNJ5CU/",
+    "https://triblive.com/local/valley-news-dispatch/3-new-officers-2nd-police-dog-joining-new-kensington-force/"
+   ]
+  },
+  {
+   "name": "Arnold Police Department",
+   "municipality": "Arnold",
+   "covers": "City of Arnold",
+   "address": "601 Drey St, Arnold, PA 15068",
+   "phone_nonemergency": "724-339-9663",
+   "chief": "Rob Haus",
+   "officers": 5,
+   "officers_year": 2025,
+   "budget": null,
+   "notes": "Five full-time and three part-time officers (2025). After a 2024\u201325 leadership shake-up, Rob Haus was appointed chief in September 2025. Officers began wearing body cameras in 2026, partly paid for with the DA's drug-forfeiture funds. A councilman has proposed merging with New Kensington's department.",
+   "sources": [
+    "https://www.cityofarnoldpa.org/home/police",
+    "https://www.myreadylink.com/new-kensington-lower-burrell-pa/number/police-arnold-police-department-non-emergency-/",
+    "https://www.countyoffice.org/arnold-police-department-new-kensington-pa-ddc/",
+    "https://community.triblive.com/news/3875257",
+    "https://triblive.com/local/valley-news-dispatch/arnold-police-chief-2nd-officer-leave-as-new-mayor-council-seated/",
+    "https://community.triblive.com/c/bridgeville-signal-item/news/3755452",
+    "https://www.wpxi.com/news/local/arnolds-suspended-police-chief-resigns-role/GKOJVG3U4NGTVDFFHFTK5G2G2A/",
+    "https://crimewatch.net/us/pa/westmoreland/da/177666/post/das-office-distributes-forfeiture-funding-arnold-police-department-body-worn-cameras"
+   ]
+  },
+  {
+   "name": "Lower Burrell Police Department",
+   "municipality": "Lower Burrell",
+   "covers": "City of Lower Burrell",
+   "address": "2800 Bethel St, Lower Burrell, PA 15068",
+   "phone_nonemergency": "724-339-4287",
+   "chief": "John Marhefka",
+   "officers": 17,
+   "officers_year": 2025,
+   "budget": null,
+   "notes": "17 full-time officers plus a police operations coordinator, organized into administrative, detective and patrol divisions. Assigns a school resource officer to the Burrell School District and runs a K-9 unit.",
+   "sources": [
+    "https://www.lowerburrellpolice.org/222/About-Us",
+    "https://www.cityoflowerburrell.com/222/About-Us",
+    "https://www.cityoflowerburrell.com/179/Police-Department",
+    "https://www.lowerburrellpolice.org/241/Contact",
+    "https://www.lowerburrellpolice.org/301/Patrolman-Application-2025",
+    "https://www.officer.com/tactical/firearms/news/10426402/pa-police-officer-fatally-shot-suspect-dead"
+   ]
+  },
+  {
+   "name": "Pennsylvania State Police, Troop A, Kiski Valley Station",
+   "municipality": "Westmoreland County (regional)",
+   "covers": "Northern Westmoreland County (support role in 15068)",
+   "address": "4451 PA-66, Apollo, PA 15613",
+   "phone_nonemergency": null,
+   "chief": null,
+   "officers": null,
+   "officers_year": null,
+   "budget": null,
+   "notes": "Troop A's Kiski Valley station serves northern Westmoreland County. All three 15068 cities have their own full-time police, so state police mostly assist and investigate here.",
+   "sources": [
+    "https://www.pa.gov/agencies/psp/contact-psp/psp-troop-directory/troop-a",
+    "https://www.cbsnews.com/pittsburgh/news/arnold-police-chief-theft-charges/"
+   ]
+  },
+  {
+   "name": "Westmoreland County Department of Public Safety (911 Emergency Communications)",
+   "municipality": "Westmoreland County (countywide)",
+   "covers": "911 dispatch for all of Westmoreland County",
+   "address": null,
+   "phone_nonemergency": null,
+   "chief": null,
+   "officers": null,
+   "officers_year": null,
+   "budget": null,
+   "notes": "Countywide 911 answering and dispatch. Police District 9 covers Arnold, New Kensington, Lower Burrell and Upper Burrell.",
+   "sources": [
+    "https://www.westmorelandcountypa.gov/3276/911-Emergency-Communications",
+    "https://www.westmorelandcountypa.gov/3281/Public-Safety",
+    "https://wiki.radioreference.com/index.php/Westmoreland_County_(PA)_Public_Safety"
+   ]
+  }
+ ],
+ "stats": [
+  {
+   "agency": "New Kensington PD",
+   "metric": "sworn_officers_authorized",
+   "value": 27,
+   "year": 2023,
+   "unit": "full-time officers",
+   "source": "https://triblive.com/local/valley-news-dispatch/new-kensington-beefs-up-police-department-with-hiring-of-3-full-time-officers/",
+   "note": ""
+  },
+  {
+   "agency": "Arnold PD",
+   "metric": "part_time_officers",
+   "value": 3,
+   "year": 2025,
+   "unit": "part-time officers",
+   "source": "https://community.triblive.com/news/3875257",
+   "note": ""
+  },
+  {
+   "agency": "Lower Burrell PD",
+   "metric": "starting_salary_patrol_officer",
+   "value": 72706,
+   "year": 2025,
+   "unit": "USD per year",
+   "source": "https://www.lowerburrellpolice.org/301/Patrolman-Application-2025",
+   "note": "2025 hiring"
+  },
+  {
+   "agency": "Arnold PD",
+   "metric": "body_camera_funding",
+   "value": 13353,
+   "year": 2026,
+   "unit": "USD (DA drug-forfeiture funds contributed)",
+   "source": "https://crimewatch.net/us/pa/westmoreland/da/177666/post/das-office-distributes-forfeiture-funding-arnold-police-department-body-worn-cameras",
+   "note": "The DA's share of the cost"
+  },
+  {
+   "agency": "New Kensington PD",
+   "metric": "pct_arrests_low_level_nonviolent",
+   "value": 64,
+   "year": null,
+   "unit": "percent of arrests, 2013-2023",
+   "source": "https://policescorecard.org/pa/police-department/new-kensington",
+   "note": "Police Scorecard, 2013\u20132023"
+  },
+  {
+   "agency": "Lower Burrell PD",
+   "metric": "pct_arrests_low_level_nonviolent",
+   "value": 62,
+   "year": null,
+   "unit": "percent of arrests, 2013-2023",
+   "source": "https://policescorecard.org/pa/police-department/lower-burrell",
+   "note": "Police Scorecard, 2013\u20132023"
+  },
+  {
+   "agency": "New Kensington PD",
+   "metric": "people_killed_by_police",
+   "value": 1,
+   "year": null,
+   "unit": "people, 2013-2023",
+   "source": "https://policescorecard.org/pa/police-department/new-kensington",
+   "note": "Police Scorecard; matches the Washington Post database"
+  },
+  {
+   "agency": "Lower Burrell PD",
+   "metric": "people_killed_by_police",
+   "value": 1,
+   "year": null,
+   "unit": "people, 2013-2023",
+   "source": "https://policescorecard.org/pa/police-department/lower-burrell",
+   "note": "Police Scorecard; matches the Washington Post database"
+  },
+  {
+   "agency": "All 15068 agencies",
+   "metric": "fatal_police_shootings_wapo",
+   "value": 2,
+   "year": null,
+   "unit": "fatal shootings, 2015-2024",
+   "source": "https://raw.githubusercontent.com/washingtonpost/data-police-shootings/master/v2/fatal-police-shootings-data.csv",
+   "note": "Lower Burrell 2018, New Kensington 2020"
+  }
+ ],
+ "interactions": [
+  {
+   "date": "2011-10-12",
+   "kind": "officer_killed",
+   "municipality": "Lower Burrell",
+   "location_text": "Outside a Dairy Queen restaurant, Lower Burrell",
+   "summary": "A Lower Burrell K-9 patrolman, one of the department's 16 officers, was shot and killed by a wanted fugitive while approaching him outside a Dairy Queen. A detective had been on the phone with the fugitive trying to get him to surrender. The gunman fled and later died. Accounts differ on whether he died in gunfire with other officers or shot himself.",
+   "source": "https://www.officer.com/tactical/firearms/news/10426402/pa-police-officer-fatally-shot-suspect-dead"
+  },
+  {
+   "date": "2017-11-17",
+   "kind": "officer_killed",
+   "municipality": "New Kensington",
+   "location_text": "Leishman Avenue, New Kensington",
+   "summary": "A 25-year-old New Kensington officer, five months on the force, was shot and killed after an attempted traffic stop on Leishman Avenue when a passenger ran and fired at him during a foot chase. A suspect was arrested days later, and a Westmoreland County jury convicted him in 2019.",
+   "source": "https://www.police1.com/legal/articles/man-found-guilty-in-2017-pa-rookie-officers-killing-uFgYOm8TnmD589du/"
+  },
+  {
+   "date": "2018-05-10",
+   "kind": "police_shooting",
+   "municipality": "Lower Burrell",
+   "location_text": "400 block of Violet Drive, Lower Burrell",
+   "summary": "Lower and Upper Burrell officers answered a 911 call about an armed man at a house. Police said he did not obey repeated commands to drop a handgun, and a Lower Burrell officer shot and killed him; the DA said a loaded pistol was found beside him.",
+   "source": "https://www.post-gazette.com/news/crime-courts/2018/05/10/At-least-one-dead-in-Lower-Burrell/stories/201805100174"
+  },
+  {
+   "date": "2019-11-05",
+   "kind": "lawsuit",
+   "municipality": "Arnold",
+   "location_text": "18th Street, Arnold",
+   "summary": "A man filed a federal civil-rights suit in Pittsburgh against the City of Arnold, its police chief at the time and two officers. He alleged that in 2018 officers answering a burglary call he had nothing to do with beat him and falsely arrested him while he was fixing up an apartment on 18th Street. The suit alleged a 'history of excessive force and unlawful arrests.' Outcome not found.",
+   "source": "https://www.post-gazette.com/news/crime-courts/2019/11/05/police-excessive-force-arnold-westmoreland-county-lawsuit/stories/201911050105"
+  },
+  {
+   "date": "2020-03-13",
+   "kind": "police_shooting",
+   "municipality": "New Kensington",
+   "location_text": "Center Avenue near the KFC restaurant, New Kensington",
+   "summary": "Officers from New Kensington, Arnold and Lower Burrell found a man in his 60s walking up Center Avenue with a shotgun. New Kensington police say an officer fired after he pointed the shotgun at them, and he died at the scene. The Westmoreland County Coroner and DA investigated.",
+   "source": "https://triblive.com/local/valley-news-dispatch/new-kensington-police-say-officer-killed-suspect-after-he-aimed-shotgun-at-officers/"
+  },
+  {
+   "date": "2022",
+   "kind": "staffing",
+   "municipality": "New Kensington",
+   "location_text": null,
+   "summary": "Two patrol officers resigned and a longtime detective sergeant retired, leaving New Kensington police short-staffed.",
+   "source": "https://triblive.com/local/valley-news-dispatch/resignations-retirement-leave-new-kensington-police-short-staffed/"
+  },
+  {
+   "date": "2023-03",
+   "kind": "staffing",
+   "municipality": "New Kensington",
+   "location_text": null,
+   "summary": "Council unanimously hired three full-time officers from other local agencies, bringing the roster to 24 of an authorized 27. The chief said the department had been short-staffed, with 3 to 6 officers on patrol per shift.",
+   "source": "https://triblive.com/local/valley-news-dispatch/new-kensington-beefs-up-police-department-with-hiring-of-3-full-time-officers/"
+  },
+  {
+   "date": "2024-01",
+   "kind": "staffing",
+   "municipality": "Arnold",
+   "location_text": null,
+   "summary": "At the reorganization meeting that seated a new mayor and council, Arnold's police chief retired before council could vote to demote him, and a second officer left with him. Council unanimously named an officer interim chief.",
+   "source": "https://triblive.com/local/valley-news-dispatch/arnold-police-chief-2nd-officer-leave-as-new-mayor-council-seated/"
+  },
+  {
+   "date": "2024-02",
+   "kind": "community_program",
+   "municipality": "New Kensington",
+   "location_text": null,
+   "summary": "New Kensington police introduced the newest member of the K-9 unit.",
+   "source": "https://www.wpxi.com/news/local/new-kensington-police-department-introduces-newest-member-k9-unit/Z4XB6SMKVBAM3GRENZXOJNJ5CU/"
+  },
+  {
+   "date": "2024-08",
+   "kind": "misconduct_charge",
+   "municipality": "Arnold",
+   "location_text": "Union Cemetery, Arnold",
+   "summary": "In a state 'professional integrity test', agents left a staged 'stolen' vehicle with cash and fake pills at Union Cemetery. Arnold's then-chief, hired earlier that year, was charged with theft and four other misdemeanors after allegedly keeping most of the cash; he pleaded not guilty, and no verdict had been reported.",
+   "source": "https://www.cbsnews.com/pittsburgh/news/arnold-police-chief-theft-charges/"
+  },
+  {
+   "date": "2025",
+   "kind": "regionalization",
+   "municipality": "Arnold",
+   "location_text": null,
+   "summary": "An Arnold city councilman proposed talks with New Kensington about merging the two cities' police departments into a regional force with a joint governing board. He noted the cities already share the New Kensington-Arnold School District and cited savings, competitive wages and better coverage. An online petition had 55 verified signatures at the time of the report.",
+   "source": "https://www.wpxi.com/news/local/arnold-city-councilman-proposes-merging-police-force-with-new-kensington/C25HOA7QRVFAZHAX7DL2OIYV7M/"
+  },
+  {
+   "date": "2025",
+   "kind": "staffing",
+   "municipality": "Arnold",
+   "location_text": null,
+   "summary": "Arnold's police department went without an officer-in-charge, and the mayor handled the department's administrative work.",
+   "source": "https://community.triblive.com/c/bridgeville-signal-item/news/3755452"
+  },
+  {
+   "date": "2025-09",
+   "kind": "staffing",
+   "municipality": "Arnold",
+   "location_text": null,
+   "summary": "Arnold's suspended chief resigned in lieu of being fired. Rob Haus, officer-in-charge since July, was appointed chief, ending about a year of leadership uncertainty.",
+   "source": "https://www.wpxi.com/news/local/arnolds-suspended-police-chief-resigns-role/GKOJVG3U4NGTVDFFHFTK5G2G2A/"
+  },
+  {
+   "date": "2026-02-14",
+   "kind": "police_shooting",
+   "municipality": "Lower Burrell",
+   "location_text": "Rodgers Drive, Lower Burrell",
+   "summary": "Lower Burrell police were sent to Rodgers Drive for a report of shots fired into a nearby home. A standoff followed and ended with Westmoreland County SWAT shooting and wounding the man; the DA later ruled the shooting justified.",
+   "source": "https://crimewatch.net/us/pa/westmoreland/da/177666/cases/county-detectives-investigating-after-standoff-officer-involved-shooting-lower-burrell"
+  },
+  {
+   "date": "2026",
+   "kind": "body_cameras",
+   "municipality": "Arnold",
+   "location_text": null,
+   "summary": "Westmoreland County DA Nicole Ziccarelli's office gave Arnold police $13,353 in drug-forfeiture funds toward body-worn cameras. Mayor Shannon Santucci had called body cameras one of her top priorities, and Arnold officers now wear them.",
+   "source": "https://crimewatch.net/us/pa/westmoreland/da/177666/post/das-office-distributes-forfeiture-funding-arnold-police-department-body-worn-cameras"
+  },
+  {
+   "date": "2026-08",
+   "kind": "use_of_force",
+   "municipality": "New Kensington",
+   "location_text": "Alley near an abandoned house, New Kensington (exact street not reported)",
+   "summary": "A 911 caller reported two people on bicycles trying to break into an abandoned house, and officers stopped a man and a woman in a nearby alley. Police said the man resisted handcuffing; an assisting Arnold officer used a Taser on him three times and a New Kensington officer struck him in the face several times, saying the man tried to bite him. The man was hospitalized with facial fractures and charged with aggravated assault, resisting arrest and loitering and prowling. The officer was placed on administrative leave while the DA reviewed the use of force, then resigned.",
+   "source": "https://www.cbsnews.com/pittsburgh/news/new-kensington-police-officer-under-investigation/"
+  }
+ ],
+ "wapo_fatal_shootings_in_area": [
+  {
+   "date": "2018-05-10",
+   "city": "Lower Burrell",
+   "armed": "gun",
+   "source": "https://raw.githubusercontent.com/washingtonpost/data-police-shootings/master/v2/fatal-police-shootings-data.csv"
+  },
+  {
+   "date": "2020-03-13",
+   "city": "New Kensington",
+   "armed": "gun",
+   "source": "https://raw.githubusercontent.com/washingtonpost/data-police-shootings/master/v2/fatal-police-shootings-data.csv"
+  }
+ ],
+ "notes": "Agencies, staffing and interactions come from news reports and department pages; the two fatal police shootings are from the Washington Post's database (2015\u20132024). Items that could not be verified were removed."
+}

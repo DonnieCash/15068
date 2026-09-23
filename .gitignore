@@ -4,3 +4,6 @@ data/raw/*
 __pycache__/
 *.pyc
 .DS_Store
+# Unverified crime research scratch (may hold exact addresses) — only curated
+# data/research/crime/*.json is committed
+data/research/crime/_work/

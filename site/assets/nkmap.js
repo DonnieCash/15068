@@ -168,7 +168,8 @@
       this.scale = 0.05; this.cx = -3300; this.cy = 0; // centre on downtown New Ken
       this.places = []; this.streets = [];
       this.filter = new Set(Object.keys(GROUP_COLORS));
-      this.layers = { buildings: true, relief: true, towns: true, places: true };
+      this.layers = { buildings: true, relief: true, towns: true, places: true, incidents: false, crashes: false };
+      this.incidents = []; this.incVisible = () => true; this.crashes = [];
       this.sel = null; this.hover = null;
       this.pointers = new Map();
       this.dirty = true;
@@ -283,6 +284,23 @@
       });
     }
     _pick(sx, sy) {
+      if (this.layers.incidents || this.layers.crashes) {
+        let best = null, bd = 16 * 16;
+        if (this.layers.crashes) for (const p of this.crashes) {
+          const [x, y] = this.toScreen(p.x, p.y);
+          const d = (x - sx) ** 2 + (y - sy) ** 2;
+          if (d < bd) { bd = d; best = p; }
+        }
+        if (this.layers.incidents) {
+          for (const p of this.incidents) {
+            if (!this.incVisible(p)) continue;
+            const [x, y] = this._incPos(p);
+            const d = (x - sx) ** 2 + (y - sy) ** 2;
+            if (d < bd) { bd = d; best = p; }
+          }
+        }
+        return best;
+      }
       if (!this.layers.places) return null;
       let best = null, bd = 14 * 14;
       for (const p of this.places) {
@@ -392,7 +410,14 @@
       // ---------- screen-space overlays ----------
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       this._labels(ctx, dark);
-      if (this.layers.places) this._pins(ctx);
+      if (this.layers.places) {
+        ctx.globalAlpha = this.layers.incidents || this.layers.crashes ? 0.18 : 1;
+        this._pins(ctx);
+        ctx.globalAlpha = 1;
+        this._pinRings(ctx);
+      }
+      if (this.layers.crashes) this._crashes(ctx);
+      if (this.layers.incidents) this._incidents(ctx);
       this._scaleBar();
     }
     _text(ctx, t, x, y, font, color, halo) {
@@ -463,7 +488,7 @@
         ctx.lineWidth = 1.2; ctx.strokeStyle = halo; ctx.stroke();
       }
       // names at close zoom
-      if (s > 1.6) {
+      if (s > 1.6 && !this.layers.incidents && !this.layers.crashes) {
         ctx.textAlign = "left"; ctx.textBaseline = "middle";
         const font = `600 11.5px ${css("--f-body")}`;
         ctx.font = font;
@@ -479,8 +504,11 @@
           this._text(ctx, p.n, bx, y, font, css("--map-label"), halo);
         }
       }
+    }
+    _pinRings(ctx) {
+      const s = this.scale, r = s < .15 ? 2.2 : s < .6 ? 3.2 : s < 2 ? 4.5 : 6;
       for (const p of [this.hover, this.sel]) {
-        if (!p || !this.filter.has(p.g)) continue;
+        if (!p || !p.g || !this.filter.has(p.g) || p.yr != null || (p.d && p.k)) continue;
         const [x, y] = this.toScreen(p.x, p.y);
         ctx.beginPath(); ctx.arc(x, y, r + 5, 0, 7);
         ctx.lineWidth = 2.5; ctx.strokeStyle = css("--ember"); ctx.stroke();
@@ -494,6 +522,72 @@
       const px = v * this.scale;
       const ft = v * 3.28084;
       this.opts.scaleEl.innerHTML = `<span>${v >= 1000 ? v / 1000 + " km" : v + " m"} · ${ft >= 5280 ? (ft / 5280).toFixed(1) + " mi" : Math.round(ft) + " ft"}</span><i style="width:${px.toFixed(0)}px"></i>`;
+    }
+    /* crime & police incidents: circle = reported incident, diamond = police-involved,
+       dashed halo = located to the street only (approximate) */
+    _incR() { const s = this.scale; return s < .15 ? 4 : s < .6 ? 5 : 6.5; }
+    _incPos(p) {
+      const [x, y] = this.toScreen(p.x, p.y);
+      if (!p._n || p._n < 2) return [x, y];
+      const r = this._incR() * 2.4, a = (p._i / p._n) * Math.PI * 2 - Math.PI / 2;
+      return [x + Math.cos(a) * r, y + Math.sin(a) * r];
+    }
+    _incidents(ctx) {
+      const r = this._incR();
+      const halo = css("--map-halo"), ground = css("--map-bg");
+      const col = { violent: css("--inc-violent"), property: css("--inc-property"), police: css("--inc-police") };
+      const shape = (x, y, rr, pi) => {
+        ctx.beginPath();
+        if (pi) { ctx.moveTo(x, y - rr * 1.3); ctx.lineTo(x + rr * 1.3, y); ctx.lineTo(x, y + rr * 1.3); ctx.lineTo(x - rr * 1.3, y); ctx.closePath(); }
+        else ctx.arc(x, y, rr, 0, 7);
+      };
+      for (const p of this.incidents) {
+        if (!this.incVisible(p)) continue;
+        const [x, y] = this._incPos(p);
+        if (x < -20 || y < -20 || x > this.w + 20 || y > this.h + 20) continue;
+        if (p.p === "street") {
+          ctx.setLineDash([2, 2]); ctx.lineWidth = 1.2; ctx.strokeStyle = css("--muted");
+          ctx.beginPath(); ctx.arc(x, y, r + 5, 0, 7); ctx.stroke(); ctx.setLineDash([]);
+        }
+        shape(x, y, r, p.pi);
+        ctx.lineWidth = 4; ctx.strokeStyle = ground; ctx.stroke();
+        ctx.fillStyle = col[p.c] || col.police; ctx.fill();
+        ctx.lineWidth = 1; ctx.strokeStyle = this.isDark() ? halo : "rgba(20,25,30,.65)"; ctx.stroke();
+      }
+      for (const p of [this.hover, this.sel]) {
+        if (!p || p.g || p.yr != null || !this.incVisible(p)) continue;
+        const [x, y] = this._incPos(p);
+        shape(x, y, r + 4, p.pi);
+        ctx.lineWidth = 2.5; ctx.strokeStyle = css("--ink"); ctx.stroke();
+      }
+    }
+    /* police-reported serious crashes: ink triangles, filled = fatal, hollow = serious injury */
+    _crashes(ctx) {
+      const r = this._incR() + 1, ink = css("--ink"), ground = css("--map-bg");
+      const tri = (x, y, rr) => { ctx.beginPath(); ctx.moveTo(x, y - rr); ctx.lineTo(x + rr * 0.95, y + rr * 0.7); ctx.lineTo(x - rr * 0.95, y + rr * 0.7); ctx.closePath(); };
+      for (const p of this.crashes) {
+        const [x, y] = this.toScreen(p.x, p.y);
+        if (x < -20 || y < -20 || x > this.w + 20 || y > this.h + 20) continue;
+        tri(x, y, r);
+        ctx.lineWidth = 4; ctx.strokeStyle = ground; ctx.stroke();
+        if (p.f) { ctx.fillStyle = ink; ctx.fill(); }
+        else { ctx.fillStyle = ground; ctx.fill(); ctx.lineWidth = 1.6; ctx.strokeStyle = ink; ctx.stroke(); }
+      }
+      for (const p of [this.hover, this.sel]) {
+        if (!p || p.yr == null) continue;
+        const [x, y] = this.toScreen(p.x, p.y);
+        tri(x, y, r + 5); ctx.lineWidth = 2.5; ctx.strokeStyle = css("--ember"); ctx.stroke();
+      }
+    }
+    setCrashes(list) { this.crashes = list; this.dirty = true; }
+    setIncidents(list) {
+      const groups = new Map();
+      for (const p of list) {
+        const k = Math.round(p.x / 4) + "," + Math.round(p.y / 4);
+        (groups.get(k) || groups.set(k, []).get(k)).push(p);
+      }
+      for (const g of groups.values()) g.forEach((p, i) => { p._i = i; p._n = g.length; });
+      this.incidents = list; this.dirty = true;
     }
     setData(places, streets) {
       this.places = places; this.streets = streets;

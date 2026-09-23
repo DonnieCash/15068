@@ -18,6 +18,7 @@
     <nav class="nav" aria-label="Sections">
       <a href="#map">Map</a>
       <a href="#towns">Towns</a>
+      <a href="#safety">Safety</a>
       <a href="#story">Story</a>
       <a href="#eat">Eat &amp; Drink</a>
       <a href="#directory">Directory</a>
@@ -76,11 +77,24 @@
         <button type="button" id="home" title="Show all of 15068" aria-label="Show all of 15068">ZIP</button>
         <button type="button" id="dt" title="Downtown New Kensington" aria-label="Zoom to downtown New Kensington">DT</button>
         <button type="button" id="t3d" title="3D terrain view" aria-pressed="false">3D</button>
+        <button type="button" id="tinc" title="Crime &amp; police incidents" aria-label="Show crime and police incidents" aria-pressed="false">INC</button>
+        <button type="button" id="tcr" title="Serious &amp; fatal crashes" aria-label="Show serious and fatal crashes" aria-pressed="false">CRASH</button>
         <button type="button" id="tbld" title="Buildings" aria-pressed="true">BLD</button>
         <button type="button" id="trel" title="Terrain relief" aria-pressed="true">REL</button>
         <button type="button" id="ttheme" title="Switch light or dark" aria-label="Switch light or dark">◐</button>
       </div>
       <div class="panel card" id="card" hidden aria-live="polite"></div>
+      <div class="panel map-legend" id="inc-legend" hidden>
+        <div data-l="inc"><span class="inc-key" style="background:var(--inc-violent)"></span>Violent</div>
+        <div data-l="inc"><span class="inc-key" style="background:var(--inc-property)"></span>Property</div>
+        <div data-l="inc"><span class="inc-key" style="background:var(--inc-police)"></span>Police &amp; other</div>
+        <div data-l="inc" data-shape="1"><span class="inc-key pi" style="background:var(--muted)"></span>Police involved</div>
+        <div data-l="inc" data-shape="1"><span class="ring-key"></span>Street only (approximate)</div>
+        <small data-l="inc">News-reported · block, intersection, place or street</small>
+        <div data-l="cr" data-shape="1"><span class="tri-key"></span>Fatal crash</div>
+        <div data-l="cr" data-shape="1"><span class="tri-key hollow"></span>Serious-injury crash</div>
+        <div data-l="cr" data-3d="1"><span class="inc-key" style="background:var(--ink)"></span>Serious or fatal crash</div>
+      </div>
       <div class="scale" id="scale"></div>
       <div class="attrib">© OpenStreetMap contributors · Overture Maps · US Census · AWS Terrain Tiles</div>
     </div>
@@ -94,6 +108,44 @@
         <p>The ZIP code takes in three cities: New Kensington's grid on the river flat, Arnold just upriver, and Lower Burrell on the hills above. It also clips small edges of Upper Burrell, Plum and Allegheny Township.</p>
       </div>
       <div class="towns-grid" id="towns-grid"></div>
+    </div>
+  </section>
+
+  <section class="block" id="safety" aria-labelledby="safety-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">Crime &amp; policing</p>
+        <h2 id="safety-h">Safety, on the record</h2>
+        <p>What each city's police department reports to the FBI, what those departments look like, and incidents local news reported with a place you can find on the map.</p>
+      </div>
+      <p class="caveat">Rates are per 1,000 residents. Small towns swing from year to year, and a few incidents can move a rate a lot. The mapped incidents are a news-reported sample, not every call. No suspects, victims or line officers are named, and locations are rounded to the block or placed on the street.</p>
+      <div id="safety-body">
+        <div class="tiles" id="safety-tiles"></div>
+        <p class="viz-title">Violent crimes per 1,000 residents</p>
+        <p class="viz-sub">Murder, rape, robbery and aggravated assault · FBI UCR · same scale in every panel · hollow dots are partial-year reports</p>
+        <div class="multiples" id="safety-violent"></div>
+        <p class="viz-title">Property crimes per 1,000 residents</p>
+        <p class="viz-sub">Burglary, larceny-theft and motor vehicle theft · FBI UCR · same scale in every panel · hollow dots are partial-year reports</p>
+        <div class="multiples" id="safety-property"></div>
+        <details class="tableview"><summary>Show every year as a table</summary><div class="dir-table-wrap" id="safety-table"></div></details>
+        <div id="safety-offenses"></div>
+        <div class="sec-head" style="margin-top:72px">
+          <p class="eyebrow">Police departments</p>
+          <h2>Who patrols 15068</h2>
+        </div>
+        <p class="viz-title">Arrests per 1,000 residents</p>
+        <p class="viz-sub">All arrests reported to the FBI, any offense · hollow dots are partial-year reports</p>
+        <div class="multiples" id="safety-arrests"></div>
+        <div id="safety-policing"></div>
+        <div class="sec-head" style="margin-top:72px">
+          <p class="eyebrow">Where it happened</p>
+          <h2>Reported incidents</h2>
+          <p>Filter the list; the same filters apply to the map's incident layer.</p>
+        </div>
+        <div id="inc-block"></div>
+        <p class="viz-title" style="margin-top:40px">How this was put together</p>
+        <ul class="ledger-note" id="safety-method" style="display:grid;gap:8px;padding-left:18px;font-size:13px"></ul>
+      </div>
     </div>
   </section>
 
@@ -180,6 +232,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="assets/nkmap.js"></script>
 <script src="assets/nk3d.js"></script>
+<script src="assets/safety.js"></script>
 <script src="assets/app.js"></script>
 </body>
 </html>

@@ -81,16 +81,17 @@
   }
 
   /* ---------------- data ---------------- */
-  let W, meta, places = [], streets = [], history = {}, civic = {}, map2d, map3d;
+  let W, meta, places = [], streets = [], history = {}, civic = {}, safety = {}, map2d, map3d;
+  const INC_COLORS = () => ({ violent: css("--inc-violent"), property: css("--inc-property"), police: css("--inc-police") });
   const soft = (p) => p.catch((e) => { console.warn(e); return {}; });
 
   async function boot() {
     [meta, W] = await Promise.all([getJSON("meta.json"), loadWorld({ keepLines: true })]);
     startHero(W);
-    [places, streets, history, civic] = await Promise.all([
-      getJSON("places.json"), getJSON("streets.json"), soft(getJSON("history.json")), soft(getJSON("civic.json"))]);
+    [places, streets, history, civic, safety] = await Promise.all([
+      getJSON("places.json"), getJSON("streets.json"), soft(getJSON("history.json")), soft(getJSON("civic.json")), soft(getJSON("safety.json"))]);
     places.forEach((p, i) => { p.id = i; p.key = norm(p.n); });
-    renderLedger(); initMap(); renderTowns(); renderStory(); renderEat(); renderDirectory(); renderPeople(); renderNews(); renderSources();
+    renderLedger(); initMap(); renderTowns(); renderSafety(); renderStory(); renderEat(); renderDirectory(); renderPeople(); renderNews(); renderSources();
   }
 
   const norm = (s) => String(s || "").toLowerCase().replace(/\b(new kensington|lower burrell|arnold|the|pa)\b/g, "").replace(/[^a-z0-9]/g, "");
@@ -154,7 +155,7 @@
       chips.querySelectorAll(".chip").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
       map2d.filter = new Set(g === "*" ? Object.keys(GROUP_COLORS) : [g]);
       map2d.dirty = true;
-      if (map3d) map3d.setPlaces(places.filter((p) => map2d.filter.has(p.g)), GROUP_COLORS);
+      sync3DPins();
     });
 
     // search
@@ -186,6 +187,8 @@
     };
     toggle("#tbld", "buildings"); toggle("#trel", "relief");
     $("#t3d").onclick = () => set3D($("#gl-host").hidden);
+    $("#tinc").onclick = () => setIncidents(!map2d.layers.incidents);
+    $("#tcr").onclick = () => setCrashes(!map2d.layers.crashes);
   }
 
   async function set3D(on) {
@@ -193,6 +196,7 @@
     if (on && !window.THREE) { showCard({ msg: "3D needs the three.js library, which didn't load. Check your connection and reload the page." }); return; }
     gl.hidden = !on; b.setAttribute("aria-pressed", String(on));
     $("#map-canvas").hidden = on;
+    syncLegend();
     ["#tbld", "#trel", "#zin", "#zout", "#scale"].forEach((s) => { $(s).hidden = on; });
     if (on && !map3d) {
       $("#map-loading").hidden = false; $("#map-loading").textContent = "Raising the terrain…";
@@ -200,11 +204,65 @@
       map3d = new window.NK.Map3D(gl, W, { onSelect: showCard });
       const [T, bld] = await Promise.all([getTerrain(meta), loadBuildings(W)]);
       await map3d.build(T, bld);
-      map3d.setPlaces(places.filter((p) => map2d.filter.has(p.g)), GROUP_COLORS);
+      sync3DPins();
       map3d.target.x = map2d.cx; map3d.target.z = map2d.cy;
       $("#map-loading").hidden = true;
     } else if (on && map3d) { map3d.resize(); }
   }
+  function sync3DPins() {
+    if (!map3d) return;
+    if (map2d.layers.incidents || map2d.layers.crashes) {
+      const list = [];
+      if (map2d.layers.incidents) list.push(...map2d.incidents.filter(map2d.incVisible).map((i) => Object.assign(Object.create(i), { g: i.c })));
+      if (map2d.layers.crashes) list.push(...map2d.crashes.map((c) => Object.assign(Object.create(c), { g: "crash" })));
+      map3d.setPlaces(list, { ...INC_COLORS(), crash: css("--ink") });
+    }
+    else map3d.setPlaces(places.filter((p) => map2d.filter.has(p.g)), GROUP_COLORS);
+  }
+  function syncLegend() {
+    const inc = map2d.layers.incidents, cr = map2d.layers.crashes;
+    $("#inc-legend").hidden = !(inc || cr);
+    const in3d = !$("#gl-host").hidden;
+    document.querySelectorAll("#inc-legend [data-l]").forEach((el) => {
+      el.hidden = (el.dataset.l === "inc" ? !inc : !cr) || (in3d && !!el.dataset.shape) || (!in3d && !!el.dataset["3d"]);
+    });
+  }
+  function setCrashes(on) {
+    map2d.layers.crashes = on;
+    $("#tcr").setAttribute("aria-pressed", String(on));
+    syncLegend();
+    map2d.hover = null; map2d.dirty = true;
+    if (!on && map2d.sel && map2d.sel.yr != null) { map2d.sel = null; $("#card").hidden = true; }
+    sync3DPins();
+  }
+  function setIncidents(on) {
+    map2d.layers.incidents = on;
+    $("#tinc").setAttribute("aria-pressed", String(on));
+    syncLegend();
+    map2d.hover = null; map2d.dirty = true;
+    if (!on && map2d.sel && map2d.sel.d && map2d.sel.k && map2d.sel.yr == null) { map2d.sel = null; $("#card").hidden = true; }
+    sync3DPins();
+  }
+  function focusIncident(i) {
+    if (!i) return;
+    scrollToMap();
+    setIncidents(true);
+    if (!map2d.incVisible(i)) map2d.incVisible = () => true;
+    if (map3d && !$("#gl-host").hidden) map3d.flyTo(i.x, i.y); else map2d.flyTo(i.x, i.y, 2.2);
+    map2d.select(i);
+  }
+  function renderSafety() {
+    if (!window.NKSafety) return;
+    map2d.setIncidents(safety.incidents || []);
+    map2d.setCrashes(safety.crashes?.points || []);
+    window.NKSafety.render(safety, {
+      setFilter: (fn) => { map2d.incVisible = fn; map2d.dirty = true; if (map2d.layers.incidents) sync3DPins(); },
+      focus: focusIncident,
+      showLayer: () => { scrollToMap(); set3D(false); setIncidents(true); map2d.fitView([-6200, -2600, 1800, 2600]); },
+      showCrashes: () => { scrollToMap(); set3D(false); setCrashes(true); map2d.fitView([-6200, -2600, 3200, 3600]); },
+    });
+  }
+
   async function rebuild3D() {
     if (!map3d) return;
     map3d.stopped = true;
@@ -234,6 +292,24 @@
     if (!p) { card.hidden = true; return; }
     let html = `<button class="close" type="button" aria-label="Close">×</button>`;
     if (p.msg) html += `<p>${esc(p.msg)}</p>`;
+    else if (p.yr != null && p.col) {
+      const mo = p.mo ? new Date(p.yr, p.mo - 1).toLocaleString("en-US", { month: "long" }) + " " : "";
+      html += `<p class="eyebrow">Police-reported crash</p><h3>${p.f ? "Fatal crash" : "Serious-injury crash"}</h3>
+        <div class="meta">${esc(mo)}${p.yr} · ${esc(p.t)}</div>
+        <div class="lines"><span>${esc(p.col)}</span>
+          <span>${p.f ? `${p.f} killed` : ""}${p.f && p.s ? " · " : ""}${p.s ? `${p.s} seriously injured` : ""}</span>
+          <a href="${esc(safety.crashes?.source || "")}" target="_blank" rel="noopener">PennDOT crash data ↗</a></div>
+        <div class="meta">Location as recorded by the investigating police agency.</div>`;
+    }
+    else if (p.d && p.k && p.c) {
+      const S = window.NKSafety;
+      html += `<p class="eyebrow" style="color:var(--ink-2)"><span class="inc-key${p.pi ? " pi" : ""}" style="background:var(--inc-${esc(p.c)})"></span>${esc(S.CAT[p.c] || "")}${p.pi ? " · police involved" : ""}</p>
+        <h3>${esc(S.TYPE[p.k] || p.k)}</h3>
+        <div class="meta">${esc(S.monthName(p.d))} · ${esc(p.t)}</div>
+        <div class="lines"><span class="mono" style="font-size:13px">${esc(p.l)}</span><span>${esc(p.s)}</span>
+          <a href="${esc(p.src)}" target="_blank" rel="noopener">Source: ${esc(host(p.src))} ↗</a></div>
+        <div class="meta">Location precision: ${esc(S.PREC[p.p] || p.p)}. Reported in the news; not a complete record.</div>`;
+    }
     else if (p.street) {
       const s = p.street;
       html += `<p class="eyebrow">Street</p><h3>${esc(s.n)}</h3>

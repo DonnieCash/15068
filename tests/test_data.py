@@ -102,5 +102,66 @@ class SiteData(unittest.TestCase):
                         self.assertTrue(it.get("source") or it.get("url"), f"{name}:{key}:{it}")
 
 
+@unittest.skipUnless((DATA / "safety.json").exists(), "safety data not built")
+class SafetyData(unittest.TestCase):
+    """Privacy + integrity rules for the crime/policing layer."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.s = json.loads((DATA / "safety.json").read_text())
+        cls.meta = json.loads((DATA / "meta.json").read_text())
+
+    def test_incidents_are_sourced_located_and_coarse(self):
+        import re
+        x0, y0, x1, y1 = self.meta["bounds"]
+        house = re.compile(r"\b(\d{2,5})\s+(?:[NSEW]\.?\s+)?(?:\d+(?:st|nd|rd|th)|[A-Z][a-z]+)\s+"
+                           r"(?:Street|St|Avenue|Ave|Road|Rd|Drive|Dr|Boulevard|Blvd|Lane|Ln|Way|Court|Ct|Alley|Place|Pl)\b")
+        for i in self.s["incidents"]:
+            self.assertTrue(i["src"].startswith("http"), i)
+            self.assertIn(i["c"], {"violent", "property", "police"})
+            self.assertIn(i["p"], {"block", "intersection", "place", "street"})
+            self.assertNotIn(i["k"], {"sexual_assault", "rape", "sex_offense"})
+            self.assertTrue(x0 <= i["x"] <= x1 and y0 <= i["y"] <= y1, i["l"])
+            self.assertRegex(i["d"], r"^20\d\d-\d\d(-\d\d)?$")
+            m = re.match(r"^(\d+) block of ", i["l"])
+            if m:
+                self.assertEqual(int(m.group(1)) % 100, 0, i["l"])
+            else:
+                self.assertFalse(re.match(r"^\d+\s", i["l"]), f"exact address leaked: {i['l']}")
+            for n in house.findall(i["s"]):
+                self.assertEqual(int(n) % 100, 0, f"house number in summary: {i['s']}")
+
+    def test_no_titles_or_raw_coordinates_ship(self):
+        for i in self.s["incidents"]:
+            self.assertNotIn("st", i, "article titles can carry details the summary omits")
+        for w in self.s["policing"].get("wapo_fatal_shootings_in_area", []):
+            self.assertNotIn("lat", w)
+            self.assertNotIn("lon", w)
+
+    def test_coordinates_not_overly_precise(self):
+        for i in self.s["incidents"] + self.s["crashes"]["points"]:
+            for k in ("lat", "lon"):
+                self.assertLessEqual(len(str(i[k]).split(".")[-1]), 5, i)
+
+    def test_street_only_policy_respected(self):
+        curated = json.loads((ROOT / "data" / "research" / "crime" / "incidents.json").read_text())["incidents"]
+        street_only = {(c["date"], c["municipality"], c["type"]) for c in curated if c.get("label_policy") == "use_street_only"}
+        for i in self.s["incidents"]:
+            if (i["d"], i["t"], i["k"]) in street_only:
+                self.assertIn(i["p"], {"block", "street"}, f"{i['d']} {i['l']} exposes a place or cross street")
+
+    def test_fbi_counts_sane(self):
+        for ag in self.s["fbi"].get("agencies", []):
+            for y in ag["years"]:
+                for k in ("violent", "property", "murder", "robbery", "agg_assault", "burglary", "larceny", "mvt"):
+                    v = y.get(k)
+                    if v is not None:
+                        self.assertGreaterEqual(v, 0, (ag["agency"], y["year"], k))
+                parts = [y.get(k) for k in ("burglary", "larceny", "mvt")]
+                if y.get("property") is not None and all(p is not None for p in parts):
+                    self.assertLessEqual(sum(parts), y["property"] + 2, (ag["agency"], y["year"]))
+                self.assertTrue(y.get("sources"), (ag["agency"], y["year"]))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -1,0 +1,2506 @@
+{
+ "source": "https://github.com/bencarneiro/ntsb/tree/master/pennsylvania",
+ "notes": "PennDOT fatal and suspected-serious-injury crashes (police-reported), 2005-2024, from the bencarneiro/ntsb mirror of PennDOT crash data; spot-checked against PennDOT's full statewide CRASH files for 2012-2016.",
+ "points": [
+  {
+   "year": 2005,
+   "month": 4,
+   "muni": "64201",
+   "lat": 40.58684,
+   "lon": -79.64925,
+   "fatal": 2,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2005,
+   "month": 7,
+   "muni": "64219",
+   "lat": 40.51093,
+   "lon": -79.65224,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Rear-end"
+  },
+  {
+   "year": 2005,
+   "month": 7,
+   "muni": "64306",
+   "lat": 40.58556,
+   "lon": -79.71042,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2005,
+   "month": 8,
+   "muni": "64306",
+   "lat": 40.58,
+   "lon": -79.71198,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2005,
+   "month": 8,
+   "muni": "64306",
+   "lat": 40.59861,
+   "lon": -79.68706,
+   "fatal": 1,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2005,
+   "month": 9,
+   "muni": "64306",
+   "lat": 40.5842,
+   "lon": -79.73795,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit pedestrian"
+  },
+  {
+   "year": 2005,
+   "month": 4,
+   "muni": "64305",
+   "lat": 40.5627,
+   "lon": -79.7633,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit pedestrian"
+  },
+  {
+   "year": 2005,
+   "month": 6,
+   "muni": "64305",
+   "lat": 40.5631,
+   "lon": -79.7607,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit pedestrian"
+  },
+  {
+   "year": 2005,
+   "month": 7,
+   "muni": "64305",
+   "lat": null,
+   "lon": null,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2005,
+   "month": 10,
+   "muni": "64437",
+   "lat": 40.5014,
+   "lon": -79.6792,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Non-collision"
+  },
+  {
+   "year": 2005,
+   "month": 10,
+   "muni": "64218",
+   "lat": 40.55056,
+   "lon": -79.65603,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Head-on"
+  },
+  {
+   "year": 2005,
+   "month": 12,
+   "muni": "64201",
+   "lat": 40.61222,
+   "lon": -79.66385,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2006,
+   "month": 1,
+   "muni": "64301",
+   "lat": 40.58009,
+   "lon": -79.76706,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Sideswipe (opposite direction)"
+  },
+  {
+   "year": 2006,
+   "month": 3,
+   "muni": "64306",
+   "lat": 40.60222,
+   "lon": -79.71168,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Angle"
+  },
+  {
+   "year": 2006,
+   "month": 5,
+   "muni": "64201",
+   "lat": 40.6057,
+   "lon": -79.6832,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2006,
+   "month": 6,
+   "muni": "64306",
+   "lat": 40.5675,
+   "lon": -79.71921,
+   "fatal": 0,
+   "serious": 2,
+   "collision": "Head-on"
+  },
+  {
+   "year": 2006,
+   "month": 8,
+   "muni": "64301",
+   "lat": 40.58597,
+   "lon": -79.76135,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2006,
+   "month": 9,
+   "muni": "64218",
+   "lat": 40.55444,
+   "lon": -79.70791,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Head-on"
+  },
+  {
+   "year": 2006,
+   "month": 10,
+   "muni": "64306",
+   "lat": 40.5927,
+   "lon": -79.73043,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2006,
+   "month": 11,
+   "muni": "64306",
+   "lat": 40.56583,
+   "lon": -79.71655,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2006,
+   "month": 11,
+   "muni": "64306",
+   "lat": 40.5879,
+   "lon": -79.72086,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2006,
+   "month": 12,
+   "muni": "64306",
+   "lat": 40.595,
+   "lon": -79.69134,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2006,
+   "month": 12,
+   "muni": "64306",
+   "lat": 40.58528,
+   "lon": -79.74523,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit pedestrian"
+  },
+  {
+   "year": 2007,
+   "month": 3,
+   "muni": "64306",
+   "lat": 40.55,
+   "lon": -79.74397,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Rear-end"
+  },
+  {
+   "year": 2007,
+   "month": 4,
+   "muni": "64306",
+   "lat": 40.55972,
+   "lon": -79.71056,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2007,
+   "month": 3,
+   "muni": "64201",
+   "lat": 40.59417,
+   "lon": -79.63481,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Sideswipe (opposite direction)"
+  },
+  {
+   "year": 2007,
+   "month": 8,
+   "muni": "64219",
+   "lat": 40.49806,
+   "lon": -79.66492,
+   "fatal": 0,
+   "serious": 2,
+   "collision": "Angle"
+  },
+  {
+   "year": 2007,
+   "month": 8,
+   "muni": "64305",
+   "lat": 40.5684,
+   "lon": -79.75249,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Rear-end"
+  },
+  {
+   "year": 2007,
+   "month": 7,
+   "muni": "64306",
+   "lat": 40.60028,
+   "lon": -79.71456,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Angle"
+  },
+  {
+   "year": 2007,
+   "month": 8,
+   "muni": "64201",
+   "lat": 40.63588,
+   "lon": -79.65373,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2007,
+   "month": 9,
+   "muni": "64437",
+   "lat": 40.52361,
+   "lon": -79.69959,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit pedestrian"
+  },
+  {
+   "year": 2007,
+   "month": 12,
+   "muni": "64219",
+   "lat": 40.52667,
+   "lon": -79.63285,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Rear-end"
+  },
+  {
+   "year": 2007,
+   "month": 12,
+   "muni": "64306",
+   "lat": 40.59389,
+   "lon": -79.69177,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Angle"
+  },
+  {
+   "year": 2007,
+   "month": 12,
+   "muni": "64306",
+   "lat": 40.55111,
+   "lon": -79.74709,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Hit pedestrian"
+  },
+  {
+   "year": 2008,
+   "month": 1,
+   "muni": "64305",
+   "lat": 40.55487,
+   "lon": -79.75874,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2008,
+   "month": 1,
+   "muni": "64219",
+   "lat": 40.53528,
+   "lon": -79.63922,
+   "fatal": 0,
+   "serious": 2,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2008,
+   "month": 2,
+   "muni": "64219",
+   "lat": 40.53528,
+   "lon": -79.63922,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Head-on"
+  },
+  {
+   "year": 2008,
+   "month": 2,
+   "muni": "64437",
+   "lat": 40.50488,
+   "lon": -79.68122,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2008,
+   "month": 6,
+   "muni": "64306",
+   "lat": 40.54969,
+   "lon": -79.74015,
+   "fatal": 2,
+   "serious": 0,
+   "collision": "Head-on"
+  },
+  {
+   "year": 2008,
+   "month": 6,
+   "muni": "64306",
+   "lat": 40.58558,
+   "lon": -79.71042,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Sideswipe (opposite direction)"
+  },
+  {
+   "year": 2008,
+   "month": 6,
+   "muni": "64305",
+   "lat": 40.56809,
+   "lon": -79.767,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit pedestrian"
+  },
+  {
+   "year": 2008,
+   "month": 7,
+   "muni": "64305",
+   "lat": 40.58743,
+   "lon": -79.7475,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2008,
+   "month": 7,
+   "muni": "64306",
+   "lat": 40.59911,
+   "lon": -79.69395,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Non-collision"
+  },
+  {
+   "year": 2008,
+   "month": 8,
+   "muni": "64305",
+   "lat": 40.5882,
+   "lon": -79.75003,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2008,
+   "month": 6,
+   "muni": "64201",
+   "lat": 40.61937,
+   "lon": -79.63454,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Angle"
+  },
+  {
+   "year": 2008,
+   "month": 8,
+   "muni": "64218",
+   "lat": 40.54523,
+   "lon": -79.67488,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Sideswipe (opposite direction)"
+  },
+  {
+   "year": 2008,
+   "month": 10,
+   "muni": "64437",
+   "lat": 40.50583,
+   "lon": -79.68581,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2008,
+   "month": 10,
+   "muni": "64305",
+   "lat": 40.5565,
+   "lon": -79.76539,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2008,
+   "month": 11,
+   "muni": "64305",
+   "lat": 40.5697,
+   "lon": -79.76605,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2008,
+   "month": 12,
+   "muni": "64305",
+   "lat": 40.56336,
+   "lon": -79.75553,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2009,
+   "month": 1,
+   "muni": "64305",
+   "lat": 40.58739,
+   "lon": -79.7613,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2009,
+   "month": 1,
+   "muni": "64305",
+   "lat": 40.5684,
+   "lon": -79.75249,
+   "fatal": 1,
+   "serious": 2,
+   "collision": "Angle"
+  },
+  {
+   "year": 2009,
+   "month": 3,
+   "muni": "64201",
+   "lat": 40.62254,
+   "lon": -79.63889,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2009,
+   "month": 4,
+   "muni": "64306",
+   "lat": 40.59768,
+   "lon": -79.69058,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2009,
+   "month": 5,
+   "muni": "64306",
+   "lat": 40.59832,
+   "lon": -79.71816,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2009,
+   "month": 5,
+   "muni": "64306",
+   "lat": 40.58342,
+   "lon": -79.70212,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Rear-end"
+  },
+  {
+   "year": 2009,
+   "month": 6,
+   "muni": "64218",
+   "lat": 40.53973,
+   "lon": -79.64679,
+   "fatal": 0,
+   "serious": 2,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2009,
+   "month": 7,
+   "muni": "64306",
+   "lat": 40.55253,
+   "lon": -79.75515,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Angle"
+  },
+  {
+   "year": 2009,
+   "month": 8,
+   "muni": "64306",
+   "lat": null,
+   "lon": null,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit pedestrian"
+  },
+  {
+   "year": 2009,
+   "month": 9,
+   "muni": "64305",
+   "lat": 40.5773,
+   "lon": -79.7504,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2009,
+   "month": 9,
+   "muni": "64306",
+   "lat": 40.59302,
+   "lon": -79.7137,
+   "fatal": 0,
+   "serious": 2,
+   "collision": "Hit pedestrian"
+  },
+  {
+   "year": 2009,
+   "month": 9,
+   "muni": "64306",
+   "lat": 40.58505,
+   "lon": -79.68251,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2009,
+   "month": 10,
+   "muni": "64201",
+   "lat": 40.62709,
+   "lon": -79.64615,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2009,
+   "month": 12,
+   "muni": "64305",
+   "lat": 40.58578,
+   "lon": -79.75614,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Hit pedestrian"
+  },
+  {
+   "year": 2010,
+   "month": 1,
+   "muni": "64219",
+   "lat": 40.51178,
+   "lon": -79.64734,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2010,
+   "month": 2,
+   "muni": "64437",
+   "lat": 40.50141,
+   "lon": -79.67919,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2010,
+   "month": 3,
+   "muni": "64301",
+   "lat": 40.58092,
+   "lon": -79.75772,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit pedestrian"
+  },
+  {
+   "year": 2010,
+   "month": 4,
+   "muni": "64219",
+   "lat": 40.51103,
+   "lon": -79.65225,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2010,
+   "month": 4,
+   "muni": "64201",
+   "lat": 40.62521,
+   "lon": -79.64444,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Head-on"
+  },
+  {
+   "year": 2010,
+   "month": 5,
+   "muni": "64219",
+   "lat": 40.51103,
+   "lon": -79.65225,
+   "fatal": 0,
+   "serious": 2,
+   "collision": "Angle"
+  },
+  {
+   "year": 2010,
+   "month": 7,
+   "muni": "64218",
+   "lat": 40.54847,
+   "lon": -79.65369,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Rear-end"
+  },
+  {
+   "year": 2010,
+   "month": 8,
+   "muni": "64305",
+   "lat": 40.58888,
+   "lon": -79.75472,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2010,
+   "month": 8,
+   "muni": "64437",
+   "lat": 40.50234,
+   "lon": -79.679,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2010,
+   "month": 7,
+   "muni": "64305",
+   "lat": 40.56272,
+   "lon": -79.75801,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Sideswipe (same direction)"
+  },
+  {
+   "year": 2010,
+   "month": 8,
+   "muni": "64218",
+   "lat": 40.53263,
+   "lon": -79.64452,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2010,
+   "month": 8,
+   "muni": "64306",
+   "lat": 40.5553,
+   "lon": -79.71023,
+   "fatal": 2,
+   "serious": 0,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2010,
+   "month": 8,
+   "muni": "64219",
+   "lat": 40.49971,
+   "lon": -79.67254,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2010,
+   "month": 8,
+   "muni": "64305",
+   "lat": 40.58691,
+   "lon": -79.74946,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Rear-end"
+  },
+  {
+   "year": 2010,
+   "month": 11,
+   "muni": "64305",
+   "lat": 40.57043,
+   "lon": -79.7611,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Rear-end"
+  },
+  {
+   "year": 2010,
+   "month": 12,
+   "muni": "64305",
+   "lat": 40.57522,
+   "lon": -79.74832,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2011,
+   "month": 1,
+   "muni": "64437",
+   "lat": 40.50141,
+   "lon": -79.67919,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2011,
+   "month": 5,
+   "muni": "64305",
+   "lat": 40.58566,
+   "lon": -79.74881,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2011,
+   "month": 5,
+   "muni": "64301",
+   "lat": 40.58303,
+   "lon": -79.76574,
+   "fatal": 0,
+   "serious": 2,
+   "collision": "Angle"
+  },
+  {
+   "year": 2011,
+   "month": 9,
+   "muni": "64305",
+   "lat": 40.56398,
+   "lon": -79.74833,
+   "fatal": 1,
+   "serious": 2,
+   "collision": "Head-on"
+  },
+  {
+   "year": 2011,
+   "month": 9,
+   "muni": "64306",
+   "lat": 40.59882,
+   "lon": -79.68706,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2011,
+   "month": 9,
+   "muni": "64305",
+   "lat": 40.55988,
+   "lon": -79.75939,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2011,
+   "month": 11,
+   "muni": "64306",
+   "lat": 40.55014,
+   "lon": -79.74373,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Sideswipe (opposite direction)"
+  },
+  {
+   "year": 2012,
+   "month": 2,
+   "muni": "64218",
+   "lat": 40.55052,
+   "lon": -79.66785,
+   "fatal": 0,
+   "serious": 2,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2012,
+   "month": 5,
+   "muni": "64437",
+   "lat": 40.50263,
+   "lon": -79.67829,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2012,
+   "month": 3,
+   "muni": "64306",
+   "lat": 40.588,
+   "lon": -79.71133,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Hit pedestrian"
+  },
+  {
+   "year": 2012,
+   "month": 2,
+   "muni": "64218",
+   "lat": 40.51725,
+   "lon": -79.69143,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2012,
+   "month": 4,
+   "muni": "64218",
+   "lat": 40.55215,
+   "lon": -79.69944,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2012,
+   "month": 4,
+   "muni": "64218",
+   "lat": 40.53128,
+   "lon": -79.70974,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2012,
+   "month": 4,
+   "muni": "64305",
+   "lat": 40.58147,
+   "lon": -79.74794,
+   "fatal": 1,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2012,
+   "month": 4,
+   "muni": "64437",
+   "lat": 40.52208,
+   "lon": -79.69737,
+   "fatal": 0,
+   "serious": 2,
+   "collision": "Angle"
+  },
+  {
+   "year": 2012,
+   "month": 3,
+   "muni": "64201",
+   "lat": 40.63326,
+   "lon": -79.65199,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2012,
+   "month": 3,
+   "muni": "64306",
+   "lat": 40.58381,
+   "lon": -79.70162,
+   "fatal": 0,
+   "serious": 2,
+   "collision": "Non-collision"
+  },
+  {
+   "year": 2012,
+   "month": 7,
+   "muni": "64201",
+   "lat": 40.58582,
+   "lon": -79.6603,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2012,
+   "month": 5,
+   "muni": "64301",
+   "lat": 40.57372,
+   "lon": -79.76723,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit pedestrian"
+  },
+  {
+   "year": 2012,
+   "month": 6,
+   "muni": "64301",
+   "lat": 40.57646,
+   "lon": -79.77129,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Head-on"
+  },
+  {
+   "year": 2012,
+   "month": 9,
+   "muni": "64306",
+   "lat": 40.56914,
+   "lon": -79.72707,
+   "fatal": 0,
+   "serious": 2,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2012,
+   "month": 8,
+   "muni": "64306",
+   "lat": 40.59204,
+   "lon": -79.73169,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2012,
+   "month": 9,
+   "muni": "64305",
+   "lat": 40.56714,
+   "lon": -79.74078,
+   "fatal": 0,
+   "serious": 2,
+   "collision": "Head-on"
+  },
+  {
+   "year": 2012,
+   "month": 8,
+   "muni": "64305",
+   "lat": 40.58742,
+   "lon": -79.7497,
+   "fatal": 2,
+   "serious": 0,
+   "collision": "Angle"
+  },
+  {
+   "year": 2012,
+   "month": 10,
+   "muni": "64306",
+   "lat": 40.55689,
+   "lon": -79.7116,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Rear-end"
+  },
+  {
+   "year": 2013,
+   "month": 1,
+   "muni": "64305",
+   "lat": null,
+   "lon": null,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Non-collision"
+  },
+  {
+   "year": 2013,
+   "month": 6,
+   "muni": "64201",
+   "lat": 40.58681,
+   "lon": -79.65133,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2013,
+   "month": 5,
+   "muni": "64219",
+   "lat": 40.49866,
+   "lon": -79.67017,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2013,
+   "month": 5,
+   "muni": "64201",
+   "lat": 40.60757,
+   "lon": -79.65066,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2013,
+   "month": 11,
+   "muni": "64219",
+   "lat": 40.50495,
+   "lon": -79.67608,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Non-collision"
+  },
+  {
+   "year": 2014,
+   "month": 2,
+   "muni": "64218",
+   "lat": 40.55206,
+   "lon": -79.6741,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2014,
+   "month": 1,
+   "muni": "64305",
+   "lat": 40.57857,
+   "lon": -79.74997,
+   "fatal": 1,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2014,
+   "month": 2,
+   "muni": "64306",
+   "lat": 40.59045,
+   "lon": -79.73629,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit pedestrian"
+  },
+  {
+   "year": 2014,
+   "month": 1,
+   "muni": "64305",
+   "lat": 40.57748,
+   "lon": -79.75039,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Head-on"
+  },
+  {
+   "year": 2014,
+   "month": 5,
+   "muni": "64201",
+   "lat": 40.58575,
+   "lon": -79.65844,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Head-on"
+  },
+  {
+   "year": 2014,
+   "month": 4,
+   "muni": "64201",
+   "lat": 40.6231,
+   "lon": -79.65342,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2014,
+   "month": 8,
+   "muni": "64437",
+   "lat": 40.50204,
+   "lon": -79.6774,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2014,
+   "month": 9,
+   "muni": "64306",
+   "lat": 40.59014,
+   "lon": -79.72646,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2014,
+   "month": 10,
+   "muni": "64219",
+   "lat": 40.51109,
+   "lon": -79.65171,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2015,
+   "month": 1,
+   "muni": "64201",
+   "lat": 40.61826,
+   "lon": -79.65516,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Sideswipe (opposite direction)"
+  },
+  {
+   "year": 2015,
+   "month": 4,
+   "muni": "64305",
+   "lat": 40.58703,
+   "lon": -79.76322,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2015,
+   "month": 5,
+   "muni": "64219",
+   "lat": 40.5108,
+   "lon": -79.65337,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Rear-end"
+  },
+  {
+   "year": 2015,
+   "month": 5,
+   "muni": "64218",
+   "lat": 40.55213,
+   "lon": -79.69766,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Head-on"
+  },
+  {
+   "year": 2015,
+   "month": 6,
+   "muni": "64201",
+   "lat": 40.59639,
+   "lon": -79.629,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Non-collision"
+  },
+  {
+   "year": 2015,
+   "month": 6,
+   "muni": "64305",
+   "lat": 40.55928,
+   "lon": -79.75982,
+   "fatal": 0,
+   "serious": 2,
+   "collision": "Angle"
+  },
+  {
+   "year": 2015,
+   "month": 6,
+   "muni": "64219",
+   "lat": 40.51368,
+   "lon": -79.64512,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Angle"
+  },
+  {
+   "year": 2015,
+   "month": 8,
+   "muni": "64306",
+   "lat": 40.59029,
+   "lon": -79.69649,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2015,
+   "month": 8,
+   "muni": "64305",
+   "lat": 40.56484,
+   "lon": -79.75496,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit pedestrian"
+  },
+  {
+   "year": 2015,
+   "month": 9,
+   "muni": "64437",
+   "lat": 40.52448,
+   "lon": -79.70058,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Head-on"
+  },
+  {
+   "year": 2015,
+   "month": 10,
+   "muni": "64306",
+   "lat": null,
+   "lon": null,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2015,
+   "month": 11,
+   "muni": "64218",
+   "lat": 40.55283,
+   "lon": -79.69612,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Other"
+  },
+  {
+   "year": 2016,
+   "month": 1,
+   "muni": "64305",
+   "lat": 40.56515,
+   "lon": -79.7548,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2016,
+   "month": 3,
+   "muni": "64201",
+   "lat": 40.63279,
+   "lon": -79.65159,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Sideswipe (same direction)"
+  },
+  {
+   "year": 2016,
+   "month": 4,
+   "muni": "64305",
+   "lat": 40.58751,
+   "lon": -79.75779,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2016,
+   "month": 3,
+   "muni": "64305",
+   "lat": 40.56336,
+   "lon": -79.75553,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2016,
+   "month": 6,
+   "muni": "64306",
+   "lat": 40.54828,
+   "lon": -79.7339,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2016,
+   "month": 5,
+   "muni": "64305",
+   "lat": 40.56336,
+   "lon": -79.75553,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2016,
+   "month": 5,
+   "muni": "64305",
+   "lat": 40.5572,
+   "lon": -79.75981,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Non-collision"
+  },
+  {
+   "year": 2016,
+   "month": 8,
+   "muni": "64306",
+   "lat": 40.57741,
+   "lon": -79.73377,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Rear-end"
+  },
+  {
+   "year": 2016,
+   "month": 9,
+   "muni": "64306",
+   "lat": 40.59982,
+   "lon": -79.70486,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2016,
+   "month": 10,
+   "muni": "64301",
+   "lat": 40.57961,
+   "lon": -79.76337,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2016,
+   "month": 9,
+   "muni": "64305",
+   "lat": 40.56273,
+   "lon": -79.76331,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2017,
+   "month": 2,
+   "muni": "64218",
+   "lat": 40.55323,
+   "lon": -79.68956,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2017,
+   "month": 2,
+   "muni": "64306",
+   "lat": 40.58056,
+   "lon": -79.72975,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Rear-end"
+  },
+  {
+   "year": 2017,
+   "month": 4,
+   "muni": "64219",
+   "lat": 40.5105,
+   "lon": -79.65715,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Non-collision"
+  },
+  {
+   "year": 2017,
+   "month": 5,
+   "muni": "64306",
+   "lat": 40.58342,
+   "lon": -79.70212,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Angle"
+  },
+  {
+   "year": 2017,
+   "month": 5,
+   "muni": "64305",
+   "lat": 40.57697,
+   "lon": -79.73649,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Non-collision"
+  },
+  {
+   "year": 2017,
+   "month": 4,
+   "muni": "64305",
+   "lat": 40.57463,
+   "lon": -79.75588,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2017,
+   "month": 5,
+   "muni": "64437",
+   "lat": 40.50066,
+   "lon": -79.67434,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2017,
+   "month": 10,
+   "muni": "64306",
+   "lat": 40.58046,
+   "lon": -79.7117,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Non-collision"
+  },
+  {
+   "year": 2017,
+   "month": 10,
+   "muni": "64306",
+   "lat": 40.5502,
+   "lon": -79.72008,
+   "fatal": 0,
+   "serious": 7,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2017,
+   "month": 11,
+   "muni": "64305",
+   "lat": 40.57721,
+   "lon": -79.73576,
+   "fatal": 0,
+   "serious": 3,
+   "collision": "Angle"
+  },
+  {
+   "year": 2017,
+   "month": 11,
+   "muni": "64305",
+   "lat": 40.56875,
+   "lon": -79.76458,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2018,
+   "month": 1,
+   "muni": "64201",
+   "lat": 40.62773,
+   "lon": -79.66845,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2018,
+   "month": 6,
+   "muni": "64437",
+   "lat": 40.50773,
+   "lon": -79.68215,
+   "fatal": 0,
+   "serious": 2,
+   "collision": "Angle"
+  },
+  {
+   "year": 2018,
+   "month": 6,
+   "muni": "64219",
+   "lat": 40.50702,
+   "lon": -79.67317,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Non-collision"
+  },
+  {
+   "year": 2018,
+   "month": 6,
+   "muni": "64306",
+   "lat": 40.5499,
+   "lon": -79.7426,
+   "fatal": 0,
+   "serious": 3,
+   "collision": "Head-on"
+  },
+  {
+   "year": 2018,
+   "month": 11,
+   "muni": "64219",
+   "lat": 40.50476,
+   "lon": -79.6761,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2018,
+   "month": 10,
+   "muni": "64306",
+   "lat": 40.58445,
+   "lon": -79.70089,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2018,
+   "month": 11,
+   "muni": "64218",
+   "lat": 40.54115,
+   "lon": -79.72282,
+   "fatal": 1,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2018,
+   "month": 3,
+   "muni": "64305",
+   "lat": 40.58742,
+   "lon": -79.74758,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Head-on"
+  },
+  {
+   "year": 2018,
+   "month": 9,
+   "muni": "64306",
+   "lat": 40.58477,
+   "lon": -79.70055,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Head-on"
+  },
+  {
+   "year": 2018,
+   "month": 1,
+   "muni": "64305",
+   "lat": 40.58281,
+   "lon": -79.74774,
+   "fatal": 0,
+   "serious": 2,
+   "collision": "Sideswipe (opposite direction)"
+  },
+  {
+   "year": 2018,
+   "month": 4,
+   "muni": "64305",
+   "lat": 40.56325,
+   "lon": -79.74565,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Non-collision"
+  },
+  {
+   "year": 2018,
+   "month": 9,
+   "muni": "64306",
+   "lat": 40.56291,
+   "lon": -79.70981,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Head-on"
+  },
+  {
+   "year": 2018,
+   "month": 10,
+   "muni": "64306",
+   "lat": 40.5508,
+   "lon": -79.7458,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Rear-end"
+  },
+  {
+   "year": 2018,
+   "month": 7,
+   "muni": "64305",
+   "lat": 40.58694,
+   "lon": -79.76264,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2018,
+   "month": 10,
+   "muni": "64306",
+   "lat": 40.55259,
+   "lon": -79.75738,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Sideswipe (opposite direction)"
+  },
+  {
+   "year": 2018,
+   "month": 10,
+   "muni": "64218",
+   "lat": 40.55407,
+   "lon": -79.70443,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2019,
+   "month": 2,
+   "muni": "64201",
+   "lat": 40.63134,
+   "lon": -79.64823,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Angle"
+  },
+  {
+   "year": 2019,
+   "month": 8,
+   "muni": "64201",
+   "lat": 40.60146,
+   "lon": -79.67854,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2019,
+   "month": 7,
+   "muni": "64219",
+   "lat": 40.50893,
+   "lon": -79.66895,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2019,
+   "month": 9,
+   "muni": "64437",
+   "lat": 40.49513,
+   "lon": -79.68892,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Hit pedestrian"
+  },
+  {
+   "year": 2019,
+   "month": 8,
+   "muni": "64306",
+   "lat": 40.55016,
+   "lon": -79.7438,
+   "fatal": 0,
+   "serious": 2,
+   "collision": "Angle"
+  },
+  {
+   "year": 2019,
+   "month": 8,
+   "muni": "64306",
+   "lat": 40.59851,
+   "lon": -79.68688,
+   "fatal": 0,
+   "serious": 2,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2019,
+   "month": 6,
+   "muni": "64437",
+   "lat": 40.50732,
+   "lon": -79.68202,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Non-collision"
+  },
+  {
+   "year": 2020,
+   "month": 1,
+   "muni": "64219",
+   "lat": 40.51103,
+   "lon": -79.65225,
+   "fatal": 0,
+   "serious": 2,
+   "collision": "Angle"
+  },
+  {
+   "year": 2020,
+   "month": 3,
+   "muni": "64437",
+   "lat": 40.5014,
+   "lon": -79.6792,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Angle"
+  },
+  {
+   "year": 2020,
+   "month": 3,
+   "muni": "64305",
+   "lat": 40.56209,
+   "lon": -79.76771,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Rear-end"
+  },
+  {
+   "year": 2020,
+   "month": 3,
+   "muni": "64305",
+   "lat": 40.58692,
+   "lon": -79.74943,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit pedestrian"
+  },
+  {
+   "year": 2020,
+   "month": 4,
+   "muni": "64305",
+   "lat": 40.5691,
+   "lon": -79.75133,
+   "fatal": 1,
+   "serious": 1,
+   "collision": "Other"
+  },
+  {
+   "year": 2020,
+   "month": 5,
+   "muni": "64306",
+   "lat": 40.57516,
+   "lon": -79.69514,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Head-on"
+  },
+  {
+   "year": 2020,
+   "month": 5,
+   "muni": "64437",
+   "lat": 40.4982,
+   "lon": -79.68484,
+   "fatal": 1,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2020,
+   "month": 1,
+   "muni": "64306",
+   "lat": 40.59186,
+   "lon": -79.73216,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Rear-end"
+  },
+  {
+   "year": 2020,
+   "month": 5,
+   "muni": "64305",
+   "lat": 40.56619,
+   "lon": -79.75464,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Non-collision"
+  },
+  {
+   "year": 2020,
+   "month": 7,
+   "muni": "64437",
+   "lat": 40.5028,
+   "lon": -79.67867,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2020,
+   "month": 6,
+   "muni": "64305",
+   "lat": 40.56306,
+   "lon": -79.7375,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Rear-end"
+  },
+  {
+   "year": 2020,
+   "month": 9,
+   "muni": "64219",
+   "lat": 40.50433,
+   "lon": -79.6765,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Sideswipe (same direction)"
+  },
+  {
+   "year": 2020,
+   "month": 8,
+   "muni": "64305",
+   "lat": 40.57043,
+   "lon": -79.75901,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2020,
+   "month": 7,
+   "muni": "64305",
+   "lat": 40.59293,
+   "lon": -79.75223,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Head-on"
+  },
+  {
+   "year": 2020,
+   "month": 8,
+   "muni": "64306",
+   "lat": 40.54666,
+   "lon": -79.73185,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Other"
+  },
+  {
+   "year": 2020,
+   "month": 10,
+   "muni": "64437",
+   "lat": 40.50296,
+   "lon": -79.67948,
+   "fatal": 0,
+   "serious": 2,
+   "collision": "Non-collision"
+  },
+  {
+   "year": 2021,
+   "month": 4,
+   "muni": "64306",
+   "lat": 40.5722,
+   "lon": -79.70491,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Non-collision"
+  },
+  {
+   "year": 2021,
+   "month": 1,
+   "muni": "64218",
+   "lat": 40.51919,
+   "lon": -79.69382,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2021,
+   "month": 1,
+   "muni": "64218",
+   "lat": 40.55062,
+   "lon": -79.6675,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Non-collision"
+  },
+  {
+   "year": 2021,
+   "month": 1,
+   "muni": "64305",
+   "lat": 40.55815,
+   "lon": -79.75706,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2021,
+   "month": 3,
+   "muni": "64218",
+   "lat": 40.51016,
+   "lon": -79.68303,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2021,
+   "month": 7,
+   "muni": "64306",
+   "lat": 40.56896,
+   "lon": -79.72763,
+   "fatal": 0,
+   "serious": 2,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2021,
+   "month": 4,
+   "muni": "64306",
+   "lat": 40.59872,
+   "lon": -79.68702,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2021,
+   "month": 8,
+   "muni": "64306",
+   "lat": 40.55244,
+   "lon": -79.75539,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Angle"
+  },
+  {
+   "year": 2021,
+   "month": 9,
+   "muni": "64305",
+   "lat": 40.56256,
+   "lon": -79.7645,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Angle"
+  },
+  {
+   "year": 2021,
+   "month": 8,
+   "muni": "64305",
+   "lat": 40.58692,
+   "lon": -79.74943,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Angle"
+  },
+  {
+   "year": 2021,
+   "month": 11,
+   "muni": "64437",
+   "lat": 40.50204,
+   "lon": -79.6774,
+   "fatal": 0,
+   "serious": 2,
+   "collision": "Angle"
+  },
+  {
+   "year": 2021,
+   "month": 12,
+   "muni": "64306",
+   "lat": 40.58342,
+   "lon": -79.70212,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2021,
+   "month": 12,
+   "muni": "64305",
+   "lat": 40.55728,
+   "lon": -79.75971,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Angle"
+  },
+  {
+   "year": 2022,
+   "month": 4,
+   "muni": "64201",
+   "lat": 40.59366,
+   "lon": -79.63554,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2022,
+   "month": 4,
+   "muni": "64218",
+   "lat": 40.55056,
+   "lon": -79.66771,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2022,
+   "month": 7,
+   "muni": "64201",
+   "lat": 40.59475,
+   "lon": -79.67348,
+   "fatal": 0,
+   "serious": 2,
+   "collision": "Other"
+  },
+  {
+   "year": 2022,
+   "month": 7,
+   "muni": "64305",
+   "lat": 40.57464,
+   "lon": -79.7559,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2022,
+   "month": 8,
+   "muni": "64305",
+   "lat": 40.5784,
+   "lon": -79.73799,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2022,
+   "month": 7,
+   "muni": "64201",
+   "lat": 40.62578,
+   "lon": -79.66633,
+   "fatal": 0,
+   "serious": 4,
+   "collision": "Non-collision"
+  },
+  {
+   "year": 2022,
+   "month": 9,
+   "muni": "64306",
+   "lat": 40.59875,
+   "lon": -79.68703,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2022,
+   "month": 10,
+   "muni": "64201",
+   "lat": 40.62269,
+   "lon": -79.69103,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2022,
+   "month": 12,
+   "muni": "64305",
+   "lat": 40.5931,
+   "lon": -79.75246,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2022,
+   "month": 11,
+   "muni": "64218",
+   "lat": 40.55871,
+   "lon": -79.67794,
+   "fatal": 1,
+   "serious": 1,
+   "collision": "Sideswipe (opposite direction)"
+  },
+  {
+   "year": 2022,
+   "month": 6,
+   "muni": "64305",
+   "lat": 40.55733,
+   "lon": -79.75978,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2022,
+   "month": 10,
+   "muni": "64306",
+   "lat": 40.55139,
+   "lon": -79.75769,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Sideswipe (same direction)"
+  },
+  {
+   "year": 2023,
+   "month": 2,
+   "muni": "64306",
+   "lat": 40.57142,
+   "lon": -79.72433,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2023,
+   "month": 2,
+   "muni": "64306",
+   "lat": 40.59034,
+   "lon": -79.69644,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2023,
+   "month": 5,
+   "muni": "64306",
+   "lat": 40.55004,
+   "lon": -79.73958,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit pedestrian"
+  },
+  {
+   "year": 2023,
+   "month": 5,
+   "muni": "64306",
+   "lat": 40.58009,
+   "lon": -79.71195,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Rear-end"
+  },
+  {
+   "year": 2023,
+   "month": 5,
+   "muni": "64437",
+   "lat": 40.5232,
+   "lon": -79.69875,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Rear-end"
+  },
+  {
+   "year": 2023,
+   "month": 6,
+   "muni": "64201",
+   "lat": 40.58969,
+   "lon": -79.66505,
+   "fatal": 2,
+   "serious": 1,
+   "collision": "Head-on"
+  },
+  {
+   "year": 2023,
+   "month": 7,
+   "muni": "64201",
+   "lat": 40.61963,
+   "lon": -79.65129,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Rear-end"
+  },
+  {
+   "year": 2023,
+   "month": 7,
+   "muni": "64201",
+   "lat": 40.61328,
+   "lon": -79.64854,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Head-on"
+  },
+  {
+   "year": 2023,
+   "month": 7,
+   "muni": "64201",
+   "lat": 40.58708,
+   "lon": -79.64841,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2023,
+   "month": 9,
+   "muni": "64306",
+   "lat": 40.6053,
+   "lon": -79.72296,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2023,
+   "month": 11,
+   "muni": "64305",
+   "lat": 40.5635,
+   "lon": -79.76808,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2023,
+   "month": 12,
+   "muni": "64305",
+   "lat": 40.56708,
+   "lon": -79.7409,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2023,
+   "month": 11,
+   "muni": "64219",
+   "lat": 40.49808,
+   "lon": -79.6637,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Rear-end"
+  },
+  {
+   "year": 2024,
+   "month": 2,
+   "muni": "64306",
+   "lat": 40.5961,
+   "lon": -79.6808,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2024,
+   "month": 3,
+   "muni": "64218",
+   "lat": 40.5497,
+   "lon": -79.65455,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Other"
+  },
+  {
+   "year": 2024,
+   "month": 7,
+   "muni": "64305",
+   "lat": 40.56845,
+   "lon": -79.75223,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2024,
+   "month": 5,
+   "muni": "64305",
+   "lat": 40.55495,
+   "lon": -79.75884,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Rear-end"
+  },
+  {
+   "year": 2024,
+   "month": 6,
+   "muni": "64306",
+   "lat": 40.59545,
+   "lon": -79.69145,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2024,
+   "month": 5,
+   "muni": "64306",
+   "lat": 40.54666,
+   "lon": -79.73185,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Rear-end"
+  },
+  {
+   "year": 2024,
+   "month": 6,
+   "muni": "64219",
+   "lat": 40.51324,
+   "lon": -79.64542,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2024,
+   "month": 7,
+   "muni": "64201",
+   "lat": 40.62091,
+   "lon": -79.64274,
+   "fatal": 0,
+   "serious": 2,
+   "collision": "Rear-end"
+  },
+  {
+   "year": 2024,
+   "month": 4,
+   "muni": "64218",
+   "lat": 40.5528,
+   "lon": -79.69625,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Non-collision"
+  },
+  {
+   "year": 2024,
+   "month": 5,
+   "muni": "64306",
+   "lat": 40.54666,
+   "lon": -79.73185,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2024,
+   "month": 9,
+   "muni": "64201",
+   "lat": 40.62026,
+   "lon": -79.63544,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Hit fixed object"
+  },
+  {
+   "year": 2024,
+   "month": 9,
+   "muni": "64219",
+   "lat": 40.50519,
+   "lon": -79.67588,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Non-collision"
+  },
+  {
+   "year": 2024,
+   "month": 8,
+   "muni": "64305",
+   "lat": 40.5635,
+   "lon": -79.76808,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2024,
+   "month": 8,
+   "muni": "64305",
+   "lat": 40.56493,
+   "lon": -79.76841,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2024,
+   "month": 12,
+   "muni": "64437",
+   "lat": 40.50138,
+   "lon": -79.67922,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2024,
+   "month": 11,
+   "muni": "64201",
+   "lat": 40.62268,
+   "lon": -79.63922,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Head-on"
+  },
+  {
+   "year": 2024,
+   "month": 12,
+   "muni": "64305",
+   "lat": 40.58515,
+   "lon": -79.76697,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Hit pedestrian"
+  },
+  {
+   "year": 2024,
+   "month": 11,
+   "muni": "64306",
+   "lat": 40.54666,
+   "lon": -79.73185,
+   "fatal": 0,
+   "serious": 1,
+   "collision": "Angle"
+  },
+  {
+   "year": 2024,
+   "month": 12,
+   "muni": "64305",
+   "lat": 40.57514,
+   "lon": -79.74828,
+   "fatal": 1,
+   "serious": 0,
+   "collision": "Head-on"
+  },
+  {
+   "year": 2024,
+   "month": 11,
+   "muni": "64305",
+   "lat": 40.5863,
+   "lon": -79.75228,
+   "fatal": 0,
+   "serious": 2,
+   "collision": "Head-on"
+  }
+ ]
+}
