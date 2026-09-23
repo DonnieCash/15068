@@ -1,0 +1,13 @@
+# Raw Overture / terrain pulls (~70 MB) — regenerate with scripts/fetch_*.py
+data/raw/*
+!data/raw/zcta15068.geojson
+__pycache__/
+*.pyc
+.DS_Store
+# Unverified crime research scratch (may hold exact addresses) — only curated
+# data/research/crime/*.json is committed
+data/research/crime/_work/
+# lost & found board snapshot and per-listing pages are built at deploy, never committed
+site/data/pets-board.json
+site/lost-pets/gh-*/
+site/lost-pets/feed.xml

@@ -1,0 +1,212 @@
+{
+ "compiled": "2026-09-23",
+ "method": "Checked by two independent researchers against official and news sources (search summaries; most sites could not be opened directly). Call ahead: hours and intake rules change.",
+ "items": [
+  {
+   "name": "Westmoreland County state dog warden (PA Dept. of Agriculture, Bureau of Dog Law Enforcement)",
+   "kind": "dog_warden",
+   "address": null,
+   "phone": null,
+   "url": "https://www.pa.gov/agencies/pda/animals/information-about-dogs/pennsylvania-dog-wardens/find-your-local-dog-warden.html",
+   "source": "https://www.pa.gov/agencies/pda/animals/information-about-dogs/pennsylvania-dog-wardens/find-your-local-dog-warden.html",
+   "what_to_use_it_for": "Call the Westmoreland County warden when you find a loose dog or have lost one. Wardens pick up stray dogs and take them to shelters.",
+   "note": "Use the state's find-your-warden county map to get the current warden's contact details. The warden's name and phone could not be confirmed, so none is given. If you can't reach the warden, call the PDA Region 4 office (next entry)."
+  },
+  {
+   "name": "PA Dept. of Agriculture Region 4 office (covers Westmoreland County)",
+   "kind": "other",
+   "address": "226 Donohoe Road, Suite 101, Greensburg, PA 15601",
+   "phone": "724-832-1073",
+   "url": "https://www.pa.gov/agencies/pda/contact-us/regional-offices/region-4",
+   "source": "https://www.pa.gov/agencies/pda/contact-us/regional-offices/region-4",
+   "what_to_use_it_for": "Call here to reach state dog law staff if you can't get through to the county dog warden.",
+   "note": "Open Mon-Fri, 8 AM-4 PM. Region 4 covers Allegheny, Armstrong, Beaver, Butler, Fayette, Greene, Indiana, Lawrence, Washington and Westmoreland counties."
+  },
+  {
+   "name": "Animal Protectors of Allegheny Valley",
+   "kind": "shelter",
+   "address": "730 Church Street, New Kensington, PA 15068",
+   "phone": "724-339-7388",
+   "url": "https://www.animalprotectors.net/",
+   "source": "https://www.animalprotectors.net/about.html",
+   "what_to_use_it_for": "The shelter in town: call first when a dog or cat goes missing or turns up in New Kensington, Arnold or Lower Burrell.",
+   "note": "Nonprofit no-kill shelter that cares for the abused, abandoned and stray dogs and cats of the Allegheny Valley. Its FAQ has an entry on who to contact about a found stray (https://www.animalprotectors.net/faq.html). Its exact intake rules were not confirmed, so call before bringing an animal in. The phone number also appears in the TribLIVE community listing (https://community.triblive.com/new-kensington-pa/animal-protectors-of-allegheny-valley-724-339-7388). Facebook: https://www.facebook.com/animalprotectorsofav/"
+  },
+  {
+   "name": "Hoffman Kennels (contracted animal control officer)",
+   "kind": "other",
+   "address": "285 Cloverleaf Drive, Delmont, PA 15626",
+   "phone": "724-468-5505",
+   "url": "https://www.cityoflowerburrell.com/FAQ.aspx?QID=70",
+   "source": "https://www.cityoflowerburrell.com/FAQ.aspx?QID=70",
+   "what_to_use_it_for": "If your dog went missing in Lower Burrell, call Hoffman Kennels, the city's listed animal control officer, to ask whether it was picked up. In Arnold, ask police whether the dog catcher has it.",
+   "note": "Lower Burrell's city FAQ names Hoffman Kennels as its Animal Control Officer, with the number 724-468-5505. The Delmont address is from the business's BBB listing. TribLIVE reported in 2019 that Arnold hired Hoffman Kennels as its dog catcher for $160 a month (https://triblive.com/local/valley-news-dispatch/hoffman-kennels-not-volunteer-group-hired-as-arnolds-dog-catcher/). Whether Arnold still uses Hoffman was not confirmed. The kennel is in Delmont, about 20 miles from 15068, and is open weekdays only."
+  },
+  {
+   "name": "Humane Society of Westmoreland County",
+   "kind": "humane_society",
+   "address": "139 Humane Society Rd, Greensburg, PA 15601",
+   "phone": "724-837-3779",
+   "url": "https://westmorelandhumanesociety.com/",
+   "source": "https://mentalhealth.networkofcare.org/Westmoreland-pa/services/agency?pid=HumaneSocietyofWestmorelandCountyReportLostorStrayPets_2_819_0",
+   "what_to_use_it_for": "Report a lost or found pet to the county humane society and check whether it has taken the animal in.",
+   "note": "The Network of Care listing is titled 'Report Lost or Stray Pets' and says to call the office about placing stray or owned animals. It is a no-kill shelter. Stray intake is arranged by phone; walk-in intake was not confirmed. Call ahead for hours, because sources disagree. It is in Greensburg, well south of 15068."
+  },
+  {
+   "name": "Kiski Valley Cat & Kitten Rescue",
+   "kind": "rescue",
+   "address": null,
+   "phone": null,
+   "url": "https://www.facebook.com/KiskiValleyCatKittenRescue/",
+   "source": "https://www.guidestar.org/profile/25-1849856",
+   "what_to_use_it_for": "For cats: a Kiski Valley cat rescue near 15068 to ask about a found cat or kitten or to check for a lost cat.",
+   "note": "No-kill, volunteer-run cat rescue in Apollo, PA (Armstrong County, east of 15068). It has been a PA nonprofit since 2000. Visits are by appointment only. It does not say it takes in strays, so treat it as a place to ask and share information, not a drop-off point."
+  },
+  {
+   "name": "New Kensington Police Department (non-emergency)",
+   "kind": "police",
+   "address": "301 11th Street, New Kensington, PA 15068",
+   "phone": "724-339-7533 or 724-339-7534",
+   "url": null,
+   "source": "https://www.westmorelandcountypa.gov/2890/Local-Police-Departments-Non-Emergency-N",
+   "what_to_use_it_for": "Report a lost dog or cat, or a loose one you found, in New Kensington.",
+   "note": "Both numbers are listed for the City of New Kensington on the county's non-emergency numbers page. The street address is from the ReadyLink directory listing (https://www.myreadylink.com/new-kensington-lower-burrell-pa/number/police-new-kensington-police-department-non-emergency-/)."
+  },
+  {
+   "name": "Arnold Police Department (non-emergency)",
+   "kind": "police",
+   "address": "601 Drey St, Arnold, PA 15068",
+   "phone": "724-339-9663 or 724-339-9078",
+   "url": "https://www.cityofarnoldpa.org/home/police",
+   "source": "https://www.westmorelandcountypa.gov/2890/Local-Police-Departments-Non-Emergency-N",
+   "what_to_use_it_for": "Report a lost or found pet in Arnold and ask whether the city's contracted dog catcher picked up an animal.",
+   "note": "The county's non-emergency page lists both numbers for the City of Arnold. 724-339-9663 is also on ReadyLink."
+  },
+  {
+   "name": "Lower Burrell Police Department (non-emergency)",
+   "kind": "police",
+   "address": "2800 Bethel Street, Lower Burrell, PA 15068",
+   "phone": "724-339-4287",
+   "url": "https://www.lowerburrellpolice.org/",
+   "source": "https://www.cityoflowerburrell.com/179/Police-Department",
+   "what_to_use_it_for": "Report a lost or found pet in Lower Burrell.",
+   "note": "724-339-4287 is confirmed as the non-emergency number. The department is on the lower level of the municipal building."
+  },
+  {
+   "name": "Westmoreland County Public Safety non-emergency line",
+   "kind": "police",
+   "address": null,
+   "phone": "724-600-7300",
+   "url": "https://www.westmorelandcountypa.gov/2890/Local-Police-Departments-Non-Emergency-N",
+   "source": "https://www.westmorelandcountypa.gov/2890/Local-Police-Departments-Non-Emergency-N",
+   "what_to_use_it_for": "Call after hours to report a loose dog or another non-emergency animal problem when you can't reach local police.",
+   "note": "County-wide non-emergency number for the Westmoreland County Department of Public Safety (the 911 center) in Greensburg."
+  },
+  {
+   "name": "AVETS (Allegheny Veterinary Emergency Trauma & Specialty)",
+   "kind": "vet_er",
+   "address": "2674 Monroeville Blvd, Monroeville, PA 15146",
+   "phone": "412-373-4200",
+   "url": "https://www.avets.com/",
+   "source": "https://www.avets.com/contact-us/",
+   "what_to_use_it_for": "The closest 24/7 emergency vet: take an injured found or lost pet here, and call to ask whether an injured animal was brought in.",
+   "note": "Open 24/7. Emergency walk-ins are accepted, but calling ahead is recommended. Older listings give AVETS's former address, 4224 Northern Pike. That building is now BluePearl Monroeville, which may not offer 24-hour emergency care, so use the Monroeville Blvd address."
+  },
+  {
+   "name": "BluePearl Pet Hospital Pittsburgh North (formerly Pittsburgh Veterinary Specialty & Emergency Center)",
+   "kind": "vet_er",
+   "address": "807 Camp Horne Rd, Pittsburgh, PA 15237",
+   "phone": "412-366-3400",
+   "url": "https://bluepearlvet.com/hospital/pittsburgh-north-pa/",
+   "source": "https://bluepearlvet.com/hospital/pittsburgh-north-pa/",
+   "what_to_use_it_for": "A backup 24-hour emergency hospital for an injured pet if AVETS isn't an option.",
+   "note": "24-hour emergency and specialty hospital in Pittsburgh's North Hills, farther from 15068 than AVETS. 412-368-5090 also appears in listings for this hospital."
+  },
+  {
+   "name": "AAHA Universal Pet Microchip Lookup",
+   "kind": "microchip_lookup",
+   "address": null,
+   "phone": null,
+   "url": "https://www.petmicrochiplookup.org/",
+   "source": "https://www.aaha.org/faqs/",
+   "what_to_use_it_for": "After a vet or shelter scans a found pet, enter the chip number here to find out which registry holds the owner's contact details.",
+   "note": "Takes 9-, 10- or 15-digit chip numbers and searches the participating registries (HomeAgain, AKC Reunite, 24PetWatch, PetLink and others). It does not store owner data itself."
+  },
+  {
+   "name": "Westmoreland County Treasurer, dog licenses",
+   "kind": "license",
+   "address": "2 North Main Street, Suite 110, Greensburg, PA 15601",
+   "phone": "724-830-3174",
+   "url": "https://apps.westmorelandcountypa.gov/Treasurers/DogRenewals/Default.aspx",
+   "source": "https://www.westmorelandcountypa.gov/121/Dog-License",
+   "what_to_use_it_for": "Buy or renew a county dog license, and call about a Westmoreland license tag on a found dog.",
+   "note": "724-830-3174 is the main dog-license number. 724-830-3180 is for lifetime licenses, and 724-830-3195, -3172 and -3173 are Licensing Division lines. No public online search of license owners was found, so call the treasurer or the dog warden with the tag number."
+  },
+  {
+   "name": "PA Dept. of Agriculture, Dog Licenses",
+   "kind": "license",
+   "address": null,
+   "phone": null,
+   "url": "https://www.pa.gov/agencies/pda/animals/information-about-dogs/dog-owners/dog-licenses",
+   "source": "https://www.pa.gov/agencies/pda/animals/information-about-dogs/dog-owners/dog-licenses",
+   "what_to_use_it_for": "Look up the state dog-license rules. A current license tag is one of the fastest ways to get a lost dog home.",
+   "note": "Licenses are sold by county treasurers; for 15068, that's the Westmoreland County Treasurer above."
+  },
+  {
+   "name": "PawBoost lost & found pets",
+   "kind": "online_board",
+   "address": null,
+   "phone": null,
+   "url": "https://www.pawboost.com/lost-found-pets/index?LfdbFeedStatusForm%5Bzip%5D=15068",
+   "source": "https://www.pawboost.com/",
+   "what_to_use_it_for": "Post a free lost or found alert and search pets already reported near 15068.",
+   "note": "A free report emails local members, posts to PawBoost's regional Facebook page and generates a flyer."
+  },
+  {
+   "name": "Petco Love Lost",
+   "kind": "online_board",
+   "address": null,
+   "phone": null,
+   "url": "https://petcolove.org/lost/",
+   "source": "https://petcolove.org/lost/about/",
+   "what_to_use_it_for": "Upload a photo of a lost or found dog or cat to match it against a national database, including shelter pets.",
+   "note": "Free. Photo matching compares size, color, face and coat. It also searches shelter and rescue listings and posts on Nextdoor and Neighbors by Ring. It makes shareable alerts and printable posters."
+  },
+  {
+   "name": "Find Toby in PA",
+   "kind": "online_board",
+   "address": null,
+   "phone": null,
+   "url": "https://www.findtobyinpa.org/",
+   "source": "https://www.findtobyinpa.org/",
+   "what_to_use_it_for": "Follow its free statewide step-by-step guides for a lost pet (/lost-pet) or a found pet (/found-pet), and read its summary of PA law (/pa-law).",
+   "note": "Pennsylvania lost-pet reunification nonprofit (Smart 4 Paws, Inc., a 501(c)(3), doing business as Find Toby in PA). It started in 2012 as a Facebook page."
+  }
+ ],
+ "tips": [
+  {
+   "tip": "Found a dog: promptly call the police, animal control or the dog warden so the dog can go to a licensed stray-hold facility, as PA law requires. A stray dog must be held at least 48 hours in an approved kennel before ownership can legally transfer or it can be adopted, so the owner has a window to reclaim it.",
+   "source": "https://www.findtobyinpa.org/pa-law"
+  },
+  {
+   "tip": "Lost a pet: call local shelters, animal control and vet clinics to ask whether your pet was brought in, and keep checking back instead of calling only once.",
+   "source": "https://www.aspca.org/pet-care/general-pet-care/finding-lost-pet"
+  },
+  {
+   "tip": "Tell your pet's microchip company it is missing. The company can alert shelters and vets in the area and contact you if someone reports finding the pet. A chip only helps if your contact details on file are current.",
+   "source": "https://www.aspca.org/pet-care/general-pet-care/finding-lost-pet"
+  },
+  {
+   "tip": "Search on foot and put up flyers. Walk the neighborhood, knock on doors, and look under decks, sheds, porches and thick shrubs. Post flyers at vet offices, groomers, pet stores, dog parks, grocery and convenience stores, gas stations and laundromats.",
+   "source": "https://www.aspca.org/pet-care/general-pet-care/finding-lost-pet"
+  },
+  {
+   "tip": "Post the pet on both Petco Love Lost (free photo matching against lost, found and shelter pets, with cross-posting to Nextdoor and Ring Neighbors) and PawBoost (free local email alert, regional Facebook post and flyer).",
+   "source": "https://petcolove.org/lost/about/"
+  },
+  {
+   "tip": "Keep your dog licensed. Pennsylvania requires a license once a dog is 3 months old, and a current tag lets a warden or shelter trace the owner quickly.",
+   "source": "https://www.findtobyinpa.org/pa-law"
+  }
+ ]
+}

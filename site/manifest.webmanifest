@@ -1,0 +1,26 @@
+{
+ "name": "NK15068",
+ "short_name": "NK15068",
+ "start_url": "./",
+ "scope": "./",
+ "display": "minimal-ui",
+ "theme_color": "#8a1c2b",
+ "background_color": "#ffffff",
+ "icons": [
+  {
+   "src": "favicon.svg",
+   "sizes": "any",
+   "type": "image/svg+xml"
+  }
+ ],
+ "shortcuts": [
+  {
+   "name": "Lost pets",
+   "url": "lost-pets/"
+  },
+  {
+   "name": "Phone numbers",
+   "url": "numbers/"
+  }
+ ]
+}

@@ -1,0 +1,58 @@
+name: Deploy site to GitHub Pages
+
+# Rebuilds on every push to main, whenever a lost & found pet issue changes (so the board snapshot and the
+# per-listing pages stay current), and once a day (so "This week" and the calendar roll forward).
+on:
+  push:
+    branches: [main]
+  issues:
+    types: [opened, edited, closed, reopened, labeled, unlabeled, deleted]
+  schedule:
+    - cron: "15 9 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  issues: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install shapely
+      - run: python -m unittest discover -s tests
+
+  deploy:
+    needs: test
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      # open pet listings -> site/data/pets-board.json (never committed; a failure leaves the board to the live API)
+      - run: python scripts/snapshot_pets.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # today's calendar, the board in the HTML, /lost-pets/gh-N/ pages and the listings feed
+      - run: python scripts/build_pages.py --snapshot
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,47 @@
+name: Monthly data refresh
+
+# Re-pulls the open data, rebuilds the site data and pages, records a What's new entry, and opens a pull
+# request for a person to review. It never merges on its own.
+on:
+  schedule:
+    - cron: "0 11 3 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+      - run: python scripts/fetch_overture.py
+      - run: python scripts/fetch_terrain.py
+      - run: python scripts/build_data.py
+      - run: python scripts/fetch_crime.py
+      - run: python scripts/build_safety.py
+      - run: python scripts/build_pages.py --log
+      - run: python -m unittest discover -s tests
+      - name: Open a pull request if anything changed
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # build.json's date and "generated" stamps change every run; only open a PR when the data did
+          if git diff --quiet -- data/research data/changelog.json site/data ':!site/data/build.json' ':!site/data/safety.json' \
+             && git diff -I '"generated"' --quiet -- site/data/safety.json; then
+            echo "No data changes."; exit 0
+          fi
+          month="$(date -u +%Y-%m)"
+          branch="data-refresh-$month"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add -A
+          git commit -m "Data refresh $month"
+          git push -u origin "$branch"
+          gh pr create --title "Data refresh $month" --body "Monthly re-pull of Overture Maps, terrain, FBI UCR and PennDOT data, rebuilt pages and a What's new entry. Review the diff and the entry in data/changelog.json before merging."

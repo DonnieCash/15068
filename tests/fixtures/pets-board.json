@@ -1,0 +1,41 @@
+{
+ "fetched": "2026-09-23T13:15:00Z",
+ "posts": [
+  {
+   "id": "gh-8",
+   "status": "found",
+   "animal": "cat",
+   "name": "Smokey (Logans Ferry Rd)",
+   "desc": "Grey tabby, no collar, taken to Animal Protectors.",
+   "near": "Leechburg Road",
+   "town": "Lower Burrell",
+   "date": "2026-09-22",
+   "contact": "Animal Protectors, 724-339-7388, or stop by Old Greensburg Road",
+   "created": "2026-09-22T10:00:00Z",
+   "source": "github",
+   "x": 2350,
+   "y": -2290,
+   "prec": "street",
+   "placeLabel": "Leechburg Road",
+   "url": "https://github.com/DonnieCash/15068/issues/8"
+  },
+  {
+   "id": "gh-7",
+   "status": "lost",
+   "animal": "dog",
+   "name": "Biscuit",
+   "desc": "Small brown and white beagle mix, red collar, very friendly. Got out of our yard at Victoria near the school.",
+   "near": "Fifth Avenue & 11th Street",
+   "town": "New Kensington",
+   "date": "2026-09-20",
+   "contact": "Comment on this post",
+   "created": "2026-09-21T14:00:00Z",
+   "source": "github",
+   "x": -3450,
+   "y": 80,
+   "prec": "intersection",
+   "placeLabel": "5th Avenue & 11th Street",
+   "url": "https://github.com/DonnieCash/15068/issues/7"
+  }
+ ]
+}
