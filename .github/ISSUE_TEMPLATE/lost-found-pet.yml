@@ -1,0 +1,69 @@
+name: Lost or found pet (15068)
+description: Post a lost, found or spotted pet in New Kensington, Arnold or Lower Burrell. It appears on the NK15068 map.
+title: "[Lost] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Everything you write here is **public**. Only share contact details you're comfortable posting.
+        Change the title to start with **[Lost]**, **[Found]** or **[Spotted]**.
+        When your pet is home, close this issue and it will drop off the map.
+  - type: dropdown
+    id: status
+    attributes:
+      label: Lost, found or spotted?
+      options:
+        - Lost
+        - Found
+        - Spotted
+    validations:
+      required: true
+  - type: dropdown
+    id: animal
+    attributes:
+      label: Animal
+      options:
+        - Dog
+        - Cat
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: name
+    attributes:
+      label: Pet's name (if known)
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Breed, size, color, collar, anything distinctive. You can drag a photo in here.
+    validations:
+      required: true
+  - type: input
+    id: near
+    attributes:
+      label: Last seen near
+      description: A street and cross street, like "Fifth Avenue & 9th Street" or "Leechburg Road at Wildlife Lodge Road".
+      placeholder: Fifth Avenue & 9th Street
+    validations:
+      required: true
+  - type: dropdown
+    id: town
+    attributes:
+      label: Town
+      options:
+        - New Kensington
+        - Arnold
+        - Lower Burrell
+    validations:
+      required: true
+  - type: input
+    id: date
+    attributes:
+      label: Date
+      placeholder: "2026-09-23"
+  - type: input
+    id: contact
+    attributes:
+      label: How to reach you (public)
+      description: A phone number or email you're OK posting publicly, or leave blank and people can comment here.

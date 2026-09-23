@@ -163,5 +163,34 @@ class SafetyData(unittest.TestCase):
                 self.assertTrue(y.get("sources"), (ag["agency"], y["year"]))
 
 
+@unittest.skipUnless((DATA / "pets.json").exists(), "pets data not built")
+class PetsData(unittest.TestCase):
+    """The lost & found pets contacts are sourced, and the GitHub issue form matches what pets.js parses."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.p = json.loads((DATA / "pets.json").read_text())
+
+    def test_contacts_sourced_and_well_formed(self):
+        import re
+        self.assertTrue(self.p["items"])
+        for it in self.p["items"]:
+            self.assertTrue(it.get("source", "").startswith("https://"), it["name"])
+            self.assertTrue(it.get("name") and it.get("what_to_use_it_for"), it)
+            if it.get("phone"):
+                for num in re.findall(r"[\d-]{7,}", it["phone"]):
+                    self.assertRegex(num, r"^\d{3}-\d{3}-\d{4}$", it["name"])
+        for t in self.p.get("tips", []):
+            self.assertTrue(t.get("source", "").startswith("https://"), t)
+
+    def test_issue_form_matches_parser(self):
+        form = (ROOT / ".github" / "ISSUE_TEMPLATE" / "lost-found-pet.yml").read_text()
+        parser = (ROOT / "site" / "assets" / "pets.js").read_text()
+        # each label pets.js reads with field("...") must start a label in the issue form
+        for label in ("Lost, found or spotted", "Animal", "Pet's name", "Description", "Last seen near", "Town", "Date", "How to reach you"):
+            self.assertIn(f'field("{label}")', parser)
+            self.assertRegex(form, r"label: " + label.replace("?", r"\?"), label)
+
+
 if __name__ == "__main__":
     unittest.main()

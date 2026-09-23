@@ -4,235 +4,263 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>NK15068</title>
-<meta name="description" content="New Kensington, Arnold and Lower Burrell — every street, building and business in ZIP 15068, mapped from open data.">
+<meta name="description" content="New Kensington, Arnold and Lower Burrell: streets, buildings, businesses, news, crime data and lost pets for ZIP 15068, mapped from open data.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:ital,wght@0,400;0,600;0,700;1,500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..800;1,6..72,400..600&family=Radio+Canada:ital,wdth,wght@0,75..100,400..700;1,75..100,400..600&display=swap">
 <link rel="stylesheet" href="assets/nk.css">
 
 </head>
 <body>
-<header class="bar">
-  <div class="wrap">
-    <a class="logo" href="#top">NK<span>15068</span></a>
-    <nav class="nav" aria-label="Sections">
-      <a href="#map">Map</a>
-      <a href="#towns">Towns</a>
-      <a href="#safety">Safety</a>
-      <a href="#story">Story</a>
-      <a href="#eat">Eat &amp; Drink</a>
-      <a href="#directory">Directory</a>
-      <a href="#people">People</a>
-      <a href="#news">News</a>
-      <a href="#sources">Sources</a>
-    </nav>
+<header class="masthead">
+  <div class="utility"><div class="page"><span id="u-built">Map data built from open sources</span><span class="u-mid" id="u-release"></span></div></div>
+  <div class="page flag">
+    <a class="nameplate" href="#top">NK15068</a>
+    <p class="tagline">New Kensington · Arnold · Lower Burrell<br>ZIP 15068, Westmoreland County, Pa.</p>
+    <p class="ear"><b>River and ridge</b><span id="hero-elev">Allegheny River about 220 m · highest ground about 430 m</span></p>
   </div>
 </header>
-
-<main id="top">
-  <section class="hero" aria-label="Introduction">
-    <canvas id="hero-canvas" aria-hidden="true"></canvas>
-    <div class="wrap">
-      <p class="eyebrow">Allegheny River · Westmoreland County · Pennsylvania</p>
-      <h1>15<em>0</em>68</h1>
-      <p class="lede">New Kensington, Arnold and Lower Burrell. Every street, building and storefront in the ZIP, mapped from open data.</p>
-      <div class="towns"><span>New Kensington</span><span>Arnold</span><span>Lower Burrell</span></div>
-      <div class="cta">
-        <a class="btn" href="#map">Explore the map</a>
-        <a class="btn ghost" href="#story">Read the story</a>
-      </div>
-      <div class="coords mono">
-        <span>40.5695° N, 79.7647° W · downtown New Kensington</span>
-        <span id="hero-elev">River pool ≈ 220 m · ridgetops ≈ 430 m</span>
-      </div>
+<nav class="secbar" aria-label="Sections">
+  <div class="page">
+    <div class="links">
+      <a href="#top">Front</a>
+      <a href="#map">Map</a>
+      <a href="#news">News</a>
+      <a href="#pets">Lost pets</a>
+      <a href="#towns">Towns</a>
+      <a href="#safety">Crime &amp; safety</a>
+      <a href="#story">History</a>
+      <a href="#eat">Eat &amp; drink</a>
+      <a href="#people">People</a>
+      <a href="#directory">Directory</a>
+      <a href="#sources">Sources</a>
     </div>
+    <button type="button" id="ttheme" aria-label="Switch to dark theme">Dark</button>
+  </div>
+</nav>
+
+<main>
+  <section id="top" class="page front well-rail" aria-labelledby="front-h">
+    <div class="well">
+      <figure class="lead-art">
+        <canvas id="hero-canvas" role="img" aria-label="Road map of ZIP 15068 with state routes highlighted"></canvas>
+        <figcaption class="caption">Downtown New Kensington sits on the river flat; Lower Burrell's streets climb the hills to the east. State routes in orange. <span class="credit">Map: NK15068 from Overture Maps road centerlines.</span></figcaption>
+      </figure>
+      <h1 id="front-h">Every street, building and storefront in New Kensington, Arnold and Lower Burrell, on one map</h1>
+      <p class="deck">A map and guide to the three cities on this stretch of the Allegheny, built from open data and published reporting.</p>
+      <div class="lede" id="ledger-lede"></div>
+    </div>
+    <aside class="rail" id="ledger" aria-label="15068 at a glance">
+      <div class="box">
+        <h2 class="lh">15068 by the count</h2>
+        <dl class="facts" id="ledger-grid"></dl>
+        <p class="fine" id="ledger-note"></p>
+      </div>
+      <div class="box" id="latest-box" hidden>
+        <h2 class="lh">Latest</h2>
+        <ol class="latest" id="latest"></ol>
+      </div>
+      <p class="pets-line" id="pets-line" hidden></p>
+    </aside>
   </section>
 
-  <section class="block" id="ledger" aria-labelledby="ledger-h">
-    <div class="wrap">
-      <div class="sec-head">
-        <p class="eyebrow">By the numbers</p>
-        <h2 id="ledger-h">Counted, not estimated</h2>
-        <p>Every number below comes from building footprints, road centerlines, address points and business listings inside the 15068 boundary.</p>
-      </div>
-      <div class="ledger" id="ledger-grid"></div>
-      <p class="ledger-note" id="ledger-note"></p>
+  <section id="map" aria-labelledby="map-h">
+    <div class="page map-head">
+      <h2 class="gh" id="map-h">Map of ZIP 15068</h2>
+      <p class="chatter">Search a business or street, or drag to explore. Use Layers to add police incidents, serious crashes, lost pets or 3D terrain.</p>
     </div>
-  </section>
-
-  <section id="map" aria-label="Interactive map of 15068">
     <div class="explorer" id="explorer">
       <canvas class="stage" id="map-canvas" aria-label="Map of ZIP 15068. Drag to pan, scroll or pinch to zoom, arrow keys also work."></canvas>
       <div class="gl" id="gl-host" hidden></div>
-      <div class="loading" id="map-loading">Loading 15068…</div>
+      <div class="loading" id="map-loading">Loading map data…</div>
       <div class="panel search-panel">
-        <label class="eyebrow" for="q">Search 15068</label>
+        <label for="q">Search 15068</label>
         <input id="q" type="search" placeholder="A business, street or landmark" autocomplete="off">
         <div class="results" id="results" role="listbox" aria-label="Search results"></div>
         <div class="chips" id="chips" aria-label="Filter places by type"></div>
       </div>
-      <div class="panel tools" role="toolbar" aria-label="Map tools">
-        <button type="button" id="zin" title="Zoom in" aria-label="Zoom in">+</button>
-        <button type="button" id="zout" title="Zoom out" aria-label="Zoom out">−</button>
-        <button type="button" id="home" title="Show all of 15068" aria-label="Show all of 15068">ZIP</button>
-        <button type="button" id="dt" title="Downtown New Kensington" aria-label="Zoom to downtown New Kensington">DT</button>
-        <button type="button" id="t3d" title="3D terrain view" aria-pressed="false">3D</button>
-        <button type="button" id="tinc" title="Crime &amp; police incidents" aria-label="Show crime and police incidents" aria-pressed="false">INC</button>
-        <button type="button" id="tcr" title="Serious &amp; fatal crashes" aria-label="Show serious and fatal crashes" aria-pressed="false">CRASH</button>
-        <button type="button" id="tbld" title="Buildings" aria-pressed="true">BLD</button>
-        <button type="button" id="trel" title="Terrain relief" aria-pressed="true">REL</button>
-        <button type="button" id="ttheme" title="Switch light or dark" aria-label="Switch light or dark">◐</button>
+      <div class="layers">
+        <button type="button" class="panel layers-btn" id="layers-btn" aria-expanded="false" aria-controls="layers-pop" aria-label="Layers">
+          <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="2" fill="none"/></svg><span>Layers</span>
+        </button>
+        <div class="panel layers-pop" id="layers-pop" role="group" aria-label="Map layers" hidden>
+          <button type="button" id="tbld" aria-pressed="true">Buildings</button>
+          <button type="button" id="trel" aria-pressed="true">Terrain relief</button>
+          <button type="button" id="t3d" aria-pressed="false">3D terrain</button>
+          <button type="button" id="tinc" aria-pressed="false">Crime and police incidents</button>
+          <button type="button" id="tcr" aria-pressed="false">Serious and fatal crashes</button>
+          <button type="button" id="tpet" aria-pressed="false">Lost and found pets</button>
+          <hr>
+          <p class="go">Go to</p>
+          <button type="button" id="dt">Downtown New Kensington</button>
+          <button type="button" id="home">Whole ZIP</button>
+        </div>
+      </div>
+      <div class="panel zoom" role="group" aria-label="Zoom">
+        <button type="button" id="zin" aria-label="Zoom in">+</button>
+        <button type="button" id="zout" aria-label="Zoom out">−</button>
       </div>
       <div class="panel card" id="card" hidden aria-live="polite"></div>
       <div class="panel map-legend" id="inc-legend" hidden>
         <div data-l="inc"><span class="inc-key" style="background:var(--inc-violent)"></span>Violent</div>
         <div data-l="inc"><span class="inc-key" style="background:var(--inc-property)"></span>Property</div>
-        <div data-l="inc"><span class="inc-key" style="background:var(--inc-police)"></span>Police &amp; other</div>
+        <div data-l="inc"><span class="inc-key" style="background:var(--inc-police)"></span>Police and other</div>
         <div data-l="inc" data-shape="1"><span class="inc-key pi" style="background:var(--muted)"></span>Police involved</div>
         <div data-l="inc" data-shape="1"><span class="ring-key"></span>Street only (approximate)</div>
-        <small data-l="inc">News-reported · block, intersection, place or street</small>
+        <small data-l="inc">News-reported, placed at a block, intersection, place or street</small>
         <div data-l="cr" data-shape="1"><span class="tri-key"></span>Fatal crash</div>
         <div data-l="cr" data-shape="1"><span class="tri-key hollow"></span>Serious-injury crash</div>
         <div data-l="cr" data-3d="1"><span class="inc-key" style="background:var(--ink)"></span>Serious or fatal crash</div>
+        <div data-l="pet"><span class="pet-key" style="background:var(--pet-lost)">L</span>Lost pet</div>
+        <div data-l="pet"><span class="pet-key found">F</span>Found pet</div>
+        <div data-l="pet"><span class="pet-key" style="background:var(--pet-spotted)">S</span>Spotted</div>
       </div>
       <div class="scale" id="scale"></div>
-      <div class="attrib">© OpenStreetMap contributors · Overture Maps · US Census · AWS Terrain Tiles</div>
+      <div class="attrib">Map data © OpenStreetMap contributors · Overture Maps · US Census · AWS Terrain Tiles</div>
+    </div>
+    <p class="page map-credit">Map data © OpenStreetMap contributors · Overture Maps · US Census · AWS Terrain Tiles</p>
+  </section>
+
+  <section id="news" class="page sec" aria-labelledby="news-h">
+    <h2 id="news-h">Recent news from the three cities</h2>
+    <p class="deck">Summaries of recent reporting on the three cities, newest first. Each links to the outlet that reported it.</p>
+    <div class="river" id="news-list"></div>
+  </section>
+
+  <section id="pets" class="classified" aria-labelledby="pets-h">
+    <div class="page">
+      <div class="pets-head">
+        <h2 class="lh" id="pets-h">Lost &amp; found pets</h2>
+        <p class="chatter">Post a lost or found pet with the street where it was last seen. Listings show on the map as pins.</p>
+      </div>
+      <p id="pets-status" role="status"></p>
+      <div class="ads" id="pets-list"></div>
+      <div class="pets-help">
+        <div>
+          <h3 class="lh">Who to call in 15068</h3>
+          <div class="runin" id="pets-res"></div>
+        </div>
+        <div>
+          <h3 class="lh">If a pet goes missing</h3>
+          <ol class="tips" id="pets-tips"></ol>
+        </div>
+      </div>
     </div>
   </section>
 
-  <section class="block" id="towns" aria-labelledby="towns-h">
-    <div class="wrap">
-      <div class="sec-head">
-        <p class="eyebrow">Three towns · one ZIP</p>
-        <h2 id="towns-h">Where 15068 draws its line</h2>
-        <p>The ZIP code takes in three cities: New Kensington's grid on the river flat, Arnold just upriver, and Lower Burrell on the hills above. It also clips small edges of Upper Burrell, Plum and Allegheny Township.</p>
-      </div>
-      <div class="towns-grid" id="towns-grid"></div>
-    </div>
+  <section id="towns" class="page sec" aria-labelledby="towns-h">
+    <h2 id="towns-h">Three cities share one ZIP code</h2>
+    <p class="deck">New Kensington holds the river-flat street grid, Arnold sits just upriver, and Lower Burrell covers the hills above. The ZIP also clips edges of Upper Burrell, Plum and Allegheny Township.</p>
+    <div class="profiles" id="towns-grid"></div>
   </section>
 
-  <section class="block" id="safety" aria-labelledby="safety-h">
-    <div class="wrap">
-      <div class="sec-head">
-        <p class="eyebrow">Crime &amp; policing</p>
-        <h2 id="safety-h">Safety, on the record</h2>
-        <p>What each city's police department reports to the FBI, what those departments look like, and incidents local news reported with a place you can find on the map.</p>
+  <section id="safety" class="page sec" aria-labelledby="safety-h">
+    <h2 id="safety-h">Crime and policing in the three cities</h2>
+    <p class="deck">What each police department reports to the FBI, who the departments are, and incidents local news reported at a place you can find on the map.</p>
+    <div id="safety-body" class="safety-grid">
+      <div class="area-a">
+        <p class="note"><b>Note on these numbers.</b> Rates are per 1,000 residents. Small towns swing from year to year, and a few incidents can move a rate a lot. The mapped incidents are a news-reported sample, not every call. No suspects, victims or line officers are named, and locations are rounded to the block or placed on the street.</p>
+        <h3 class="gh">Reported crime, latest year, per 1,000 residents</h3>
+        <p class="chatter">One row per police department. Figures under each rate are the count and the year.</p>
+        <div class="dir-table-wrap" id="safety-tiles"></div>
       </div>
-      <p class="caveat">Rates are per 1,000 residents. Small towns swing from year to year, and a few incidents can move a rate a lot. The mapped incidents are a news-reported sample, not every call. No suspects, victims or line officers are named, and locations are rounded to the block or placed on the street.</p>
-      <div id="safety-body">
-        <div class="tiles" id="safety-tiles"></div>
-        <p class="viz-title">Violent crimes per 1,000 residents</p>
-        <p class="viz-sub">Murder, rape, robbery and aggravated assault · FBI UCR · same scale in every panel · hollow dots are partial-year reports</p>
-        <div class="multiples" id="safety-violent"></div>
-        <p class="viz-title">Property crimes per 1,000 residents</p>
-        <p class="viz-sub">Burglary, larceny-theft and motor vehicle theft · FBI UCR · same scale in every panel · hollow dots are partial-year reports</p>
-        <div class="multiples" id="safety-property"></div>
-        <details class="tableview"><summary>Show every year as a table</summary><div class="dir-table-wrap" id="safety-table"></div></details>
+      <aside class="rail" id="safety-depts" aria-label="Police departments and notes on the data"></aside>
+      <div class="area-b">
+        <div class="viz">
+          <h3 class="gh">Violent crimes per 1,000 residents</h3>
+          <p class="chatter">Murder, rape, robbery and aggravated assault, as each department reported them to the FBI. Every panel uses the same scale.</p>
+          <div class="multiples" id="safety-violent"></div>
+          <p class="credit" data-credit="fbi"></p>
+        </div>
+        <div class="viz">
+          <h3 class="gh">Property crimes per 1,000 residents</h3>
+          <p class="chatter">Burglary, larceny-theft and motor vehicle theft. Every panel uses the same scale.</p>
+          <div class="multiples" id="safety-property"></div>
+          <p class="credit" data-credit="fbi"></p>
+          <details class="tableview"><summary>Every year as a table ›</summary><div class="dir-table-wrap" id="safety-table"></div></details>
+        </div>
         <div id="safety-offenses"></div>
-        <div class="sec-head" style="margin-top:72px">
-          <p class="eyebrow">Police departments</p>
-          <h2>Who patrols 15068</h2>
+        <div class="viz">
+          <h3 class="gh">Arrests per 1,000 residents</h3>
+          <p class="chatter">All arrests reported to the FBI, for any offense.</p>
+          <div class="multiples" id="safety-arrests"></div>
+          <p class="credit" data-credit="fbi"></p>
         </div>
-        <p class="viz-title">Arrests per 1,000 residents</p>
-        <p class="viz-sub">All arrests reported to the FBI, any offense · hollow dots are partial-year reports</p>
-        <div class="multiples" id="safety-arrests"></div>
         <div id="safety-policing"></div>
-        <div class="sec-head" style="margin-top:72px">
-          <p class="eyebrow">Where it happened</p>
-          <h2>Reported incidents</h2>
-          <p>Filter the list; the same filters apply to the map's incident layer.</p>
-        </div>
         <div id="inc-block"></div>
-        <p class="viz-title" style="margin-top:40px">How this was put together</p>
-        <ul class="ledger-note" id="safety-method" style="display:grid;gap:8px;padding-left:18px;font-size:13px"></ul>
       </div>
     </div>
   </section>
 
-  <section class="block" id="story" aria-labelledby="story-h">
-    <div class="wrap">
-      <div class="sec-head">
-        <p class="eyebrow">1769 → today</p>
-        <h2 id="story-h">Aluminum, river, hillside</h2>
-        <p id="story-lede">From the Parnassus land grant and Fort Crawford to the first Alcoa works, the 1950 peak and the Fifth Avenue revival. Each entry links to its source.</p>
+  <section id="story" class="page sec" aria-labelledby="story-h">
+    <h2 id="story-h">A history of 15068, from the 1769 Parnassus tract to 2026</h2>
+    <p class="deck">From the Parnassus land grant and Fort Crawford to the first Alcoa works, the 1950 census peak and the Fifth Avenue revival. Each entry links to where it was reported.</p>
+    <div class="well-rail">
+      <div class="well">
+        <div class="chron" id="timeline"></div>
+        <button class="text-btn" type="button" id="tl-more">Show all entries ›</button>
       </div>
-      <div id="pop-chart"></div>
-      <div class="timeline" id="timeline"></div>
-      <button class="btn ghost more" type="button" id="tl-more">Show the full timeline</button>
-      <div class="sec-head" style="margin-top:72px">
-        <p class="eyebrow">Neighborhoods &amp; landmarks</p>
-        <h2>Places with a past</h2>
-      </div>
-      <div class="cols" id="landmarks"></div>
+      <aside class="rail" id="story-rail">
+        <h3 class="gh">New Kensington population, by census</h3>
+        <div id="pop-chart"></div>
+      </aside>
+    </div>
+    <div id="landmarks"></div>
+  </section>
+
+  <section id="eat" class="page sec" aria-labelledby="eat-h">
+    <h2 id="eat-h">Where to eat and drink in 15068</h2>
+    <p class="deck" id="eat-deck">Restaurants, bars, bakeries and clubs with a published write-up. Select one to find it on the map.</p>
+    <div class="well-rail">
+      <div class="well" id="eat-list"></div>
+      <aside class="rail">
+        <div class="box">
+          <h3 class="lh">Community calendar</h3>
+          <div id="events"></div>
+        </div>
+      </aside>
     </div>
   </section>
 
-  <section class="block" id="eat" aria-labelledby="eat-h">
-    <div class="wrap">
-      <div class="sec-head">
-        <p class="eyebrow">Local picks</p>
-        <h2 id="eat-h">Eat, drink, hang out</h2>
-        <p>The spots locals talk about, from breweries to bakeries. Select any spot to find it on the map.</p>
-      </div>
-      <div class="cols" id="eat-list"></div>
-      <div class="sec-head" style="margin-top:64px">
-        <p class="eyebrow">On the calendar</p>
-        <h2>Every year in 15068</h2>
-      </div>
-      <div class="cols" id="events"></div>
-    </div>
+  <section id="people" class="page sec" aria-labelledby="people-h">
+    <h2 id="people-h">Notable people from 15068</h2>
+    <div class="people" id="people-list"></div>
   </section>
 
-  <section class="block" id="directory" aria-labelledby="dir-h">
-    <div class="wrap">
-      <div class="sec-head">
-        <p class="eyebrow">Directory</p>
-        <h2 id="dir-h">Everything in 15068</h2>
-        <p>Every business, street and public office in the ZIP. Select a row to find it on the map.</p>
-      </div>
-      <div class="tabs chips" id="dir-tabs" role="tablist"></div>
-      <div class="dir-controls">
-        <input id="dir-q" type="search" placeholder="Filter by name, type, town or address" autocomplete="off">
-        <span class="dir-count" id="dir-count"></span>
-      </div>
-      <div class="dir-table-wrap"><table class="dir" id="dir-table"></table></div>
-      <button class="btn ghost more" type="button" id="dir-more">Show more</button>
+  <section id="directory" class="page sec" aria-labelledby="dir-h">
+    <h2 class="lh big" id="dir-h">Business directory</h2>
+    <p class="chatter">Businesses, streets and public offices from the map data. Select a row to find it on the map.</p>
+    <div class="tabs" id="dir-tabs" role="tablist" aria-label="Directory lists"></div>
+    <div class="dir-controls">
+      <input id="dir-q" type="search" placeholder="Filter by name, street or type" autocomplete="off" aria-label="Filter the directory">
+      <span class="count" id="dir-count"></span>
     </div>
-  </section>
-
-  <section class="block" id="people" aria-labelledby="people-h">
-    <div class="wrap">
-      <div class="sec-head">
-        <p class="eyebrow">From here</p>
-        <h2 id="people-h">People of the valley</h2>
-      </div>
-      <div class="cols" id="people-list"></div>
-    </div>
-  </section>
-
-  <section class="block" id="news" aria-labelledby="news-h">
-    <div class="wrap">
-      <div class="sec-head">
-        <p class="eyebrow">2025 – 2026</p>
-        <h2 id="news-h">What's changing</h2>
-      </div>
-      <div class="news" id="news-list"></div>
-    </div>
+    <div class="dir-table-wrap"><table class="dir" id="dir-table"></table></div>
+    <button class="btn-line" type="button" id="dir-more">Show 100 more</button>
   </section>
 </main>
 
-<footer id="sources">
-  <div class="wrap">
-    <p class="eyebrow">Sources &amp; method</p>
-    <p style="max-width:70ch">The map data is pulled straight from open datasets and clipped to the Census boundary for ZIP 15068: Overture Maps for buildings, roads, places and addresses, and AWS Terrain Tiles for elevation. Nothing on the map is hand-placed. The history, civic and news sections were compiled from published sources, and each entry links to its source. Business listings can go stale, so call ahead.</p>
-    <div class="srcs" id="src-list"></div>
+<footer id="sources" class="page sec" aria-labelledby="about-h">
+  <h2 id="about-h">About NK15068</h2>
+  <div class="foot">
+    <div class="about-text">
+      <p>The map is drawn from open datasets clipped to the Census boundary for ZIP 15068: Overture Maps for buildings, roads, places and addresses, and AWS Terrain Tiles for elevation. Nothing on the map is placed by hand. The news, history, civic, crime and pets sections were compiled from published sources, and each entry links to where it was reported.</p>
+      <div id="src-notes" class="about-text"></div>
+      <p>Business listings can go stale, so call ahead.</p>
+    </div>
+    <div>
+      <h3 class="lh">Sources</h3>
+      <div class="srcs" id="src-list"></div>
+    </div>
   </div>
+  <p class="bottom-line" id="foot-line">NK15068 · Map data © OpenStreetMap contributors, Overture Maps Foundation · <a href="https://github.com/DonnieCash/15068/issues" target="_blank" rel="noopener">Report a correction ›</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="assets/nkmap.js"></script>
 <script src="assets/nk3d.js"></script>
 <script src="assets/safety.js"></script>
+<script src="assets/pets.js"></script>
 <script src="assets/app.js"></script>
 </body>
 </html>

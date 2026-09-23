@@ -2,8 +2,9 @@
 
 **New Kensington · Arnold · Lower Burrell.** A website and map of ZIP 15068,
 built entirely from open data. It includes every building, road, address point
-and business listing in the ZIP, draped over real terrain, alongside a sourced
-history, civic directory, local picks and recent news.
+and business listing in the ZIP, draped over real terrain, alongside sourced
+news, crime data, history, a civic directory, local picks and a lost & found
+pets board.
 
 The site is static HTML/JS in `site/`, with no framework and no build step. It
 draws its own map from the scraped data, so it needs no tile server or API key.
@@ -13,38 +14,63 @@ draws its own map from the scraped data, so it needs no tile server or API key.
 | Buildings (footprints, 29k with real heights) | 19,242 inside the ZIP |
 | Address points | 16,051 |
 | Roads | 510 km, 790 named streets |
-| Places & businesses | 1,256 (≈90% independent) |
-| Terrain | 30 m grid, Allegheny ≈ 220 m → ridges ≈ 430 m |
+| Places & businesses | 1,256 (about 90% with no chain brand) |
+| Terrain | 30 m grid, Allegheny about 220 m, ridges about 430 m |
 | History | 61 dated timeline entries, 18 landmarks, 9 neighborhoods, 21 people |
 | Civic / culture / news | 21 offices, 32 local spots, 10 parks, 23 news items (2025–26) |
+| Lost & found pets | 18 sourced contacts (dog warden, shelters, police non-emergency lines, emergency vets, licensing, online boards) and 6 tips, plus a live board |
 | Crime & policing | FBI UCR counts, arrests, clearances and staffing for the 3 police departments (2000–2024); 43 mapped incidents (2018–26): 41 verified news incidents from 2022–26 plus 2 fatal police shootings; 146 police-reported fatal/serious crashes (PennDOT, 2005–2024) |
 
 ## What's on the page
 
-- **Hero:** the ZIP's real road network draws itself outward from downtown New Ken.
-- **By the numbers:** counts computed from the data, not estimated.
-- **Map explorer:** pan, zoom and pinch; search 1,256 places and 790 streets;
-  filter by category; toggle buildings and terrain relief; tap any pin for its
-  address, phone, website and directions.
+The page is laid out like a small regional daily: a utility strip, a
+left-aligned nameplate with an "ear", and a sticky maroon section bar. Type is
+Newsreader (headlines and text) and Radio Canada (tables, credits, map UI), and
+each section uses its own grid rather than one repeated card template.
+
+- **Front:** a still drawing of the ZIP's roads (state routes in orange), the
+  lead, and a rail with "15068 by the count", the latest headlines and a count
+  of open lost-pet listings.
+- **Map explorer:** pan, zoom and pinch; search 1,256 places and 790 streets
+  (state routes 56, 366, 380 and 780 get keystone shields); filter by category.
+  A **Layers** menu toggles buildings, terrain relief, 3D, crime incidents,
+  serious crashes and lost pets, and jumps to downtown or the whole ZIP.
   - **3D mode:** real elevation (1.5× vertical exaggeration) with every
-    building extruded to its height. It slowly orbits downtown until you
-    grab it.
-- **Three towns:** a street map and stats for each city.
-- **Safety:**
-  - Crime rates per 1,000 residents from the FBI's Uniform Crime Reporting
-    data, shown as small-multiple trends per town. Partial-year reports are
-    flagged.
-  - Arrests, clearance rates, assaults on officers and police staffing.
-  - Police departments and notable police interactions.
-  - A filterable list of news-reported incidents that doubles as a map
-    layer (**INC** button).
-  - PennDOT's police-reported fatal and serious-injury crashes, shown as a
-    chart and as a map layer (**CRASH** button).
-- **Story:** a population chart and timeline from 1769 to 2026, plus
+    building extruded to its height.
+- **News:** a three-column river of credited summaries, newest first.
+- **Lost & found pets:** classified-style listings pinned on the map, a
+  "place a free listing" box, and who to call in 15068 (see below).
+- **Towns:** a street map, incorporation dates and figures for each city.
+- **Crime & safety:**
+  - A box score of the latest FBI rates per department, then small-multiple
+    trends for violent crime, property crime and arrests. Partial-year
+    reports are flagged.
+  - Clearances, assaults on officers, staffing and a rail on each department.
+  - Police shootings, lawsuits and policy changes, and a filterable **police
+    blotter** of news-reported incidents that doubles as a map layer.
+  - PennDOT's police-reported fatal and serious-injury crashes.
+- **History:** a chronology from 1769 to 2026, a population chart, and
   neighborhoods and landmarks.
-- **Eat & Drink**, **Events**, **Directory** (places, streets, public offices),
-  **People** and **News**. Every researched entry links to its source.
-- Light and dark themes, keyboard and touch support, reduced-motion aware.
+- **Eat & drink** (grouped like a dining guide), a **community calendar**,
+  **People**, a **business directory** (places, streets, public offices), and
+  **Sources**. Credits name the outlet ("Source: WPXI") and dates are AP style.
+- Light and dark themes, keyboard and touch support, reduced-motion aware,
+  and a print stylesheet.
+
+### Lost & found pets board
+
+The board picks its backend at run time:
+
+- **On GitHub Pages** it lists open issues made with the
+  [lost or found pet form](.github/ISSUE_TEMPLATE/lost-found-pet.yml),
+  read through GitHub's public API. Posting a listing means filling in that
+  form, and closing the issue takes it down.
+- **In the Claude artifact preview** it uses the artifact's shared `db`: each
+  viewer can write only their own document (`pets/<their id>`), everyone can
+  read all of them, and owners can mark a post reunited.
+
+Locations are a street and cross street, placed on the site's own road data.
+House numbers are stripped, and a spot picked on the map is rounded to 10 m.
 
 ## Run it locally
 
@@ -122,7 +148,7 @@ is an RGB heightmap: elevation in decimetres = R×256 + G.
 - US Census TIGER/Line ZCTA5 boundary for 15068 (public domain).
 - [Terrain Tiles on AWS](https://registry.opendata.aws/terrain-tiles/)
   (USGS 3DEP / SRTM).
-- History, civic and news entries each cite their own source. These were
+- History, civic, news and pets entries each cite their own source. These were
   compiled from search results on 2026-09-23, so verify anything important.
 
 The earlier Minecraft digital-twin experiment lives on the

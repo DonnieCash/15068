@@ -168,7 +168,8 @@
       this.scale = 0.05; this.cx = -3300; this.cy = 0; // centre on downtown New Ken
       this.places = []; this.streets = [];
       this.filter = new Set(Object.keys(GROUP_COLORS));
-      this.layers = { buildings: true, relief: true, towns: true, places: true, incidents: false, crashes: false };
+      this.layers = { buildings: true, relief: true, towns: true, places: true, incidents: false, crashes: false, pets: false };
+      this.pets = []; this.pickMode = null;
       this.incidents = []; this.incVisible = () => true; this.crashes = [];
       this.sel = null; this.hover = null;
       this.pointers = new Map();
@@ -194,7 +195,7 @@
       this.c.width = Math.max(1, Math.round(r.width * this.dpr));
       this.c.height = Math.max(1, Math.round(r.height * this.dpr));
       this.w = r.width; this.h = r.height;
-      if (!this.fitted) { this.fitted = true; this.fitView(); }
+      if (!this.fitted && this.w > 0) { this.fitted = true; this.fitView(); }
       this.dirty = true;
     }
     fitView(b) {
@@ -284,8 +285,14 @@
       });
     }
     _pick(sx, sy) {
-      if (this.layers.incidents || this.layers.crashes) {
+      if (this.layers.incidents || this.layers.crashes || this.layers.pets) {
         let best = null, bd = 16 * 16;
+        if (this.layers.pets) for (const p of this.pets) {
+          if (typeof p.x !== "number") continue;
+          const [x, y] = this.toScreen(p.x, p.y);
+          const d = (x - sx) ** 2 + (y - sy) ** 2;
+          if (d < bd) { bd = d; best = p; }
+        }
         if (this.layers.crashes) for (const p of this.crashes) {
           const [x, y] = this.toScreen(p.x, p.y);
           const d = (x - sx) ** 2 + (y - sy) ** 2;
@@ -316,6 +323,7 @@
       if (p !== this.hover) { this.hover = p; this.c.style.cursor = p ? "pointer" : ""; this.dirty = true; }
     }
     _click(sx, sy) {
+      if (this.pickMode) { const [wx, wy] = this.toWorld(sx, sy); const f = this.pickMode; this.pickMode = null; this.c.style.cursor = ""; f(wx, wy); this.dirty = true; return; }
       const p = this._pick(sx, sy);
       this.select(p);
     }
@@ -367,23 +375,25 @@
         ctx.strokeStyle = dark ? "rgba(200,210,220,.28)" : "rgba(40,50,60,.3)";
         W.towns.forEach((t) => ctx.stroke(t.p));
         ctx.setLineDash([]);
-        ctx.lineWidth = 2.2 * px;
-        ctx.strokeStyle = css("--ember");
-        ctx.globalAlpha = .75;
+        ctx.lineWidth = 1.5 * px;
+        ctx.strokeStyle = css("--boundary");
+        ctx.setLineDash([6 * px, 4 * px]);
         ctx.stroke(W.zip);
-        ctx.globalAlpha = 1;
+        ctx.setLineDash([]);
       }
 
       // roads: casing then fill, minor to major
       const widthM = [16, 13, 11, 9, 7, 4.5, 3, 1.6];
       const minPx = [2.4, 2.0, 1.6, 1.2, .8, .55, .5, .5];
       const road = css("--map-road"), major = css("--map-major"), edge = css("--map-road-edge");
+      const majorEdge = css("--map-major-edge"), secondary = css("--map-secondary");
       for (let r = 7; r >= 0; r--) {
         if (r >= 6 && s < 0.35) continue;
         if (r === 5 && s < 0.12) continue;
         const w = Math.max(widthM[r], minPx[r] * px);
-        if (s > 0.6 && r < 7) { ctx.strokeStyle = edge; ctx.lineWidth = w + 2 * px; ctx.stroke(W.roads[r]); }
-        ctx.strokeStyle = r <= 1 ? major : (r === 2 ? (dark ? "#b77a47" : "#f6cf9f") : (r === 7 ? (dark ? "#4a5560" : "#aab3ba") : road));
+        if (r <= 1) { ctx.strokeStyle = majorEdge; ctx.lineWidth = w + 2 * px; ctx.stroke(W.roads[r]); }
+        else if (s > 0.6 && r < 7) { ctx.strokeStyle = edge; ctx.lineWidth = w + 2 * px; ctx.stroke(W.roads[r]); }
+        ctx.strokeStyle = r <= 1 ? major : (r === 2 ? secondary : (r === 7 ? (dark ? "#4a5560" : "#aab3ba") : road));
         if (r === 7) ctx.setLineDash([2 * px, 2 * px]);
         ctx.lineWidth = w;
         ctx.stroke(W.roads[r]);
@@ -411,12 +421,13 @@
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       this._labels(ctx, dark);
       if (this.layers.places) {
-        ctx.globalAlpha = this.layers.incidents || this.layers.crashes ? 0.18 : 1;
+        ctx.globalAlpha = this.layers.incidents || this.layers.crashes || this.layers.pets ? 0.18 : 1;
         this._pins(ctx);
         ctx.globalAlpha = 1;
         this._pinRings(ctx);
       }
       if (this.layers.crashes) this._crashes(ctx);
+      if (this.layers.pets) this._pets(ctx);
       if (this.layers.incidents) this._incidents(ctx);
       this._scaleBar();
     }
@@ -439,7 +450,7 @@
       for (const l of this.W.base.labels) {
         if (l.k !== "town") continue;
         const [x, y] = this.toScreen(l.x, l.y);
-        const f = s < .3 ? 22 : 15;
+        const f = s < .3 ? 20 : 14;
         if (s > 1.5) continue;
         ctx.font = `800 ${f}px ${css("--f-display")}`;
         const w = ctx.measureText(l.n.toUpperCase()).width;
@@ -458,7 +469,7 @@
           const t = st.ref && st.ref.length && st.r <= 1 ? st.n + " · " + st.ref[0] : st.n;
           const w = ctx.measureText(t).width;
           if (!fits(x - w / 2 - 4, y - fz / 2 - 2, w + 8, fz + 4)) continue;
-          this._text(ctx, t, x, y, font, dark ? "#aeb8c1" : "#39434c", halo);
+          this._text(ctx, t, x, y, font, css("--map-street-label"), halo);
         }
       }
       // parks & named land use
@@ -470,7 +481,7 @@
           if (x < 0 || y < 0 || x > this.w || y > this.h) continue;
           const w = ctx.measureText(l.n).width;
           if (!fits(x - w / 2, y - 7, w, 14)) continue;
-          this._text(ctx, l.n, x, y, ctx.font, dark ? "#7fb48f" : "#2f6b41", halo);
+          this._text(ctx, l.n, x, y, ctx.font, css("--map-park-label"), halo);
         }
       }
       this.labelBoxes = boxes;
@@ -488,7 +499,7 @@
         ctx.lineWidth = 1.2; ctx.strokeStyle = halo; ctx.stroke();
       }
       // names at close zoom
-      if (s > 1.6 && !this.layers.incidents && !this.layers.crashes) {
+      if (s > 1.6 && !this.layers.incidents && !this.layers.crashes && !this.layers.pets) {
         ctx.textAlign = "left"; ctx.textBaseline = "middle";
         const font = `600 11.5px ${css("--f-body")}`;
         ctx.font = font;
@@ -508,10 +519,11 @@
     _pinRings(ctx) {
       const s = this.scale, r = s < .15 ? 2.2 : s < .6 ? 3.2 : s < 2 ? 4.5 : 6;
       for (const p of [this.hover, this.sel]) {
-        if (!p || !p.g || !this.filter.has(p.g) || p.yr != null || (p.d && p.k)) continue;
+        if (!p || !p.g || !this.filter.has(p.g) || p.yr != null || (p.d && p.k) || p.status) continue;
         const [x, y] = this.toScreen(p.x, p.y);
         ctx.beginPath(); ctx.arc(x, y, r + 5, 0, 7);
-        ctx.lineWidth = 2.5; ctx.strokeStyle = css("--ember"); ctx.stroke();
+        ctx.lineWidth = 4.5; ctx.strokeStyle = css("--map-bg"); ctx.stroke();
+        ctx.lineWidth = 2.5; ctx.strokeStyle = css("--here"); ctx.stroke();
       }
     }
     _scaleBar() {
@@ -555,10 +567,11 @@
         ctx.lineWidth = 1; ctx.strokeStyle = this.isDark() ? halo : "rgba(20,25,30,.65)"; ctx.stroke();
       }
       for (const p of [this.hover, this.sel]) {
-        if (!p || p.g || p.yr != null || !this.incVisible(p)) continue;
+        if (!p || p.g || p.yr != null || p.status || !this.incVisible(p)) continue;
         const [x, y] = this._incPos(p);
         shape(x, y, r + 4, p.pi);
-        ctx.lineWidth = 2.5; ctx.strokeStyle = css("--ink"); ctx.stroke();
+        ctx.lineWidth = 4.5; ctx.strokeStyle = ground; ctx.stroke();
+        ctx.lineWidth = 2.5; ctx.strokeStyle = css("--here"); ctx.stroke();
       }
     }
     /* police-reported serious crashes: ink triangles, filled = fatal, hollow = serious injury */
@@ -576,10 +589,37 @@
       for (const p of [this.hover, this.sel]) {
         if (!p || p.yr == null) continue;
         const [x, y] = this.toScreen(p.x, p.y);
-        tri(x, y, r + 5); ctx.lineWidth = 2.5; ctx.strokeStyle = css("--ember"); ctx.stroke();
+        tri(x, y, r + 5); ctx.lineWidth = 4.5; ctx.strokeStyle = ground; ctx.stroke();
+        ctx.lineWidth = 2.5; ctx.strokeStyle = css("--here"); ctx.stroke();
       }
     }
     setCrashes(list) { this.crashes = list; this.dirty = true; }
+    /* lost & found pets: lost = filled pin, found = ring, spotted = small dot; the letter keeps it readable without color */
+    _pets(ctx) {
+      const r = this._incR() + 2.5, ground = css("--map-bg");
+      const col = { lost: css("--pet-lost"), found: css("--pet-found"), spotted: css("--pet-spotted") };
+      for (const p of this.pets) {
+        if (typeof p.x !== "number") continue;
+        const [x, y] = this.toScreen(p.x, p.y);
+        if (x < -20 || y < -20 || x > this.w + 20 || y > this.h + 20) continue;
+        const c = col[p.status] || col.spotted;
+        ctx.beginPath(); ctx.arc(x, y, r, 0, 7);
+        ctx.lineWidth = 4; ctx.strokeStyle = ground; ctx.stroke();
+        if (p.status === "found") { ctx.fillStyle = ground; ctx.fill(); ctx.lineWidth = 2.5; ctx.strokeStyle = c; ctx.stroke(); }
+        else { ctx.fillStyle = c; ctx.fill(); }
+        ctx.fillStyle = p.status === "found" ? c : ground;
+        ctx.font = `700 ${Math.round(r * 1.1)}px ${css("--f-body")}`;
+        ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.fillText(p.status === "lost" ? "L" : p.status === "found" ? "F" : "S", x, y + 0.5);
+      }
+      for (const p of [this.hover, this.sel]) {
+        if (!p || !p.status || typeof p.x !== "number") continue;
+        const [x, y] = this.toScreen(p.x, p.y);
+        ctx.beginPath(); ctx.arc(x, y, r + 5, 0, 7); ctx.lineWidth = 4.5; ctx.strokeStyle = ground; ctx.stroke();
+        ctx.lineWidth = 2.5; ctx.strokeStyle = css("--here"); ctx.stroke();
+      }
+    }
+    setPets(list) { this.pets = list; this.dirty = true; }
     setIncidents(list) {
       const groups = new Map();
       for (const p of list) {
