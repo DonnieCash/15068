@@ -1,7 +1,9 @@
 /* NK15068 map engine — draws the scraped 15068 dataset on a canvas.
-   World units are metres on a local grid (x east, y south) centred on the ZIP. */
+   World units are metres on a local grid (x east, y south) centred on the ZIP.
+   Every fetch is prefixed with <html data-root> so pages at any depth find data/. */
 (function () {
   "use strict";
+  const ROOT = () => (typeof document !== "undefined" && document.documentElement.dataset.root) || "";
 
   const GROUP_COLORS = {
     eat: "#e0743a", shop: "#c9a227", health: "#d4455b", faith: "#8b6fc6",
@@ -10,16 +12,18 @@
   };
 
   const cache = {};
+  /* a failed fetch is forgotten so the next call can try again */
+  const keep = (k, p) => { cache[k] = p; p.catch(() => { if (cache[k] === p) delete cache[k]; }); return p; };
   function getJSON(name) {
-    if (!cache[name]) cache[name] = fetch("data/" + name).then((r) => {
+    if (!cache[name]) keep(name, fetch(ROOT() + "data/" + name).then((r) => {
       if (!r.ok) throw new Error(name + " " + r.status);
       return r.json();
-    });
+    }));
     return cache[name];
   }
   function getTerrain(meta) {
     // heightmap PNG: elevation in decimetres = R*256 + G
-    if (!cache.terrain) cache.terrain = fetch("data/terrain.png").then((r) => r.blob())
+    if (!cache.terrain) keep("terrain", fetch(ROOT() + "data/terrain.png").then((r) => { if (!r.ok) throw new Error("terrain.png " + r.status); return r.blob(); })
       .then((b) => createImageBitmap(b, { colorSpaceConversion: "none", premultiplyAlpha: "none" }))
       .then((img) => {
         const c = document.createElement("canvas");
@@ -30,8 +34,15 @@
         const f = new Float32Array(img.width * img.height);
         for (let i = 0; i < f.length; i++) f[i] = (px[i * 4] * 256 + px[i * 4 + 1]) / 10;
         return { data: f, ...meta.terrain };
-      });
+      }));
     return cache.terrain;
+  }
+
+  /* road lines without Path2D: [{n, rank, bridge, pts: flat x,y Float32Array}] (pets, blotter and near-me use it) */
+  function loadLines() {
+    if (!cache["lines"]) keep("lines", Promise.all([getJSON("meta.json"), getJSON("roads.json")]).then(([meta, roads]) =>
+      roads.r.map(([rank, ni, brg, c]) => ({ n: ni >= 0 ? roads.names[ni] : null, rank, bridge: !!brg, pts: dec(c, meta.q) }))));
+    return cache["lines"];
   }
 
   /* decode a delta/quantised int list to a Float32Array of metres */
@@ -135,8 +146,9 @@
       const pts = dec(c, q);
       addPoly(W.roads[rank], pts, false);
       if (brg) addPoly(W.bridgeRoads, pts, false);
-      if (opts.keepLines) W.lines.push({ rank, pts, n: ni >= 0 ? roads.names[ni] : null });
+      if (opts.keepLines) W.lines.push({ n: ni >= 0 ? roads.names[ni] : null, rank, bridge: !!brg, pts });
     }
+    if (opts.keepLines && !cache["lines"]) cache["lines"] = Promise.resolve(W.lines);
     return W;
   }
 
@@ -161,22 +173,44 @@
   /* ---------------------------------------------------------------- */
   /* Interactive 2D map                                                */
   /* ---------------------------------------------------------------- */
+  /* distance from (px, py) to a flat x,y polyline, and the nearest point on it */
+  function nearOnLine(px, py, pts) {
+    let best = null;
+    for (let i = 0; i + 3 < pts.length; i += 2) {
+      const ax = pts[i], ay = pts[i + 1], dx = pts[i + 2] - ax, dy = pts[i + 3] - ay, L = dx * dx + dy * dy;
+      const t = L ? Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / L)) : 0;
+      const x = ax + t * dx, y = ay + t * dy, d = Math.hypot(px - x, py - y);
+      if (!best || d < best.d) best = { d, x, y };
+    }
+    if (!best && pts.length >= 2) best = { d: Math.hypot(px - pts[0], py - pts[1]), x: pts[0], y: pts[1] };
+    return best || { d: Infinity, x: px, y: py };
+  }
+  const lineDist = (px, py, pts) => nearOnLine(px, py, pts).d;
+
   class Map2D {
     constructor(canvas, W, opts = {}) {
       this.c = canvas; this.ctx = canvas.getContext("2d");
       this.W = W; this.opts = opts;
       this.scale = 0.05; this.cx = -3300; this.cy = 0; // centre on downtown New Ken
-      this.places = []; this.streets = [];
+      this.places = []; this.streets = []; this.streetsByRank = [];
       this.filter = new Set(Object.keys(GROUP_COLORS));
       this.layers = { buildings: true, relief: true, towns: true, places: true, incidents: false, crashes: false, pets: false };
       this.pets = []; this.pickMode = null;
       this.incidents = []; this.incVisible = () => true; this.crashes = [];
       this.sel = null; this.hover = null;
+      this.focus = null;        // {x, y}: label the streets around this point
+      this.here = null;         // {x, y}: a "you are here" / corner ring
+      this.hl = null;           // the highlighted street {name, town, lines, path}
+      this.hold = !!opts.hold;  // true: don't draw yet (an arrival view is still being worked out)
+      this.touched = false;     // the person has panned or zoomed (only then is ?at= written)
+      this.drawnLabels = [];    // street names drawn as labels in the last frame
+      this.petDrawn = new Map(); // post id -> dots drawn in the last frame
+      this.townBoxes = [];
       this.pointers = new Map();
       this.dirty = true;
       this._bind();
       this.resize();
-      const loop = () => { if (this.dirty) { this.dirty = false; this.draw(); } this.raf = requestAnimationFrame(loop); };
+      const loop = () => { if (this.dirty && !this.hold) { this.dirty = false; this.draw(); } this.raf = requestAnimationFrame(loop); };
       loop();
       new ResizeObserver(() => this.resize()).observe(canvas);
       this.themeMQ = matchMedia("(prefers-color-scheme: dark)");
@@ -196,40 +230,121 @@
       this.c.height = Math.max(1, Math.round(r.height * this.dpr));
       this.w = r.width; this.h = r.height;
       if (!this.fitted && this.w > 0) { this.fitted = true; this.fitView(); }
+      else this.clampView();
       this.dirty = true;
     }
-    fitView(b) {
-      b = b || this.opts.initial || [-6500, -3200, 1200, 3600];
-      const s = Math.min(this.w / (b[2] - b[0]), this.h / (b[3] - b[1]));
-      this.scale = s; this.cx = (b[0] + b[2]) / 2; this.cy = (b[1] + b[3]) / 2;
+
+    /* ---------- the view: centre (cx, cy) in metres and scale in px per metre ---------- */
+    view() { return { x: this.cx, y: this.cy, s: this.scale }; }
+    /* the scale that fits the whole ZIP (the Whole ZIP button's view) */
+    zipScale() {
+      const b = this.W.meta.bounds, pad = 300;
+      return Math.min(this.w / (b[2] - b[0] - 2 * pad), this.h / (b[3] - b[1] - 2 * pad));
+    }
+    /* the centre stays within the ZIP's bounds plus 1 km; zooming out stops at 0.8 x the whole-ZIP fit */
+    clampView() {
+      const b = this.W.meta && this.W.meta.bounds;
+      if (!b || !(this.w > 0)) return;
+      const lo = 0.8 * this.zipScale();
+      this.scale = Math.max(lo, Math.min(12, this.scale));
+      this.cx = Math.max(b[0] - 1000, Math.min(b[2] + 1000, this.cx));
+      this.cy = Math.max(b[1] - 1000, Math.min(b[3] + 1000, this.cy));
+    }
+    _viewChanged() {
       this.dirty = true;
+      if (!this.touched || !this.opts.onView) return;
+      clearTimeout(this._vt);
+      this._vt = setTimeout(() => this.opts.onView(this.view()), 300);
+    }
+    setView(x, y, s) {
+      this._fly = null;
+      this.cx = x; this.cy = y; if (s) this.scale = s;
+      this.clampView();
+      this._viewChanged();
+    }
+    /* inset {top, bottom, left, right} in px keeps the box clear of panels or a bottom sheet */
+    fitView(b, inset = {}, maxScale = 12) {
+      this._fly = null;
+      b = b || this.opts.initial || [-6500, -3200, 1200, 3600];
+      const { top = 0, bottom = 0, left = 0, right = 0 } = inset;
+      const hh = Math.max(60, this.h - top - bottom), ww = Math.max(60, this.w - left - right);
+      const s = Math.min(maxScale, ww / (b[2] - b[0]), hh / (b[3] - b[1]));
+      this.scale = s; this.cx = (b[0] + b[2]) / 2 - (left - right) / 2 / s; this.cy = (b[1] + b[3]) / 2 + (bottom - top) / 2 / s;
+      this.clampView();
+      this._viewChanged();
     }
     toScreen(x, y) { return [(x - this.cx) * this.scale + this.w / 2, (y - this.cy) * this.scale + this.h / 2]; }
     toWorld(sx, sy) { return [(sx - this.w / 2) / this.scale + this.cx, (sy - this.h / 2) / this.scale + this.cy]; }
     zoomAt(f, sx, sy) {
+      this._fly = null;
       const [wx, wy] = this.toWorld(sx, sy);
       this.scale = Math.max(0.012, Math.min(12, this.scale * f));
+      this.clampView();
       const [nx, ny] = this.toWorld(sx, sy);
       this.cx += wx - nx; this.cy += wy - ny;
-      this.dirty = true;
-      this.opts.onView?.();
+      this.clampView();
+      this._viewChanged();
     }
-    flyTo(x, y, scale) {
+    /* offsetY (px): how far above the middle the target sits (0.15 * h puts it at 35% of the height);
+       offsetX (px): how far right of the middle */
+    flyTo(x, y, scale, { offsetX = 0, offsetY = 0 } = {}) {
       const s0 = this.scale, x0 = this.cx, y0 = this.cy, s1 = scale || Math.max(this.scale, 2.2);
+      const ty = y + offsetY / s1, tx = x - offsetX / s1;
       const t0 = performance.now(), dur = matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 900;
+      const id = this._fly = {};
       const step = (t) => {
+        if (this._fly !== id) return;
         const k = Math.min(1, (t - t0) / dur), e = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
-        this.cx = x0 + (x - x0) * e; this.cy = y0 + (y - y0) * e;
+        this.cx = x0 + (tx - x0) * e; this.cy = y0 + (ty - y0) * e;
         this.scale = Math.exp(Math.log(s0) + (Math.log(s1) - Math.log(s0)) * e);
+        this.clampView();
         this.dirty = true;
-        if (k < 1) requestAnimationFrame(step);
+        if (k < 1) requestAnimationFrame(step); else { this._fly = null; this._viewChanged(); }
       };
       requestAnimationFrame(step);
     }
+
+    /* ---------- a street in --map-focus: every line with that name (inside the town, when given) ---------- */
+    streetLines(name, town) {
+      const tp = town ? (this.W.towns || []).find((t) => t.n === town) : null;
+      const inTown = (l) => {
+        if (!tp) return true;
+        const n = l.pts.length / 2, a = Math.floor((n - 1) / 2), b = Math.ceil((n - 1) / 2);
+        const mx = (l.pts[a * 2] + l.pts[b * 2]) / 2, my = (l.pts[a * 2 + 1] + l.pts[b * 2 + 1]) / 2;
+        this.ctx.save(); this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        const ok = this.ctx.isPointInPath(tp.p, mx, my);
+        this.ctx.restore();
+        return ok;
+      };
+      return (this.W.lines || []).filter((l) => l.n === name && inTown(l));
+    }
+    highlightStreet(name, town) {
+      if (!name) { this.hl = null; this.dirty = true; return 0; }
+      let lines = this.streetLines(name, town);
+      if (!lines.length && town) lines = this.streetLines(name);
+      const path = new Path2D();
+      lines.forEach((l) => addPoly(path, l.pts, false));
+      this.hl = { name, town: town || null, lines, path };
+      this.dirty = true;
+      return lines.length;
+    }
+    /* fit the highlighted street (or every line named `name`) plus 80 m */
+    fitStreet(name, inset = {}) {
+      const lines = this.hl && (!name || this.hl.name === name) ? this.hl.lines : this.streetLines(name);
+      if (!lines.length) return false;
+      let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+      for (const l of lines) for (let i = 0; i < l.pts.length; i += 2) {
+        x0 = Math.min(x0, l.pts[i]); x1 = Math.max(x1, l.pts[i]); y0 = Math.min(y0, l.pts[i + 1]); y1 = Math.max(y1, l.pts[i + 1]);
+      }
+      this.fitView([x0 - 80, y0 - 80, x1 + 80, y1 + 80], inset, 3);
+      return true;
+    }
+
     _bind() {
       const c = this.c;
+      const touch = () => { this.touched = true; this._fly = null; };
       c.addEventListener("wheel", (e) => {
-        e.preventDefault();
+        e.preventDefault(); touch();
         const r = c.getBoundingClientRect();
         this.zoomAt(Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0022)), e.clientX - r.left, e.clientY - r.top);
       }, { passive: false });
@@ -244,10 +359,13 @@
         if (!p) { this._hover(e.clientX - r.left, e.clientY - r.top); return; }
         if (this.pointers.size === 1) {
           const dx = e.clientX - p.x, dy = e.clientY - p.y;
+          if (dx || dy) touch();
           this.cx -= dx / this.scale; this.cy -= dy / this.scale;
+          this.clampView();
           this.moved += Math.abs(dx) + Math.abs(dy);
           this.dirty = true;
         } else if (this.pointers.size === 2) {
+          touch();
           const [a, b] = [...this.pointers.values()];
           const other = a === p ? b : a;
           const d0 = Math.hypot(p.x - other.x, p.y - other.y);
@@ -263,11 +381,12 @@
           this._click(e.clientX - r.left, e.clientY - r.top);
         }
         this.pointers.delete(e.pointerId);
-        if (!this.pointers.size) { c.classList.remove("drag"); this.opts.onView?.(); }
+        if (!this.pointers.size) { c.classList.remove("drag"); if (this.moved >= 6) this._viewChanged(); }
       };
       c.addEventListener("pointerup", up);
       c.addEventListener("pointercancel", up);
       c.addEventListener("dblclick", (e) => {
+        touch();
         const r = c.getBoundingClientRect();
         this.zoomAt(2, e.clientX - r.left, e.clientY - r.top);
       });
@@ -281,24 +400,26 @@
         else if (k === "ArrowUp") this.cy -= step;
         else if (k === "ArrowDown") this.cy += step;
         else return;
-        e.preventDefault(); this.dirty = true;
+        e.preventDefault(); touch(); this.clampView(); this._viewChanged();
       });
     }
+    /* incidents and crashes take every tap; with only pets on, a tap that misses a pet falls through to places */
     _pick(sx, sy) {
-      if (this.layers.incidents || this.layers.crashes || this.layers.pets) {
+      const L = this.layers;
+      if (L.incidents || L.crashes || L.pets) {
         let best = null, bd = 16 * 16;
-        if (this.layers.pets) for (const p of this.pets) {
-          if (typeof p.x !== "number") continue;
+        if (L.pets) for (const p of this.pets) {
+          if (typeof p.x !== "number" || p.prec === "street") continue;
           const [x, y] = this.toScreen(p.x, p.y);
           const d = (x - sx) ** 2 + (y - sy) ** 2;
           if (d < bd) { bd = d; best = p; }
         }
-        if (this.layers.crashes) for (const p of this.crashes) {
+        if (L.crashes) for (const p of this.crashes) {
           const [x, y] = this.toScreen(p.x, p.y);
           const d = (x - sx) ** 2 + (y - sy) ** 2;
           if (d < bd) { bd = d; best = p; }
         }
-        if (this.layers.incidents) {
+        if (L.incidents) {
           for (const p of this.incidents) {
             if (!this.incVisible(p)) continue;
             const [x, y] = this._incPos(p);
@@ -306,9 +427,9 @@
             if (d < bd) { bd = d; best = p; }
           }
         }
-        return best;
+        if (best || L.incidents || L.crashes) return best;
       }
-      if (!this.layers.places) return null;
+      if (!L.places) return null;
       let best = null, bd = 14 * 14;
       for (const p of this.places) {
         if (!this.filter.has(p.g)) continue;
@@ -328,6 +449,8 @@
       this.select(p);
     }
     select(p) { this.sel = p; this.dirty = true; this.opts.onSelect?.(p); }
+    /* places are dimmed only under incidents or crashes; pets alone leave them readable */
+    _dimPlaces() { return this.layers.incidents || this.layers.crashes; }
 
     draw() {
       const { ctx, W, dpr } = this;
@@ -417,16 +540,24 @@
         ctx.globalAlpha = 1;
       }
 
+      // the highlighted street, over the roads and buildings: 5 px of --map-focus on a halo
+      if (this.hl && this.hl.lines.length) {
+        ctx.strokeStyle = css("--map-halo"); ctx.lineWidth = 9 * px; ctx.stroke(this.hl.path);
+        ctx.strokeStyle = css("--map-focus") || "#0b63c4"; ctx.lineWidth = 5 * px; ctx.stroke(this.hl.path);
+      }
+
       // ---------- screen-space overlays ----------
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       this._labels(ctx, dark);
       if (this.layers.places) {
-        ctx.globalAlpha = this.layers.incidents || this.layers.crashes || this.layers.pets ? 0.18 : 1;
+        ctx.globalAlpha = this._dimPlaces() ? 0.18 : 1;
         this._pins(ctx);
         ctx.globalAlpha = 1;
         this._pinRings(ctx);
       }
+      if (this.here) this._here(ctx);
       if (this.layers.crashes) this._crashes(ctx);
+      this.petDrawn = new Map();
       if (this.layers.pets) this._pets(ctx);
       if (this.layers.incidents) this._incidents(ctx);
       this._scaleBar();
@@ -441,35 +572,43 @@
     _labels(ctx, dark) {
       const s = this.scale, lab = css("--map-label"), halo = css("--map-halo");
       ctx.textAlign = "center"; ctx.textBaseline = "middle";
-      const boxes = [];
+      const boxes = [], drawn = [];
       const fits = (x, y, w, h) => {
         for (const b of boxes) if (x < b[0] + b[2] && x + w > b[0] && y < b[1] + b[3] && y + h > b[1]) return false;
         boxes.push([x, y, w, h]); return true;
       };
+      // the streets around a focus point (a pet's pin, an incident, a corner) come first
+      if (this.focus && s >= 0.8) this._focusLabels(ctx, fits, drawn, lab, halo);
       // towns
+      this.townBoxes = [];
       for (const l of this.W.base.labels) {
         if (l.k !== "town") continue;
         const [x, y] = this.toScreen(l.x, l.y);
-        const f = s < .3 ? 20 : 14;
+        const f = this.w < 700 ? 14 : s < .3 ? 20 : 14;
         if (s > 1.5) continue;
         ctx.font = `800 ${f}px ${css("--f-display")}`;
         const w = ctx.measureText(l.n.toUpperCase()).width;
-        if (fits(x - w / 2, y - f / 2, w, f)) this._text(ctx, l.n.toUpperCase(), x, y, ctx.font, lab, halo);
+        if (fits(x - w / 2, y - f / 2, w, f)) {
+          this._text(ctx, l.n.toUpperCase(), x, y, ctx.font, lab, halo);
+          this.townBoxes.push([x - w / 2 - 4, y - f / 2 - 3, w + 8, f + 6]);
+        }
       }
       // streets (by rank, visible at zoom)
-      if (this.streets.length && s > 0.09) {
+      if (this.streetsByRank.length && s > 0.09) {
         const maxRank = s > 1.2 ? 5 : s > 0.5 ? 4 : s > 0.25 ? 3 : 2;
         const fz = s > 1.2 ? 12 : 11;
         const font = `500 ${fz}px ${css("--f-body")}`;
         ctx.font = font;
         for (const st of this.streetsByRank) {
           if (st.r > maxRank) continue;
+          if (drawn.includes(st.n)) continue;
           const [x, y] = this.toScreen(st.x, st.y);
           if (x < -50 || y < -20 || x > this.w + 50 || y > this.h + 20) continue;
           const t = st.ref && st.ref.length && st.r <= 1 ? st.n + " · " + st.ref[0] : st.n;
           const w = ctx.measureText(t).width;
           if (!fits(x - w / 2 - 4, y - fz / 2 - 2, w + 8, fz + 4)) continue;
           this._text(ctx, t, x, y, font, css("--map-street-label"), halo);
+          drawn.push(st.n);
         }
       }
       // parks & named land use
@@ -485,21 +624,68 @@
         }
       }
       this.labelBoxes = boxes;
+      this.drawnLabels = drawn;
+    }
+    /* up to 4 distinct named lines within 150 m of the focus, each labelled at its point nearest the focus that
+       leaves the pin itself clear */
+    _focusLabels(ctx, fits, drawn, lab, halo) {
+      const f = this.focus, lines = this.W.lines || [];
+      if (!lines.length) return;
+      const near = new Map();
+      for (const l of lines) {
+        if (!l.n) continue;
+        const d = lineDist(f.x, f.y, l.pts);
+        if (d <= 150 && (!near.has(l.n) || d < near.get(l.n))) near.set(l.n, d);
+      }
+      const names = [...near.entries()].sort((a, b) => a[1] - b[1]).slice(0, 4).map((e) => e[0]);
+      const [fx, fy] = this.toScreen(f.x, f.y);
+      fits(fx - 16, fy - 16, 32, 32); // keep the pin clear
+      const fz = 12.5, font = `700 ${fz}px ${css("--f-body")}`, step = 12 / this.scale;
+      ctx.font = font;
+      for (const n of names) {
+        const cands = [];
+        for (const l of lines) {
+          if (l.n !== n) continue;
+          for (let i = 0; i + 1 < l.pts.length; i += 2) {
+            const ax = l.pts[i], ay = l.pts[i + 1];
+            cands.push([ax, ay]);
+            if (i + 3 < l.pts.length) {
+              const bx = l.pts[i + 2], by = l.pts[i + 3], k = Math.floor(Math.hypot(bx - ax, by - ay) / step);
+              for (let j = 1; j < k; j++) cands.push([ax + (bx - ax) * j / k, ay + (by - ay) * j / k]);
+            }
+          }
+        }
+        cands.sort((a, b) => Math.hypot(a[0] - f.x, a[1] - f.y) - Math.hypot(b[0] - f.x, b[1] - f.y));
+        const w = ctx.measureText(n).width;
+        for (const [x, y] of cands) {
+          const [sx, sy] = this.toScreen(x, y);
+          if (Math.hypot(sx - fx, sy - fy) < 34 + w / 2) continue;
+          if (sx - w / 2 < 4 || sx + w / 2 > this.w - 4 || sy < 10 || sy > this.h - 10) continue;
+          if (Math.hypot(sx - fx, sy - fy) > 260) break;
+          if (fits(sx - w / 2 - 4, sy - fz / 2 - 3, w + 8, fz + 6)) {
+            this._text(ctx, n, sx, sy, font, lab, halo);
+            drawn.push(n);
+            break;
+          }
+        }
+      }
     }
     _pins(ctx) {
       const s = this.scale;
       const r = s < .15 ? 2.2 : s < .6 ? 3.2 : s < 2 ? 4.5 : 6;
       const halo = css("--map-halo");
+      const under = s < 0.3 ? this.townBoxes : [];
       for (const p of this.places) {
         if (!this.filter.has(p.g)) continue;
         const [x, y] = this.toScreen(p.x, p.y);
         if (x < -10 || y < -10 || x > this.w + 10 || y > this.h + 10) continue;
+        if (under.length && under.some((b) => x > b[0] && x < b[0] + b[2] && y > b[1] && y < b[1] + b[3])) continue;
         ctx.beginPath(); ctx.arc(x, y, r, 0, 7);
         ctx.fillStyle = GROUP_COLORS[p.g]; ctx.fill();
         ctx.lineWidth = 1.2; ctx.strokeStyle = halo; ctx.stroke();
       }
       // names at close zoom
-      if (s > 1.6 && !this.layers.incidents && !this.layers.crashes && !this.layers.pets) {
+      if (s > 1.6 && !this._dimPlaces()) {
         ctx.textAlign = "left"; ctx.textBaseline = "middle";
         const font = `600 11.5px ${css("--f-body")}`;
         ctx.font = font;
@@ -525,6 +711,15 @@
         ctx.lineWidth = 4.5; ctx.strokeStyle = css("--map-bg"); ctx.stroke();
         ctx.lineWidth = 2.5; ctx.strokeStyle = css("--here"); ctx.stroke();
       }
+    }
+    /* a corner or "my location": an open ring with a dot, in --here */
+    _here(ctx) {
+      const [x, y] = this.toScreen(this.here.x, this.here.y);
+      if (x < -20 || y < -20 || x > this.w + 20 || y > this.h + 20) return;
+      ctx.beginPath(); ctx.arc(x, y, 11, 0, 7);
+      ctx.lineWidth = 5; ctx.strokeStyle = css("--map-halo"); ctx.stroke();
+      ctx.lineWidth = 2.5; ctx.strokeStyle = css("--here"); ctx.stroke();
+      ctx.beginPath(); ctx.arc(x, y, 3.5, 0, 7); ctx.fillStyle = css("--here"); ctx.fill();
     }
     _scaleBar() {
       if (!this.opts.scaleEl) return;
@@ -567,7 +762,7 @@
         ctx.lineWidth = 1; ctx.strokeStyle = this.isDark() ? halo : "rgba(20,25,30,.65)"; ctx.stroke();
       }
       for (const p of [this.hover, this.sel]) {
-        if (!p || p.g || p.yr != null || p.status || !this.incVisible(p)) continue;
+        if (!p || p.g || p.yr != null || p.status || !p.k || !this.incVisible(p)) continue;
         const [x, y] = this._incPos(p);
         shape(x, y, r + 4, p.pi);
         ctx.lineWidth = 4.5; ctx.strokeStyle = ground; ctx.stroke();
@@ -594,13 +789,20 @@
       }
     }
     setCrashes(list) { this.crashes = list; this.dirty = true; }
-    /* lost & found pets: lost = filled pin, found = ring, spotted = small dot; the letter keeps it readable without color */
+    /* lost & found pets: lost = filled pin, found = ring, spotted = small dot; the letter keeps it readable without color.
+       A post that gives only a street gets no dot (its street is highlighted instead). */
+    petPin(p) {
+      if (!p || typeof p.x !== "number" || p.prec === "street") return null;
+      const [x, y] = this.toScreen(p.x, p.y);
+      return { x, y };
+    }
     _pets(ctx) {
       const r = this._incR() + 2.5, ground = css("--map-bg");
       const col = { lost: css("--pet-lost"), found: css("--pet-found"), spotted: css("--pet-spotted") };
       for (const p of this.pets) {
-        if (typeof p.x !== "number") continue;
-        const [x, y] = this.toScreen(p.x, p.y);
+        const pin = this.petPin(p);
+        if (!pin) continue;
+        const { x, y } = pin;
         if (x < -20 || y < -20 || x > this.w + 20 || y > this.h + 20) continue;
         const c = col[p.status] || col.spotted;
         ctx.beginPath(); ctx.arc(x, y, r, 0, 7);
@@ -611,11 +813,13 @@
         ctx.font = `700 ${Math.round(r * 1.1)}px ${css("--f-body")}`;
         ctx.textAlign = "center"; ctx.textBaseline = "middle";
         ctx.fillText(p.status === "lost" ? "L" : p.status === "found" ? "F" : "S", x, y + 0.5);
+        if (p.id) this.petDrawn.set(p.id, (this.petDrawn.get(p.id) || 0) + 1);
       }
       for (const p of [this.hover, this.sel]) {
-        if (!p || !p.status || typeof p.x !== "number") continue;
-        const [x, y] = this.toScreen(p.x, p.y);
-        ctx.beginPath(); ctx.arc(x, y, r + 5, 0, 7); ctx.lineWidth = 4.5; ctx.strokeStyle = ground; ctx.stroke();
+        if (!p || !p.status) continue;
+        const pin = this.petPin(p);
+        if (!pin) continue;
+        ctx.beginPath(); ctx.arc(pin.x, pin.y, r + 5, 0, 7); ctx.lineWidth = 4.5; ctx.strokeStyle = ground; ctx.stroke();
         ctx.lineWidth = 2.5; ctx.strokeStyle = css("--here"); ctx.stroke();
       }
     }
@@ -636,5 +840,5 @@
     }
   }
 
-  window.NK = { GROUP_COLORS, getJSON, getTerrain, dec, addPoly, loadWorld, loadBuildings, Map2D, heightAt, css, hillshade };
+  window.NK = { GROUP_COLORS, getJSON, getTerrain, loadLines, dec, addPoly, loadWorld, loadBuildings, Map2D, heightAt, css, hillshade, nearOnLine, lineDist };
 })();

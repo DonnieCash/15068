@@ -1,12 +1,13 @@
 name: Lost or found pet (15068)
 description: Post a lost, found or spotted pet in New Kensington, Arnold or Lower Burrell. It appears on the NK15068 map.
 title: "[Lost] "
+labels: ["pet-listing"]
 body:
   - type: markdown
     attributes:
       value: |
         Everything you write here is **public**. Only share contact details you're comfortable posting.
-        Change the title to start with **[Lost]**, **[Found]** or **[Spotted]**.
+        If you came from NK15068's form, the title and details are already filled in. Check them, add a photo if you like, and submit.
         When your pet is home, close this issue and it will drop off the map.
   - type: dropdown
     id: status

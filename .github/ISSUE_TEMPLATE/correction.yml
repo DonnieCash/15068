@@ -1,0 +1,34 @@
+name: Report a correction
+description: Tell NK15068 about something wrong on the site, with a source for the fix if you have one.
+title: "[Correction] "
+labels: ["correction"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping keep NK15068 accurate. Everything you write here is **public**.
+        Please don't include private people's names, house numbers or anything that identifies a child.
+        We'll fix confirmed errors and note the change on the site's What's new page.
+  - type: input
+    id: page
+    attributes:
+      label: Page address
+      description: The address of the page with the mistake.
+      placeholder: https://nk15068.com/towns/arnold/
+    validations:
+      required: true
+  - type: textarea
+    id: wrong
+    attributes:
+      label: What's wrong
+      description: What the page says, and what it should say.
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: A source for the fix
+      description: A link to where the correct information is published, like a city page or a news report.
+      placeholder: https://
+    validations:
+      required: false

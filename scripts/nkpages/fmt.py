@@ -107,6 +107,14 @@ PUBS = {
     "census.gov": "Census Bureau", "censusreporter.org": "Census Reporter", "datausa.io": "Data USA",
     "cityofarnoldpa.org": "City of Arnold", "cityoflowerburrell.com": "City of Lower Burrell",
     "westmorelandcountypa.gov": "Westmoreland County", "engage.rideprt.org": "Pittsburgh Regional Transit",
+    "newkensingtonpa.org": "City of New Kensington", "lowerburrellpolice.org": "Lower Burrell police",
+    "newkenredevelopment.org": "New Kensington Redevelopment Authority", "peopleslibrary.org": "Peoples Library",
+    "usps.com": "USPS", "tools.usps.com": "USPS", "nces.ed.gov": "National Center for Education Statistics",
+    "myreadylink.com": "ReadyLink", "overturemaps.org": "Overture Maps",
+    "animalprotectors.net": "Animal Protectors", "westmorelandhumanesociety.com": "Humane Society of Westmoreland County",
+    "aspca.org": "ASPCA", "petcolove.org": "Petco Love", "findtobyinpa.org": "Find Toby in PA", "avets.com": "AVETS",
+    "bluepearlvet.com": "BluePearl", "aaha.org": "AAHA", "pawboost.com": "PawBoost", "guidestar.org": "GuideStar",
+    "mentalhealth.networkofcare.org": "Network of Care",
 }
 AGGREGATORS = {"citizenportal.ai", "hoodline.com"}
 
@@ -138,6 +146,8 @@ def pub_name(u):
         return "TribLive"
     if h in PUBS:
         return PUBS[h]
+    if h == "pa.gov" and path.startswith("/agencies/pda"):
+        return "PA Dept. of Agriculture"
     if h.endswith(".crimewatchpa.com"):
         return "CrimeWatch"
     if h in ("github.com", "raw.githubusercontent.com"):

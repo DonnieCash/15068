@@ -167,7 +167,9 @@ def footer(D, R, upd):
 
 
 def crumbs_html(R, crumbs):
-    if not crumbs:
+    """Visible breadcrumbs only when there is a parent to go back to; a lone crumb would read as a label over the
+    H1 (the JSON-LD BreadcrumbList still carries it)."""
+    if not crumbs or not any(path for _, path in crumbs):
         return ""
     parts = []
     for label, path in crumbs:
@@ -295,6 +297,8 @@ def page_html(D, R, result):
         head.append(LEGACY)
     if res.get("head"):
         head.append(res["head"])
+    if D.get("board") is not None and "pets" in R.scripts:  # pets.js reads data/pets-board.json only when it exists
+        head.append(f'<meta name="nk-pets-snapshot" content="{esc(D["board"].get("fetched") or "")}">')
     ha = head_ads(D, R)
     if ha:
         head.append(ha)

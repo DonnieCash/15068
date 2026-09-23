@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /search/
+Sitemap: https://nk15068.com/sitemap.xml

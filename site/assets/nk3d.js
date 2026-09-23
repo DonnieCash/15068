@@ -1,4 +1,6 @@
-/* NK15068 3D — real terrain + extruded buildings, rendered with three.js (global THREE). */
+/* NK15068 3D — real terrain + extruded buildings, rendered with three.js (global THREE).
+   Map3D: build(T, bld), setPlaces, flyTo, goTo(view) for the presets, project(x, y) for HTML labels,
+   snapshot(scale) for "Save as image" (the drawing buffer is kept for it), opts.onFrame after each render. */
 (function () {
   "use strict";
   const EX = 1.5;           // vertical exaggeration for the valley
@@ -49,7 +51,7 @@
       this.target = new THREE.Vector3(-3300, 0, 0);
       this.auto = !matchMedia("(prefers-reduced-motion: reduce)").matches;
       this.places = [];
-      this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+      this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance", preserveDrawingBuffer: true });
       this.renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
       host.appendChild(this.renderer.domElement);
       this.scene = new THREE.Scene();
@@ -161,6 +163,46 @@
       };
       requestAnimationFrame(step);
     }
+    /* animate to a view {x, y, dist, pitch, yaw}; any value left out stays */
+    goTo(v, ms = 1400) {
+      this.auto = false;
+      const t0 = performance.now(), from = { t: this.target.clone(), dist: this.dist, pitch: this.pitch, yaw: this.yaw };
+      const tx = v.x ?? this.target.x, tz = v.y ?? this.target.z;
+      const to = new THREE.Vector3(tx, this.T ? heightAt(this.T, tx, tz) * EX : 0, tz);
+      let dyaw = (v.yaw ?? this.yaw) - this.yaw;
+      dyaw = Math.atan2(Math.sin(dyaw), Math.cos(dyaw)); // the short way round
+      const dur = matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : ms;
+      const id = this._go = {};
+      const step = (t) => {
+        if (this._go !== id) return;
+        const k = Math.min(1, (t - t0) / dur), e = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+        this.target.lerpVectors(from.t, to, e);
+        this.dist = Math.exp(Math.log(from.dist) + (Math.log(v.dist ?? from.dist) - Math.log(from.dist)) * e);
+        this.pitch = from.pitch + ((v.pitch ?? from.pitch) - from.pitch) * e;
+        this.yaw = from.yaw + dyaw * e;
+        if (k < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }
+    /* screen position (CSS px in the host) of a ground point lifted by `lift` metres; visible = in front of the camera */
+    project(x, y, lift = 0) {
+      const h = this.T ? heightAt(this.T, x, y) * EX : 0;
+      const v = new THREE.Vector3(x, h + lift, y).project(this.camera);
+      const r = this.host.getBoundingClientRect();
+      return { x: (v.x + 1) / 2 * r.width, y: (1 - v.y) / 2 * r.height, visible: v.z > -1 && v.z < 1 };
+    }
+    /* a PNG data URL of the current view drawn at `scale` device pixels per CSS pixel */
+    snapshot(scale = 2) {
+      const r = this.host.getBoundingClientRect(), prev = this.renderer.getPixelRatio();
+      this.renderer.setPixelRatio(scale);
+      this.renderer.setSize(r.width, r.height, false);
+      this.renderer.render(this.scene, this.camera);
+      const url = this.renderer.domElement.toDataURL("image/png");
+      this.renderer.setPixelRatio(prev);
+      this.renderer.setSize(r.width, r.height, false);
+      this.renderer.render(this.scene, this.camera);
+      return url;
+    }
     resize() {
       const r = this.host.getBoundingClientRect();
       this.renderer.setSize(r.width, r.height, false);
@@ -174,6 +216,7 @@
       el.addEventListener("contextmenu", (e) => e.preventDefault());
       el.addEventListener("pointerdown", (e) => {
         el.setPointerCapture(e.pointerId);
+        this._go = null;
         ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY });
         mode = (e.button === 2 || e.shiftKey) ? "pan" : "rot";
         this.auto = false;
@@ -203,7 +246,7 @@
       el.addEventListener("pointerup", up);
       el.addEventListener("pointercancel", up);
       el.addEventListener("wheel", (e) => {
-        e.preventDefault(); this.auto = false;
+        e.preventDefault(); this.auto = false; this._go = null;
         this.dist = Math.max(120, Math.min(26000, this.dist * Math.exp(e.deltaY * 0.0012)));
       }, { passive: false });
     }
@@ -233,7 +276,11 @@
         this.target.y + this.dist * Math.sin(this.pitch),
         this.target.z + this.dist * cp * Math.cos(this.yaw));
       this.camera.lookAt(this.target);
-      if (this.renderer.domElement.isConnected && this.host.offsetParent !== null) this.renderer.render(this.scene, this.camera);
+      if (this.scene.fog) { this.scene.fog.near = Math.max(7000, this.dist * 1.3); this.scene.fog.far = Math.max(22000, this.dist * 3); }
+      if (this.renderer.domElement.isConnected && this.host.offsetParent !== null) {
+        this.renderer.render(this.scene, this.camera);
+        if (this.opts.onFrame) this.opts.onFrame(this);
+      }
       requestAnimationFrame(() => this.loop());
     }
   }

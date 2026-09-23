@@ -31,6 +31,7 @@
     if (h === "archive.triblive.com") return "Tribune-Review archive";
     if (h === "triblive.com" || h.endsWith(".triblive.com")) return "TribLive";
     if (PUBS[h]) return PUBS[h];
+    if (h === "pa.gov" && path.startsWith("/agencies/pda")) return "PA Dept. of Agriculture";
     if (h.endsWith(".crimewatchpa.com")) return "CrimeWatch";
     if (h === "github.com" || h === "raw.githubusercontent.com") {
       if (path.startsWith("/jacobkap/")) return "FBI UCR via Jacob Kaplan";
