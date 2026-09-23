@@ -6,6 +6,7 @@ import json
 import struct
 import sys
 import unittest
+import zlib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -73,12 +74,19 @@ class SiteData(unittest.TestCase):
             if "ph" in p:
                 self.assertRegex(p["ph"], r"^\d{3}-\d{3}-\d{4}$")
 
-    def test_terrain_size(self):
+    def test_terrain_png(self):
         t = self.meta["terrain"]
-        raw = (DATA / "terrain.bin").read_bytes()
-        self.assertEqual(len(raw), t["w"] * t["h"] * 2)
-        vals = struct.unpack(f"<{t['w'] * t['h']}H", raw)
-        self.assertTrue(all(1900 <= v <= 5200 for v in vals))
+        raw = (DATA / "terrain.png").read_bytes()
+        self.assertEqual(raw[:8], b"\x89PNG\r\n\x1a\n")
+        w, h = struct.unpack(">II", raw[16:24])
+        self.assertEqual((w, h), (t["w"], t["h"]))
+        idat = raw[raw.index(b"IDAT") + 4:raw.index(b"IEND") - 8]
+        rows = zlib.decompress(idat)
+        for j in (0, h // 2, h - 1):
+            line = rows[j * (w * 3 + 1) + 1:(j + 1) * (w * 3 + 1)]
+            for i in range(0, w, 50):
+                d = line[i * 3] * 256 + line[i * 3 + 1]
+                self.assertTrue(1900 <= d <= 5200, d)
 
     def test_buildings_arrays_align(self):
         b = json.loads((DATA / "buildings.json").read_text())

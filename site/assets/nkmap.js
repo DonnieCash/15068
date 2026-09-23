@@ -18,12 +18,19 @@
     return cache[name];
   }
   function getTerrain(meta) {
-    if (!cache.terrain) cache.terrain = fetch("data/terrain.bin").then((r) => r.arrayBuffer()).then((b) => {
-      const u = new Uint16Array(b);
-      const f = new Float32Array(u.length);
-      for (let i = 0; i < u.length; i++) f[i] = u[i] / 10;
-      return { data: f, ...meta.terrain };
-    });
+    // heightmap PNG: elevation in decimetres = R*256 + G
+    if (!cache.terrain) cache.terrain = fetch("data/terrain.png").then((r) => r.blob())
+      .then((b) => createImageBitmap(b, { colorSpaceConversion: "none", premultiplyAlpha: "none" }))
+      .then((img) => {
+        const c = document.createElement("canvas");
+        c.width = img.width; c.height = img.height;
+        const ctx = c.getContext("2d", { willReadFrequently: true });
+        ctx.drawImage(img, 0, 0);
+        const px = ctx.getImageData(0, 0, img.width, img.height).data;
+        const f = new Float32Array(img.width * img.height);
+        for (let i = 0; i < f.length; i++) f[i] = (px[i * 4] * 256 + px[i * 4 + 1]) / 10;
+        return { data: f, ...meta.terrain };
+      });
     return cache.terrain;
   }
 

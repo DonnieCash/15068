@@ -67,8 +67,8 @@ python -m unittest discover -s tests
 
 Geometry is projected to a local metre grid centred on the ZIP (x east,
 y south), quantised to 0.25 m and delta-encoded. `meta.json` holds the
-projection, bounds, terrain grid spec, stats and attributions. `terrain.bin`
-is little-endian uint16 elevation in decimetres.
+projection, bounds, terrain grid spec, stats and attributions. `terrain.png`
+is an RGB heightmap: elevation in decimetres = R×256 + G.
 
 ## Sources & licenses
 

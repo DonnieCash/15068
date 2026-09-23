@@ -16,6 +16,7 @@ import json
 import math
 import re
 import struct
+import zlib
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -490,8 +491,20 @@ def main():
                       if 0 <= k < len(hm) and hm[k] is not None]
                 hm[idx] = sum(nb) / len(nb) if nb else None
     hm = [v if v is not None else 230.0 for v in hm]
-    (OUT / "terrain.bin").write_bytes(struct.pack(f"<{len(hm)}H", *[round(v * 10) for v in hm]))
-    print(f"  terrain.bin: {W}x{H}")
+    # RGB PNG heightmap: elevation in decimetres = R*256 + G (B unused)
+    rows = bytearray()
+    for j in range(H):
+        rows.append(0)
+        for i in range(W):
+            d = round(hm[j * W + i] * 10)
+            rows += bytes((d >> 8, d & 255, 0))
+    def chunk(t, b):
+        return struct.pack(">I", len(b)) + t + b + struct.pack(">I", zlib.crc32(t + b) & 0xffffffff)
+    png = (b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", W, H, 8, 2, 0, 0, 0))
+           + chunk(b"IDAT", zlib.compress(bytes(rows), 9)) + chunk(b"IEND", b""))
+    (OUT / "terrain.png").write_bytes(png)
+    (OUT / "terrain.bin").unlink(missing_ok=True)
+    print(f"  terrain.png: {W}x{H}, {len(png) / 1e6:.2f} MB")
     stats["elev_min_m"] = round(min(hm))
     stats["elev_max_m"] = round(max(hm))
 
@@ -500,7 +513,7 @@ def main():
         "generated": _dt.date.today().isoformat(),
         "origin": [LON0, LAT0], "kx": KX, "ky": KY, "q": Q,
         "bounds": [round(x0), round(y0), round(x1), round(y1)],
-        "terrain": {"w": W, "h": H, "cell": TERRAIN_CELL, "x0": round(x0, 2), "y0": round(y0, 2)},
+        "terrain": {"file": "terrain.png", "w": W, "h": H, "cell": TERRAIN_CELL, "x0": round(x0, 2), "y0": round(y0, 2)},
         "groups": GROUPS,
         "towns": [{"n": t["name"], "core": t["core"],
                    "share": round(t["share"], 3)} for t in towns if t["share"] > 0.001],
