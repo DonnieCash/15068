@@ -132,7 +132,7 @@ def _police(D, town, sec):
     if not nums:
         return None
     return _row(sec, "Police non-emergency", f"{town} police, non-emergency", ph=[nums["primary"], *nums["alt"]],
-                a=C.ap_addr(item.get("address")) if item else "", source=nums["source"], k="police cops non-emergency")
+                a=C.ap_addr(item.get("address")) if item else "", source=nums["source"], k="police cops non-emergency stray loose dog lost pet")
 
 
 def _office(D, pat, sec, label, full, k, note="", web_label=None):
@@ -325,10 +325,11 @@ def _exp(it):
     return ' <span class="exp">(expected)</span>' if it["kind"] == "rule" else ""
 
 
-def home_row(it, R, today):
-    """One compact row on the front page: date column, title linking to calendar/#id, time and where."""
+def home_row(it, R, today, anchor=None):
+    """One compact row on the front page: date column, title linking to calendar/#id, time and where.
+    `anchor` overrides the link target when /calendar/ doesn't list this occurrence (see _week)."""
     return (f'<li class="cal-row" data-date="{it["date"]}" data-id="{esc(it["id"])}">{_date_col(it, today)}'
-            f'<div class="cal-t"><a href="{rel(R, "/calendar/")}#{esc(it["id"])}">{esc(it["title"])}</a>{_exp(it)}'
+            f'<div class="cal-t"><a href="{rel(R, "/calendar/")}#{esc(anchor or it["id"])}">{esc(it["title"])}</a>{_exp(it)}'
             f'<span class="cal-m">{_meta(it)}</span></div></li>')
 
 
@@ -426,13 +427,21 @@ def _week(D, R, items):
     today = D["today"]
     rows = C.dated(items)
     first, spare = rows[:3], rows[3:9]
+    # spare rows can lie past the calendar page's reach: link those to the event's first listed date there
+    shown = [i for _, _, its in groups(items, today) for i in its]
+    ids = {i["id"] for i in shown}
+    by_title = {}
+    for i in shown:
+        by_title.setdefault(i["title"], i["id"])
+    target = lambda i: i["id"] if i["id"] in ids else by_title.get(i["title"], "")
     lis = "".join(home_row(i, R, today) for i in first) or \
         '<li class="cal-none">Nothing dated on the calendar right now.</li>'
     return ('<section class="week" id="week" aria-labelledby="week-h">'
             '<h1 id="week-h">This week in 15068</h1>'
             f'<p class="dateline">As of {fmt.ap_long(today, year=False)}</p>'
             f'<ol class="cal" id="cal-rows">{lis}</ol>'
-            + (f'<template id="cal-more">{"".join(home_row(i, R, today) for i in spare)}</template>' if spare else "")
+            + (f'<template id="cal-more">{"".join(home_row(i, R, today, target(i)) for i in spare)}</template>'
+               if spare else "")
             + f'<p class="go-line"><a class="go" href="{rel(R, "/calendar/")}">Full calendar ›</a></p></section>')
 
 
@@ -546,7 +555,7 @@ def _changes(D):
     if entries is None:
         entries = D.get("changelog") or []
     out = [{"date": str(e.get("date"))[:10], "n": len(e.get("items") or [])} for e in entries if e.get("date")]
-    return json.dumps(out[:30], separators=(",", ":")).replace("</", "<\\/")
+    return fmt.json_script(out[:30])
 
 
 def _search(R):

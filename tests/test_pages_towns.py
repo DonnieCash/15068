@@ -21,7 +21,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 from pagebuild import ROOT, TODAY, build, html_of, main_words  # noqa: E402
 from test_pages import GENERATED  # noqa: E402
 
-from nkpages import changelog, mapsvg  # noqa: E402
+from nkpages import changelog, fmt, mapsvg  # noqa: E402
 from nkpages import data as ND  # noqa: E402
 from nkpages import pages_towns as T  # noqa: E402
 from nkpages import routes as NR  # noqa: E402
@@ -260,8 +260,9 @@ class Built(unittest.TestCase):
         p = self.page("/history/people/")
         self.assertEqual(p.count('class="person"'), len(self.D["history"]["people"]))
         e = self.page("/eat/")
-        self.assertEqual(e.count('class="dine"'), len(self.D["civic"]["food_and_culture"]))
-        self.assertIn(f"{len(self.D['civic']['food_and_culture'])} restaurants, bars, bakeries and clubs", e)
+        shown = [f for f in self.D["civic"]["food_and_culture"] if not fmt.is_aggregator_only(f.get("source"))]
+        self.assertEqual(e.count('class="dine"'), len(shown))  # aggregator-only entries wait for a primary source
+        self.assertIn(f"{len(shown)} restaurants, bars, bakeries and clubs", e)
         self.assertNotIn("Business listings can go stale", e)
 
     def test_trust_pages(self):
@@ -276,9 +277,10 @@ class Built(unittest.TestCase):
         self.assertIn('id="src-list"', s)
         self.assertIn("Outlets cited", s)
         nf = (self.out / "404.html").read_text()
-        self.assertIn('<base href="/">', nf)
-        self.assertIn('action="search/"', nf)
-        self.assertIn('href="lost-pets/"', nf)
+        self.assertNotIn("<base", nf)  # a <base> would send "Skip to content" (#main) to the home page
+        self.assertIn('action="/search/"', nf)
+        self.assertIn('href="/lost-pets/"', nf)
+        self.assertIn('data-root="/"', nf)
 
     def test_poster_page(self):
         h = self.page("/poster/")

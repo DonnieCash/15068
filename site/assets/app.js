@@ -1241,6 +1241,13 @@
       }).catch(() => { listed = false; });
     };
     input.addEventListener("focus", fill, { once: true });
+    /* a failed lookup must not leave the previous street's poster and downloads on screen */
+    const clearOut = () => {
+      out.hidden = true;
+      current = null;
+      const alt = $("#street-alt");
+      if (alt) { alt.innerHTML = ""; alt.hidden = true; }
+    };
     async function make(pick) {
       const q = input.value;
       if (!q.trim()) { smsg.textContent = "Type a street name first, like Leishman Avenue."; input.focus(); return; }
@@ -1249,9 +1256,9 @@
         const W = await loadWorld();
         const found = findStreets(q, W.streets);
         const street = pick ? found.find((x) => x.n === pick) || found[0] : found[0];
-        if (!street) { smsg.textContent = `We couldn't find “${q.trim()}” in 15068. Try the full name, like Leishman Avenue.`; return; }
+        if (!street) { clearOut(); smsg.textContent = `We couldn't find “${q.trim()}” in 15068. Try the full name, like Leishman Avenue.`; return; }
         const svg = streetPoster(await getText(posterSrc()), street, W);
-        if (!svg) { smsg.textContent = `${street.n} has no mapped lines to draw.`; return; }
+        if (!svg) { clearOut(); smsg.textContent = `${street.n} has no mapped lines to draw.`; return; }
         current = { svg, file: S.slug(street.n) + "-15068" };
         const fig = $("#street-fig");
         const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));

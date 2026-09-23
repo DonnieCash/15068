@@ -300,6 +300,8 @@ def short_answer(D, town):
         out.append(clearance_short(a, long=False))
     else:
         s = f"{town} police reported {_crimes(n)} to the FBI in {Y}, or {f1(rate(a, 'violent'))} per 1,000 residents"
+        if b is not None and partial(b):  # compare like with like: a partial year is only comparable per month
+            s += f" and about {f1(monthly(a, 'violent'))} a month"
         if b is not None:
             if partial(b):
                 prev = (f"{fmt.num(b['violent'])} in the {months(b)} months of {b['year']} it reported "
@@ -333,6 +335,8 @@ def small_numbers(D, town):
 def _row_text(a, b):
     if partial(a):
         cur = f"{fmt.num(a['violent'])} in {months(a)} months of {a['year']} (about {f1(monthly(a, 'violent'))} a month)"
+    elif b is not None and partial(b):
+        cur = f"{fmt.num(a['violent'])} in {a['year']} (about {f1(monthly(a, 'violent'))} a month)"
     else:
         cur = f"{fmt.num(a['violent'])} in {a['year']} ({f1(rate(a, 'violent'))} per 1,000)"
     if b is None:
@@ -458,8 +462,10 @@ def record_high_low(D, town, key="violent", noun="rate"):
     hi = max(ys, key=lambda y: rate(y, key))
     full = [y for y in ys if not partial(y)] or ys
     lo = min(full, key=lambda y: rate(y, key))
+    # partial years are left out of the low (their rates undercount), so say so when there were any
+    lowest = "its lowest full-year rate was" if len(full) < len(ys) else "its lowest was"
     return (f"{town}'s highest {noun} in the record was {f1(rate(hi, key))} per 1,000 in {hi['year']}; "
-            f"its lowest was {f1(rate(lo, key))} in {lo['year']}.")
+            f"{lowest} {f1(rate(lo, key))} in {lo['year']}.")
 
 
 def gaps_sentence(D, town):

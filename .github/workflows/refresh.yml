@@ -31,7 +31,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [ -z "$(git status --porcelain)" ]; then echo "No changes."; exit 0; fi
+          # build.json's date and "generated" stamps change every run; only open a PR when the data did
+          if git diff --quiet -- data/research data/changelog.json site/data ':!site/data/build.json' ':!site/data/safety.json' \
+             && git diff -I '"generated"' --quiet -- site/data/safety.json; then
+            echo "No data changes."; exit 0
+          fi
           month="$(date -u +%Y-%m)"
           branch="data-refresh-$month"
           git config user.name "github-actions[bot]"

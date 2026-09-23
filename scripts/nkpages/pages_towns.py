@@ -953,7 +953,8 @@ BUCKETS = [
 
 
 def eat(D, R):
-    lst = D["civic"].get("food_and_culture") or []
+    # like the news briefs, entries sourced only to an aggregator wait for a primary source
+    lst = [f for f in D["civic"].get("food_and_culture") or [] if not fmt.is_aggregator_only(f.get("source"))]
     groups = [(t, []) for t, _ in BUCKETS]
     for f in lst:
         i = next(i for i, (_, rx) in enumerate(BUCKETS) if re.search(rx, f.get("type") or "", re.I))
@@ -1115,8 +1116,9 @@ def about(D, R):
         + sec("made", "How it&rsquo;s made",
               "<p>The map comes from Overture Maps and OpenStreetMap, clipped to the Census boundary for 15068. The "
               "history, civic, news and lost-pet entries were compiled from published reporting and official pages in "
-              f"{_month_year(D['civic']['_meta']['compiled'])}. Some pages couldn&rsquo;t be opened directly, so those facts were checked "
-              "against more than one report; where sources disagree, we say so next to the entry.</p>"
+              f"{_month_year(D['civic']['_meta']['compiled'])}. Some linked pages couldn&rsquo;t be opened while this was compiled; for "
+              "those, the facts come from a search engine&rsquo;s summary of the page rather than the page itself. Every "
+              "entry links to its source, so you can check it, and corrections are welcome.</p>"
               f'<p>Every source is listed with its license on <a href="{rel(R, "/sources/")}">Sources</a>.</p>')
         + sec("kept", "How it&rsquo;s kept up to date", kept)
         + sec("corrections", "Corrections",
@@ -1302,7 +1304,7 @@ def sources(D, R):
         f"{fmt.num(len(his.get('people') or []))} notable people.</li>"
         f"<li><b>Lost and found pet contacts and tips:</b> checked {fmt.ap_date(pts['compiled'])}. "
         f"{fmt.num(len(pts.get('items') or []))} contacts and {fmt.num(len(pts.get('tips') or []))} tips.</li></ul>"
-        "<p>Each entry links to where it was published. Where sources disagree, the entry says so.</p>")
+        "<p>Each entry links to where it was published.</p>")
     fbi = s["fbi"]
     years = sorted({y["year"] for a in fbi["agencies"] for y in a["years"]})
     cst = s["crashes"]["stats"]
@@ -1318,8 +1320,8 @@ def sources(D, R):
         f"seriously injured someone, {fmt.num(sum(r['crashes'] for r in cst))} in the three cities.</li>"
         + (f"<li>{ext(wapo[0]['source'], 'The Washington Post&rsquo;s database of fatal police shootings', '')}: "
            f"{fmt.num(len(wapo))} in the three cities.</li>" if wapo else "")
-        + f"<li>The police blotter: {fmt.num(len(inc))} incidents from {fmt.num(len(inc_outlets))} local news outlets, "
-        "each placed on its block and linked to the report.</li></ul>")
+        + f"<li>The police blotter: {fmt.num(len(inc))} incidents from {fmt.num(len(inc_outlets))} news outlets, "
+        "each placed on its block, a corner, a named place or just the street, and linked to the report.</li></ul>")
     outs = outlets(D)
     out_html = ('<ul class="outlets">' + "".join(f"<li><b>{esc(n)}</b> {fmt.num(c)}</li>" for n, c in outs) + "</ul>")
     body = (f'<h1>{esc(R.h1)}</h1>'

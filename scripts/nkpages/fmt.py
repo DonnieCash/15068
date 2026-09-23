@@ -2,6 +2,7 @@
 street names and the public() filter that research text must pass through before it reaches HTML."""
 import datetime as _dt
 import html
+import json
 import re
 import unicodedata
 from urllib.parse import urlparse
@@ -34,6 +35,12 @@ def end_stop(s):
 def slug(s):
     s = unicodedata.normalize("NFKD", str(s or "")).encode("ascii", "ignore").decode().lower()
     return re.sub(r"[^a-z0-9]+", "-", s).strip("-")
+
+
+def json_script(obj, **kw):
+    """JSON safe inside <script>: no '<', '>' or '&' can end the element or open a comment."""
+    s = json.dumps(obj, ensure_ascii=False, separators=(",", ":"), **kw)
+    return s.replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
 
 
 def words(html_text):
@@ -115,6 +122,7 @@ PUBS = {
     "aspca.org": "ASPCA", "petcolove.org": "Petco Love", "findtobyinpa.org": "Find Toby in PA", "avets.com": "AVETS",
     "bluepearlvet.com": "BluePearl", "aaha.org": "AAHA", "pawboost.com": "PawBoost", "guidestar.org": "GuideStar",
     "mentalhealth.networkofcare.org": "Network of Care",
+    "static1.squarespace.com": "Parade entry form (PDF)",  # the one file-host link in the research (the parade form)
 }
 AGGREGATORS = {"citizenportal.ai", "hoodline.com"}
 

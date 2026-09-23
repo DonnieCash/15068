@@ -160,7 +160,7 @@
     const mapBase = mapA ? mapA.getAttribute("href").split("?")[0] : "";
     const q = NKS.qs();
     const state = {
-      c: CAT[q.get("c")] ? q.get("c") : "*",
+      c: Object.hasOwn(CAT, q.get("c") || "") ? q.get("c") : "*",
       t: TOWNS.includes(q.get("town")) ? q.get("town") : "",
       y: /^\d{4}$/.test(q.get("year") || "") ? q.get("year") : "",
       st: (q.get("street") || "").slice(0, 60),

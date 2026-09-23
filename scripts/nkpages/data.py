@@ -13,7 +13,7 @@ RESEARCH = ROOT / "data" / "research"
 CORE_TOWNS = ("New Kensington", "Arnold", "Lower Burrell")
 TOWN_SLUGS = {"New Kensington": "new-kensington", "Arnold": "arnold", "Lower Burrell": "lower-burrell"}
 SLUG_TOWNS = {v: k for k, v in TOWN_SLUGS.items()}
-# research files synced into site/data/ with build_data.dump's exact serializer
+# research files synced into site/data/ (as public_copy(), with build_data.dump's serializer)
 SYNCED = ("civic", "history", "pets")
 
 
@@ -27,6 +27,24 @@ def read_json(p, default=None):
 def dumps(obj):
     """The same bytes build_data.dump writes."""
     return json.dumps(obj, separators=(",", ":"), ensure_ascii=False)
+
+
+# research fields that are working notes, never published; and fields public() must not touch
+PRIVATE_KEYS = {"method", "note", "notes", "date_note", "population_note", "coverage"}
+RAW_KEYS = {"source", "url", "date", "dates", "deadline", "year", "phone", "compiled", "zip"}
+
+
+def public_copy(obj, key=None):
+    """The research JSON as published under site/data/: working notes dropped and every text field passed through
+    fmt.public(), the same filter the pages use."""
+    from .fmt import public
+    if isinstance(obj, dict):  # "_meta" is published as "about": just the compile date and the ZIP
+        return {("about" if k == "_meta" else k): public_copy(v, k) for k, v in obj.items() if k not in PRIVATE_KEYS}
+    if isinstance(obj, list):
+        return [public_copy(v, key) for v in obj]
+    if isinstance(obj, str) and key not in RAW_KEYS:
+        return public(obj)
+    return obj
 
 
 def load(cfg, today, snapshot=False, site=SITE, board=None):

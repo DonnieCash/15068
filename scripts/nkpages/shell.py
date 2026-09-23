@@ -217,8 +217,7 @@ def place_ads(D, R, main):
 
 
 def jsonld_tag(obj):
-    s = json.dumps(obj, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
-    return f'<script type="application/ld+json">{s}</script>'
+    return f'<script type="application/ld+json">{fmt.json_script(obj)}</script>'
 
 
 def site_url(D):
@@ -264,21 +263,20 @@ def page_html(D, R, result):
     robots = {"N": '<meta name="robots" content="noindex">', "NF": '<meta name="robots" content="noindex,follow">'}.get(R.index, "")
     og_title = res.get("og_title") or short_title(R)
     og_img = res.get("og_image") or (su + "/img/og-15068.png" if (D["site"] / "img" / "og-15068.png").exists() else "")
-    base = f'<base href="{esc(D["cfg"].get("base_path") or "/")}">\n' if R.path == "/404.html" else ""
     lds = []
     if R.page == "home":
         lds.append(jsonld_website(D))
     elif R.path != "/404.html":
         lds.append(jsonld_breadcrumbs(D, R, res.get("crumbs")))
     lds += res.get("jsonld") or []
-    root = "" if R.path == "/404.html" else R.root
+    root = R.root
     desc = f'<meta name="description" content="{esc(R.desc)}">\n' if R.desc else ""
     head = [
         BANNER, "<!doctype html>",
         f'<html lang="en" data-page="{R.page}" data-root="{root}">', "<head>",
         '<meta charset="utf-8">',
         '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">',
-        base + f"<title>{esc(R.title)}</title>",
+        f"<title>{esc(R.title)}</title>",
         desc + f'<link rel="canonical" href="{esc(canon)}">',
     ]
     if robots:

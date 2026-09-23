@@ -96,7 +96,7 @@ def generate(cfg, today, snapshot=False, only=None, keep_going=False, board=None
     files, problems = {}, []
 
     for k in ND.SYNCED:
-        files[f"data/{k}.json"] = ND.dumps(D[k])
+        files[f"data/{k}.json"] = ND.dumps(ND.public_copy(D[k]))
     if snapshot and D["board"] is not None:
         files["data/pets-board.json"] = ND.dumps(D["board"])
 
@@ -222,7 +222,8 @@ def build(out, cfg, today, snapshot=False, only=None, keep_going=False, quiet=Fa
         mirror(out, files)
     prev = previous_list(out)
     n = write(out, files)
-    gone = prune(out, files, prev) if (out == SITE.resolve() and not only) else []
+    # a partial build (--only, or --keep-going with pages skipped) never deletes committed pages
+    gone = prune(out, files, prev) if (out == SITE.resolve() and not only and not keep_going) else []
     if not quiet:
         print(f"built {len(files)} files into {out} ({n} changed, {len(gone)} removed), today={today}")
     return files

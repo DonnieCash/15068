@@ -32,15 +32,15 @@ SHORT = {
               "up from about 2.2 a month in 2022 (22 in 10 months). Arnold sent no figures for 2023. The 2024 count "
               "works out to 8.4 per 1,000 residents, the city's highest rate since 2018 (9.7), and with three months "
               "missing the full-year number can only be higher. Police cleared 8 of the 39.",
-    "Lower Burrell": "Lower Burrell police reported 10 violent crimes to the FBI in 2024, or 0.9 per 1,000 residents, down "
-                     "from 17 in the 11 months of 2023 it reported (about 1.5 a month). That is the lowest rate since 2018 "
+    "Lower Burrell": "Lower Burrell police reported 10 violent crimes to the FBI in 2024, or 0.9 per 1,000 residents "
+                     "and about 0.8 a month, down from 17 in the 11 months of 2023 it reported (about 1.5 a month). That is the lowest rate since 2018 "
                      "(0.8). Property crime fell to 2.3 per 1,000, the lowest in the department's FBI record, which goes "
                      "back to 2000. Police cleared all 10 violent crimes.",
 }
 HEADLINE = "Violent crime rose in New Kensington and Arnold in 2024 and fell in Lower Burrell"
 ROWS = [("New Kensington", "Up", "54 in 2024 (4.6 per 1,000), from 40 in 2023 (3.4)"),
         ("Arnold", "Up", "39 in 9 months of 2024 (about 4.3 a month), from 22 in 10 months of 2022 (about 2.2 a month)"),
-        ("Lower Burrell", "Down", "10 in 2024 (0.9 per 1,000), from 17 in 11 months of 2023 (about 1.5 a month)")]
+        ("Lower Burrell", "Down", "10 in 2024 (about 0.8 a month), from 17 in 11 months of 2023 (about 1.5 a month)")]
 
 
 def flat(page):

@@ -66,7 +66,7 @@ browser checks by hand (see its header).
 
 | Field | Meaning |
 | --- | --- |
-| `site_url`, `base_path` | Canonical URLs, sitemap and the 404 page's `<base>` |
+| `site_url`, `base_path` | Canonical URLs, sitemap and the 404 page's root-relative links |
 | `owner_name` | Who runs the site, shown on About. Required before ads can be turned on |
 | `contact_email` | Optional; shown on Contact and the post-a-pet page only when set |
 | `adsense_client`, `adsense_slots` | Ads switch (see below). Empty means no ad code anywhere |
@@ -87,6 +87,7 @@ One-time setup:
 - *Settings → Pages → Source: GitHub Actions.*
 - Set the custom domain in *Settings → Pages* (the deploy action ignores `CNAME` files).
 - Create the `pet-listing` and `correction` labels (the issue forms apply them).
+- For the monthly refresh PRs: *Settings → Actions → General → Allow GitHub Actions to create and approve pull requests.*
 - Submit `https://nk15068.com/sitemap.xml` in Google Search Console.
 
 `.github/workflows/refresh.yml` re-pulls the data on the 3rd of each month,

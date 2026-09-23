@@ -6,7 +6,7 @@ Titles, descriptions and H1s may hold {placeholders} filled from facts(D), so co
 from dataclasses import dataclass, field, replace
 
 from .data import TOWN_SLUGS
-from .fmt import num
+from .fmt import is_aggregator_only, num
 
 BRAND = " · NK15068"
 
@@ -34,7 +34,8 @@ class Route:
 
     @property
     def root(self):
-        return "../" * self.depth
+        # 404.html is served at any depth, so it links from the site root (base_path) instead of relatively
+        return self.extra.get("root") or "../" * self.depth
 
     @property
     def file(self):
@@ -71,7 +72,7 @@ def facts(D):
         "n_timeline": num(len(D["history"]["timeline"])),
         "first_year": min(int(str(t["year"])[:4]) for t in D["history"]["timeline"] if str(t["year"])[:4].isdigit()),
         "n_people": num(len(D["history"]["people"])),
-        "n_eat": num(len(D["civic"]["food_and_culture"])),
+        "n_eat": num(sum(not is_aggregator_only(f.get("source")) for f in D["civic"]["food_and_culture"])),
         "n_places": num(D["meta"]["stats"]["places"]),
         "n_streets": num(D["meta"]["stats"]["streets"]),
         "road_km": num(D["meta"]["stats"]["road_km"]),
@@ -156,7 +157,7 @@ ROUTES = [
           "A history of 15068, from the {first_year} Parnassus tract to {this_year}", "I", "C", S_BASIC, ("history",),
           "pages_towns", "history", nav="history"),
     Route("/history/people/", "people", "Notable people from New Kensington, Arnold and Lower Burrell" + BRAND,
-          "{n_people} people born or raised in ZIP 15068, from the inventor of Kevlar to NFL players, each sourced.",
+          "{n_people} people with ties to ZIP 15068, from the inventor of Kevlar to NFL players, each sourced.",
           "Notable people from 15068", "I", "-", S_BASIC, ("history",), "pages_towns", "people", nav="history"),
     Route("/eat/", "eat", "Where to eat and drink in New Kensington, Arnold and Lower Burrell" + BRAND,
           "{n_eat} restaurants, bars, bakeries and clubs in ZIP 15068 with a published write-up.",
@@ -206,7 +207,9 @@ assert len(AD_ROUTES) == 9, AD_ROUTES
 def resolve(D):
     """ROUTES with {placeholders} filled from the data."""
     f = facts(D)
-    return [replace(r, title=r.title.format(**f), desc=r.desc.format(**f), h1=r.h1.format(**f)) for r in ROUTES]
+    out = [replace(r, title=r.title.format(**f), desc=r.desc.format(**f), h1=r.h1.format(**f)) for r in ROUTES]
+    base = D["cfg"].get("base_path") or "/"
+    return [replace(r, extra={"root": base}) if r.path == "/404.html" else r for r in out]
 
 
 def by_path(routes, path):

@@ -90,8 +90,8 @@ class Pages(unittest.TestCase):
 
     def test_no_internal_strings(self):
         for p, t in generated_texts(self.out):
-            if p.name in ("civic.json", "history.json", "pets.json", "build.json", "meta.json"):
-                continue  # data files keep their research notes; pages never print them
+            if p.name in ("build.json", "meta.json"):
+                continue
             m = INTERNAL.search(t)
             self.assertIsNone(m, f"{p.relative_to(self.out)}: {m and t[max(0, m.start() - 60):m.end() + 60]!r}")
 
@@ -162,7 +162,7 @@ class Pages(unittest.TestCase):
             t = self.pages.get(r.path)
             if t is None:
                 continue
-            base = self.out if r.path == "/404.html" else (self.out / r.file).parent
+            base = (self.out / r.file).parent
             p = parse(t)
             for u in p.links + p.srcs:
                 if re.match(r"^(https?:|mailto:|tel:|#|data:|javascript:)", u) or not u:
@@ -170,7 +170,7 @@ class Pages(unittest.TestCase):
                 u = u.split("#")[0].split("?")[0].split(" ")[0]
                 if not u:
                     continue
-                tgt = (base / u).resolve()
+                tgt = (self.out / u.lstrip("/")).resolve() if u.startswith("/") else (base / u).resolve()
                 if u.endswith("/") or tgt.is_dir():
                     tgt = tgt / "index.html"
                 with self.subTest(route=r.path, href=u):
@@ -264,10 +264,12 @@ class Committed(unittest.TestCase):
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
 
     def test_synced_research_matches(self):
+        from nkpages.data import public_copy
         for k in ("civic", "history", "pets"):
             src = json.loads((ROOT / f"data/research/{k}.json").read_text())
-            self.assertEqual((ROOT / f"site/data/{k}.json").read_text(),
-                             json.dumps(src, separators=(",", ":"), ensure_ascii=False), k)
+            pub = (ROOT / f"site/data/{k}.json").read_text()
+            self.assertEqual(pub, json.dumps(public_copy(src), separators=(",", ":"), ensure_ascii=False), k)
+            self.assertIsNone(INTERNAL.search(pub), f"{k}.json: {INTERNAL.search(pub)}")
 
 
 if __name__ == "__main__":

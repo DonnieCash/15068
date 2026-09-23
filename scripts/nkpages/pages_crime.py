@@ -401,7 +401,10 @@ def interactions_html(D, R, town):
     out = []
     for it, inc, iid in items:
         srcs = [it.get("source")] + ([inc.get("src")] if inc else [])
-        where = f" · {esc(fmt.public(it['location_text']))}" if it.get("location_text") else ""
+        if inc:  # the same event on the blotter: print its published (privacy-reviewed) location, never a finer one
+            where = f" · {esc(inc['l'])}" + (" · approximate location" if inc.get("p") == "street" else "")
+        else:
+            where = f" · {esc(fmt.public(it['location_text']))}" if it.get("location_text") else ""
         mapit = f' · <a href="{rel(R, "/map/")}?inc={esc(iid)}">Map it</a>' if iid else ""
         out.append(f'<article class="entry"><p class="bl"><b class="what">{esc(fmt.end_stop(S.pretty(it.get("kind"))))}</b> '
                    f'{esc(fmt.public(it.get("summary")))}</p>'
