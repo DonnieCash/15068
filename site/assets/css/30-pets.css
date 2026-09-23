@@ -1,0 +1,38 @@
+/* lost & found pets (owner: pets pages). Old .ad* names must be renamed: see the spec */
+/* ---------- lost & found pets (classified band) ---------- */
+.classified { background: var(--raised); padding-block: clamp(26px, 4vw, 40px); margin-top: clamp(48px, 6vw, 80px); scroll-margin-top: 44px; }
+.pets-head { border-top: 3px solid var(--rule); padding-top: 8px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 18px; }
+.pets-head .lh { border: 0; padding: 0; margin: 0; font-size: clamp(26px, 2vw + 16px, 38px); font-stretch: 75%; }
+.pets-head .chatter { font-size: 15px; margin: 0; }
+#pets-status { font: 13px/1.4 var(--f-sans); color: var(--muted); margin: 10px 0 14px; min-height: 1em; }
+.ads { columns: 15rem; column-gap: 14px; }
+.ad {
+  break-inside: avoid; margin: 0 0 14px; background: var(--surface); border: 1px solid var(--rule); padding: 10px 12px;
+  font: 14px/1.42 var(--f-sans); display: grid; gap: 5px;
+}
+.ad img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
+.ad-st { font: 700 15px/1.1 var(--f-sans); font-stretch: 80%; text-transform: uppercase; letter-spacing: .02em; }
+.ad[data-status="lost"] .ad-st { color: var(--pet-lost); }
+.ad[data-status="found"] .ad-st { color: var(--pet-found); }
+.ad[data-status="spotted"] .ad-st { color: var(--pet-spotted); }
+.ad h3 { font: 700 18px/1.2 var(--f-head); }
+.ad .ad-date { color: var(--ink-2); }
+.ad .ad-contact { font-weight: 600; overflow-wrap: anywhere; }
+.ad .ad-acts { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; }
+.ad .muted { color: var(--muted); font-size: 13px; }
+.ad.empty-ad { border-style: solid; color: var(--ink-2); }
+.ad-place { border: 2px dashed var(--rule); }
+.ad-place h3 { font: 700 18px/1.2 var(--f-head); }
+#pets-form { display: grid; gap: 10px; margin-top: 8px; }
+#pets-form label { display: grid; gap: 4px; font: 600 14px/1.3 var(--f-sans); }
+#pets-form input, #pets-form select, #pets-form textarea {
+  width: 100%; min-height: 44px; padding: 8px 10px; font: 16px/1.3 var(--f-sans); color: var(--ink);
+  background: var(--ground); border: 1px solid var(--rule); border-radius: 0;
+}
+#pets-form textarea { min-height: 88px; resize: vertical; }
+#pets-form .form-msg { font: 600 13px/1.4 var(--f-sans); }
+.pets-help { display: grid; gap: 32px; margin-top: 26px; }
+@media (min-width: 960px) { .pets-help { grid-template-columns: minmax(0, 7.2fr) minmax(0, 3.2fr); gap: 40px; } }
+.pets-help .runin { columns: 2 17rem; }
+.pets-help .runin p:not(.meta) { font: 15.5px/1.45 var(--f-text); }
+.tips { margin: 0; padding: 0 0 0 18px; display: grid; gap: 10px; font: 14px/1.45 var(--f-sans); }

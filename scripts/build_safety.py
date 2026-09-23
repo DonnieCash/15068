@@ -507,6 +507,7 @@ def main():
     policing["wapo_fatal_shootings_in_area"] = [
         {k: v for k, v in w.items() if k not in ("lat", "lon")} for w in policing.get("wapo_fatal_shootings_in_area", [])]
     doc = {
+        "generated": __import__("datetime").date.today().isoformat(),
         "fbi": fbi,
         "policing": policing,
         "crashes": crash_doc,

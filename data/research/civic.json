@@ -17,7 +17,8 @@
       "role": "Municipal government (Mayor Shannon Santucci); council meets 2nd Tuesday, 7 PM",
       "address": "1829 Fifth Ave, Arnold, PA 15068",
       "phone": "724-337-4441",
-      "url": "https://www.cityofarnoldpa.org/"
+      "url": "https://www.cityofarnoldpa.org/",
+      "council": {"rule": "2nd Tuesday", "time": "7 p.m.", "source": "https://www.cityofarnoldpa.org/"}
     },
     {
       "name": "City of Lower Burrell – City Hall",
@@ -689,6 +690,7 @@
       "date": "2026-08",
       "headline": "PRT proposes new New Kensington–Highlands Mall bus route",
       "text": "PRT's final Bus Line Redesign proposal adds 7-day N3 service linking New Kensington, Arnold, Tarentum, Brackenridge and Natrona Heights; comments due Sept. 30.",
+      "deadline": "2026-09-30",
       "source": "https://engage.rideprt.org/buslineredesign/BLR-routeN3"
     },
     {
