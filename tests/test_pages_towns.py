@@ -37,17 +37,18 @@ KEYS = ["nk-theme", "nk-town", "nk-corner", "nk-last-visit", "nk-seen-pets", "nk
 FLOORS = {"/towns/new-kensington/": 400, "/towns/arnold/": 400, "/towns/lower-burrell/": 400, "/history/": 400,
           "/towns/": 300, "/news/": 300, "/eat/": 300, "/about/": 300, "/privacy/": 300, "/sources/": 300,
           "/history/people/": 300}
+# place counts are the directory's (duplicates merged), so each count equals the list its link opens
 SPEC_GLANCE = {
     "New Kensington": "New Kensington had 12,170 residents in the 2020 census, down from a peak of 25,146 in 1950, and a "
                       "median household income of $49,063. It grew from the June 10, 1891, land sale, became a borough "
-                      "in 1892 and a city in 1934. The map data holds 5,990 buildings, 6,222 address points and 565 "
+                      "in 1892 and a city in 1934. The map data holds 5,990 buildings, 6,222 address points and 548 "
                       "listed places in the city.",
     "Arnold": "Arnold had 4,772 residents in the 2020 census and a median household income of $48,119. It became a "
-              "borough in 1896 and a city in 1939. The map data holds 2,365 buildings, 2,444 address points and 123 "
+              "borough in 1896 and a city in 1939. The map data holds 2,365 buildings, 2,444 address points and 120 "
               "listed places in the city.",
     "Lower Burrell": "Lower Burrell had 11,758 residents in the 2020 census, and its median household income, $84,602, "
                      "is the highest of the three cities. It was split off from Burrell Township in 1879 and became a "
-                     "city in 1959. The map data holds 5,857 buildings, 5,527 address points and 435 listed places in "
+                     "city in 1959. The map data holds 5,857 buildings, 5,527 address points and 419 listed places in "
                      "the city.",
 }
 
@@ -182,6 +183,14 @@ class Built(unittest.TestCase):
         a = self.page("/towns/arnold/")
         self.assertIn("Council</b> meets the second Tuesday of the month at 7 p.m. Next expected: Tuesday, Oct. 13.", a)
         self.assertIn("Council</b> meeting nights aren&rsquo;t in our data yet.", self.page("/towns/lower-burrell/"))
+
+    def test_place_counts_match_the_directory(self):
+        """'All N places in X' must equal what /directory/?town=X lists (duplicates merged, by municipality)."""
+        from nkpages import pages_map as PM
+        for slug, town in (("new-kensington", "New Kensington"), ("arnold", "Arnold"), ("lower-burrell", "Lower Burrell")):
+            h = self.page(f"/towns/{slug}/")
+            n = int(re.search(rf"All ([\d,]+) places in {town}", h).group(1).replace(",", ""))
+            self.assertEqual(n, sum(PM.town_label(p) == town for p in PM.dedupe(self.D["places"])), town)
 
     def test_hub(self):
         h = self.page("/towns/")

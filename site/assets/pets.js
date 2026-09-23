@@ -8,8 +8,9 @@
      page ask GitHub's public API. If the API fails and there is no snapshot, the board says
      it doesn't know (state "unknown"); it never claims the board is empty.
    Locations are street + cross street, placed from the site's own road data.
-   scripts/nkpages/pets.py holds exact Python ports of cleanNear, stripHouse, sanitize,
-   parseIssue, streetKey, buildIndex and geocodeNear (tests/test_pages_pets.py compares them).
+   scripts/nkpages/pets.py holds exact Python ports of cleanNear, streetKeys, stripHouse, realDay,
+   realTime, sanitize, parseIssue, streetKey, buildIndex and geocodeNear (tests/test_pages_pets.py
+   compares them).
    This file must load with no DOM (the parity test runs it in a bare vm with window = {}). */
 (function () {
   "use strict";
@@ -22,6 +23,7 @@
   const MAX_PER_VIEWER = 20;
   const LIMITS = { name: 40, desc: 500, near: 120, contact: 120, town: 40, animal: 20 };
   const FRESH_MS = 26 * 36e5; // a snapshot this new is trusted without asking GitHub
+  const FETCH_MS = 8000; // a request with no answer by then counts as failed
   const STATUS = { lost: "Lost", found: "Found", spotted: "Spotted" };
   const VERB = { lost: "Last seen near", found: "Found near", spotted: "Seen near" };
   const FORM_MARK = "### Lost, found or spotted?";
@@ -38,28 +40,68 @@
       .replace(/\u2009/g, " ")
       .replace(/\s{2,}/g, " ").replace(/^[\s,&]+|[\s,]+$/g, "").trim();
   }
-  /* in free text (description, contact) only a number right before a street name is a house number:
-     "found at 1012 Fifth Ave" -> "found at Fifth Ave"; phone numbers, ordinals and routes stay */
+  /* {core: Set(types)} for every named street the board knows (streets.json and the road index) */
+  let keyCache = { streets: null, idx: null, keys: new Map() };
+  function streetKeys() {
+    if (keyCache.streets !== board.streets || keyCache.idx !== board.idx) {
+      const keys = new Map(), add = (core, type) => { if (!keys.has(core)) keys.set(core, new Set()); keys.get(core).add(type); };
+      for (const s of board.streets || []) { const k = s && typeof s === "object" ? streetKey(s.n) : null; if (k) add(k.core, k.type); }
+      if (board.idx) for (const [core, list] of board.idx) for (const l of list) add(core, l.type);
+      keyCache = { streets: board.streets, idx: board.idx, keys };
+    }
+    return keyCache.keys;
+  }
+  /* a number is a house number when the 1-4 words after it (after "on"/"of"/"off" for 2+ digits) name a street we
+     know: "412 Leishman", "1507 on Kenneth", "88 Pleasant Valley Rd". Without a street type the number needs 2+
+     digits, so "has 2 white paws" keeps its 2 (there is a White Street). */
+  const HOUSE_AT = /(^|[^\w\u2009\u2060:./-])(#?\d{1,5}[a-z]?(?:\s*[-–]\s*\d{1,5}[a-z]?)?)(?=((?:\s+(?:\d+(?:st|nd|rd|th)\b|[a-z][a-z'.-]*)){1,5}))/gi;
+  function houseAt(keys) {
+    return (m, pre, num, after) => {
+      const big = /\d{2}/.test(num);
+      let w = after.trim().split(/\s+/);
+      if (big && /^(on|of|off)$/i.test(w[0])) w = w.slice(1);
+      for (let n = 1; n <= Math.min(4, w.length); n++) {
+        const k = streetKey(w.slice(0, n).join(" ")), types = k ? keys.get(k.core) : null;
+        if (types && (k.type ? types.has(k.type) || types.has(null) : big)) return pre;
+      }
+      return m;
+    };
+  }
+  /* in free text (name, description, contact) a number goes when the words after it name a real street ("found at
+     412 Leishman" -> "found at Leishman"), or, as a fallback, when one word and a street type follow ("1012 Fifth
+     Ave"); phone numbers, ordinals, routes and counts stay */
   function stripHouse(t) {
-    return String(t || "")
+    const keys = streetKeys();
+    t = String(t || "")
       .replace(/\b(route|rte|pa|sr|us|i)[\s-]*(\d{1,4})\b/gi, (m, a, n) => a + "\u2009" + n)
-      .replace(/(^|[^\w\u2009-])\d{1,5}[a-z]?(?:\s*[-–]\s*\d{1,5}[a-z]?)?(?=\s+(?:[nsew]\.?\s+)?(?:\d+(?:st|nd|rd|th)|[a-z]+)\s+(?:street|st|avenue|ave|av|road|rd|drive|dr|boulevard|blvd|lane|ln|way|court|ct|alley|aly|place|pl|terrace|ter|highway|hwy|pike|circle|cir)\b)/gi, "$1")
-      .replace(/\u2009/g, " ")
-      .replace(/ {2,}/g, " ").trim();
+      .replace(/\(?\b\d{3}\)?[-. ]?\d{3}[-. ]\d{4}\b/g, (m) => m.replace(/\d+/g, "\u2060$&")); // protect phone numbers
+    if (keys.size) t = t.replace(HOUSE_AT, houseAt(keys));
+    return t
+      .replace(/(^|[^\w\u2009\u2060-])\d{1,5}[a-z]?(?:\s*[-–]\s*\d{1,5}[a-z]?)?(?=\s+(?:[nsew]\.?\s+)?(?:\d+(?:st|nd|rd|th)|[a-z]+)\s+(?:street|st|avenue|ave|av|road|rd|drive|dr|boulevard|blvd|lane|ln|way|court|ct|alley|aly|place|pl|terrace|ter|highway|hwy|pike|circle|cir)\b)/gi, "$1")
+      .replace(/\u2009/g, " ").replace(/\u2060/g, "")
+      .replace(/ {2,}/g, " ").replace(/([([]) /g, "$1").trim();
   }
   const clip = (v, k) => String(v ?? "").trim().slice(0, LIMITS[k] || 40);
+  /* dates must be real calendar days ("2026-09-31" and "0000-01-01" are dropped); Python: real_day / real_time */
+  function realDay(s) {
+    if (typeof s !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(s) || s < "0001") return false;
+    try { return new Date(s + "T00:00:00Z").toISOString().slice(0, 10) === s; } catch (e) { return false; }
+  }
+  const realTime = (s) => typeof s === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/.test(s) && realDay(s.slice(0, 10))
+    && +s.slice(11, 13) < 24 && +s.slice(14, 16) < 60 && +s.slice(17, 19) < 60;
   const GH_IMG = /^https:\/\/(user-images\.githubusercontent\.com|github\.com\/user-attachments)\//;
   const GH_ISSUE = new RegExp(`^https://github\\.com/${REPO.replace("/", "\\/")}/issues/\\d+$`);
   /* posts in the shared store (and the snapshot) are untrusted: rebuild each one from an allow-list */
   function sanitize(p, source) {
     if (!p || typeof p !== "object" || typeof p.status !== "string" || !/^(lost|found|spotted)$/.test(p.status)) return null;
+    const text = (k) => clip(stripHouse(String(p[k] ?? "")), k);
     const out = {
       id: clip(p.id, "name"), status: p.status,
       animal: typeof p.animal === "string" && /^(dog|cat|other)$/i.test(p.animal) ? p.animal.toLowerCase() : "other",
-      name: clip(p.name, "name"), desc: stripHouse(clip(p.desc, "desc")), near: cleanNear(clip(p.near, "near")),
-      town: TOWNS.includes(p.town) ? p.town : "", date: typeof p.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(p.date) ? p.date : "",
-      contact: stripHouse(clip(p.contact, "contact")),
-      created: typeof p.created === "string" && /^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/.test(p.created) ? p.created : "", source,
+      name: text("name"), desc: text("desc"), near: cleanNear(clip(p.near, "near")),
+      town: TOWNS.includes(p.town) ? p.town : "", date: realDay(p.date) ? p.date : "",
+      contact: text("contact"),
+      created: realTime(p.created) ? p.created : "", source,
     };
     if (Number.isFinite(p.x) && Number.isFinite(p.y) && Math.abs(p.x) < 2e4 && Math.abs(p.y) < 2e4) {
       out.x = Math.round(p.x / 10) * 10; out.y = Math.round(p.y / 10) * 10;
@@ -74,10 +116,10 @@
   }
 
   /* ---------------- street matching (nkpages/fmt.py street_key is the Python port) ---------------- */
-  const ORD = { first: "1", second: "2", third: "3", fourth: "4", fifth: "5", sixth: "6", seventh: "7", eighth: "8", ninth: "9", tenth: "10",
-    eleventh: "11", twelfth: "12", thirteenth: "13", fourteenth: "14", fifteenth: "15", sixteenth: "16", seventeenth: "17", eighteenth: "18", nineteenth: "19", twentieth: "20" };
-  const TYPES = { street: "st", st: "st", avenue: "ave", ave: "ave", av: "ave", road: "rd", rd: "rd", drive: "dr", dr: "dr", boulevard: "blvd", blvd: "blvd",
-    lane: "ln", ln: "ln", court: "ct", ct: "ct", place: "pl", pl: "pl", way: "way", alley: "aly", aly: "aly", terrace: "ter", ter: "ter", highway: "hwy", hwy: "hwy", pike: "pike", circle: "cir", cir: "cir" };
+  const ORD = Object.assign(Object.create(null), { first: "1", second: "2", third: "3", fourth: "4", fifth: "5", sixth: "6", seventh: "7", eighth: "8", ninth: "9", tenth: "10",
+    eleventh: "11", twelfth: "12", thirteenth: "13", fourteenth: "14", fifteenth: "15", sixteenth: "16", seventeenth: "17", eighteenth: "18", nineteenth: "19", twentieth: "20" });
+  const TYPES = Object.assign(Object.create(null), { street: "st", st: "st", avenue: "ave", ave: "ave", av: "ave", road: "rd", rd: "rd", drive: "dr", dr: "dr", boulevard: "blvd", blvd: "blvd",
+    lane: "ln", ln: "ln", court: "ct", ct: "ct", place: "pl", pl: "pl", way: "way", alley: "aly", aly: "aly", terrace: "ter", ter: "ter", highway: "hwy", hwy: "hwy", pike: "pike", circle: "cir", cir: "cir" });
   function streetKey(name) {
     if (!name) return null;
     let t = String(name).toLowerCase().replace(/[.,#']/g, " ").split(/\s+/).filter(Boolean);
@@ -192,10 +234,25 @@
     notify();
   }
 
+  /* fetch and read JSON with a deadline (ms > 0): a stalled request must never leave the board, or anything
+     awaiting it, hanging, so it is aborted after `ms` and counts as a failure */
+  function fetchJSON(url, opts = {}, ms = FETCH_MS) {
+    const ac = ms > 0 && typeof AbortController === "function" ? new AbortController() : null;
+    let timer = null;
+    const got = Promise.resolve().then(() => fetch(url, ac ? { ...opts, signal: ac.signal } : opts)).then((r) => {
+      if (!r.ok) throw new Error(`${url} answered ${r.status}`);
+      return r.json();
+    });
+    if (!(ms > 0)) return got;
+    const late = new Promise((_, no) => { timer = setTimeout(() => { if (ac) ac.abort(); no(new Error(`${url}: no answer in ${ms / 1000} s`)); }, ms); });
+    return Promise.race([got, late]).finally(() => clearTimeout(timer));
+  }
+
   async function githubPosts() {
-    const r = await fetch(`https://api.github.com/repos/${REPO}/issues?state=open&per_page=100`, { headers: { Accept: "application/vnd.github+json" } });
-    if (!r.ok) throw new Error("GitHub answered " + r.status);
-    const issues = await r.json();
+    const [issues] = await Promise.all([
+      fetchJSON(`https://api.github.com/repos/${REPO}/issues?state=open&per_page=100`, { headers: { Accept: "application/vnd.github+json" } }),
+      loadStreets(), // stripHouse() needs the street names to spot "412 Leishman"
+    ]);
     if (!Array.isArray(issues)) throw new Error("GitHub answered with no list");
     return issues.filter(isPetIssue).map(parseIssue).filter(Boolean);
   }
@@ -222,14 +279,11 @@
     let snap = null;
     if (doc && !doc.querySelector('meta[name="nk-pets-snapshot"]')) return startGithub(null);
     try {
-      const r = await fetch(root() + "data/pets-board.json", { cache: "no-cache" });
-      if (r.ok) {
-        const j = await r.json();
-        const t = Date.parse(j && j.fetched);
-        if (j && Array.isArray(j.posts) && Number.isFinite(t)) {
-          snap = { fetched: j.fetched, age: Date.now() - t, posts: j.posts.map((p) => sanitize(p, "github")).filter(Boolean) };
-          snap.posts.forEach((p) => board.snapIds.add(p.id));
-        }
+      const j = await fetchJSON(root() + "data/pets-board.json", { cache: "no-cache" });
+      const t = Date.parse(j && j.fetched);
+      if (j && Array.isArray(j.posts) && Number.isFinite(t)) {
+        snap = { fetched: j.fetched, age: Date.now() - t, posts: j.posts.map((p) => sanitize(p, "github")).filter(Boolean) };
+        snap.posts.forEach((p) => board.snapIds.add(p.id));
       }
     } catch (e) { snap = null; }
     if (snap && snap.age <= FRESH_MS) {
@@ -244,6 +298,7 @@
     board.db = db;
     try { board.uid = user ? await user.id() : null; } catch (e) { board.uid = null; }
     board.canPost = typeof board.uid === "string" && board.uid.length > 0;
+    await loadStreets(); // stripHouse() needs the street names
     db.collection("pets").onSnapshot((snap) => {
       const all = [];
       board.mine = null;
@@ -314,15 +369,22 @@
     else if (typeof ui.onChange === "function") board.listeners.add(ui.onChange);
   }
 
-  /* pages with a map (or street lines): W may be null when `lines` is given */
-  async function init({ W = null, lines = null, streets = null, ui = null } = {}) {
+  /* the geocoding index (from the map's world W.lines, or road lines) and the street list, set synchronously: a
+     caller can geocode (board.idx, geocodeNear) as soon as this returns, without waiting for the board */
+  function setIndex({ W = null, lines = null, streets = null } = {}) {
     const idx = buildIndex(lines ? { lines } : W);
     if (idx.size) board.idx = idx;
     if (Array.isArray(streets)) board.streets = streets;
+    if (board.idx && board.posts.length) board.posts = board.posts.map(place);
+    return board.idx;
+  }
+  /* pages with a map (or street lines): W may be null when `lines` is given. board.idx is set before any network
+     wait; the returned promise settles once the board has an answer, and nothing needs to await it to geocode */
+  async function init({ W = null, lines = null, streets = null, ui = null } = {}) {
+    setIndex({ W, lines, streets });
     if (ui) board.ui = ui;
     if (ui && typeof ui.onChange === "function") { try { ui.onChange(board.posts); } catch (e) { console.error(e); } }
     if (started) {
-      if (board.idx && board.posts.length) board.posts = board.posts.map(place);
       notify();
       return started;
     }
@@ -337,7 +399,7 @@
   /* ---------------- street lines, loaded lazily (never on the home page) ---------------- */
   const dataCache = {};
   function getData(name) {
-    if (!dataCache[name]) dataCache[name] = fetch(root() + "data/" + name).then((r) => { if (!r.ok) throw new Error(name + " " + r.status); return r.json(); });
+    if (!dataCache[name]) dataCache[name] = fetchJSON(root() + "data/" + name, {}, 0).catch((e) => { delete dataCache[name]; throw e; });
     return dataCache[name];
   }
   function dec(arr, q) {
@@ -357,15 +419,26 @@
     }
     return linesP;
   }
+  /* the geocoding index for pages without a map; it never waits for (or starts) the board */
   let idxP = null;
   function ensureIndex() {
     if (board.idx && board.idx.size) return Promise.resolve(board.idx);
     if (!idxP) {
       idxP = Promise.all([loadLines(), getData("streets.json")])
-        .then(([lines, streets]) => { init({ W: null, lines, streets }); return board.idx; })
+        .then(([lines, streets]) => { setIndex({ lines, streets }); if (board.posts.length) notify(); return board.idx; })
         .catch((e) => { idxP = null; throw e; });
     }
     return idxP;
+  }
+  /* just the street names (data/streets.json, small): stripHouse() matches house numbers against them. Never
+     rejects and never waits longer than FETCH_MS; without them stripHouse() falls back to street-type words */
+  function loadStreets() {
+    if (board.streets.length) return Promise.resolve(board.streets);
+    let timer = null;
+    const late = new Promise((ok) => { timer = setTimeout(ok, FETCH_MS); });
+    return Promise.race([getData("streets.json"), late])
+      .then((list) => { if (Array.isArray(list) && !board.streets.length) board.streets = list; }, () => {})
+      .then(() => { clearTimeout(timer); return board.streets; });
   }
   const loadMeta = () => getData("meta.json");
 
@@ -456,9 +529,10 @@
   const headline = (p) => `${STATUS[p.status]} ${animalWord(p)}${p.name ? ": " + p.name : ""}`;
   const dayOf = (p) => p.date || String(p.created || "").slice(0, 10);
   function shortDate(iso) {
-    const S = NKS();
-    if (!iso || !S) return iso || "";
-    const s = S.apDate(String(iso).slice(0, 10));
+    const S = NKS(), d = String(iso || "").slice(0, 10);
+    if (!realDay(d)) return "";
+    if (!S) return iso;
+    const s = S.apDate(d);
     return s.replace(new RegExp(", " + new Date().getFullYear() + "$"), "");
   }
   /* "9:15 a.m." today, else "Sept. 22, 9:15 a.m." */
@@ -545,7 +619,7 @@
   }
   function dateLine(p) {
     const S = NKS(), d = dayOf(p);
-    if (!d || !S) return "";
+    if (!realDay(d) || !S) return "";
     const ago = S.daysFrom(d) <= 0 ? ` <span data-ago="${d}" data-paren>(${S.ago(d)})</span>` : "";
     return `${STATUS[p.status]} ${S.apDay(d)}${ago}`;
   }
@@ -632,8 +706,8 @@
   window.NKPets = {
     init, loadBoard, addPost, markReunited, board, ISSUE_FORM, ISSUES, TOWNS, LIMITS, STATUS,
     geocodeNear: (t, town) => geocodeNear(t, board.idx, board.streets, town),
-    parseIssue, isPetIssue, cleanNear, stripHouse, sanitize, streetKey, buildIndex,
-    startSnapshot, startGithub, ensureIndex, loadLines, loadMeta, nearestStreets, shortStreet,
+    parseIssue, isPetIssue, cleanNear, stripHouse, streetKeys, realDay, realTime, sanitize, streetKey, buildIndex,
+    startSnapshot, startGithub, setIndex, ensureIndex, loadStreets, loadLines, loadMeta, nearestStreets, shortStreet,
     distanceFrom, distText, newSince, markSeen, issueTitle, issueUrl, mailtoUrl, draftText,
     headline, nearLine, where, animalWord, shortDate, checkedText, shareText, shareUrl, sharePost,
     rowHTML, cardHTML, contactHTML, renderHomeBox, renderTownList,

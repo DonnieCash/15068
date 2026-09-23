@@ -204,6 +204,7 @@
       this.hold = !!opts.hold;  // true: don't draw yet (an arrival view is still being worked out)
       this.touched = false;     // the person has panned or zoomed (only then is ?at= written)
       this.drawnLabels = [];    // street names drawn as labels in the last frame
+      this.drawnTowns = [];     // town names drawn in the last frame
       this.petDrawn = new Map(); // post id -> dots drawn in the last frame
       this.townBoxes = [];
       this.pointers = new Map();
@@ -254,7 +255,8 @@
       this.dirty = true;
       if (!this.touched || !this.opts.onView) return;
       clearTimeout(this._vt);
-      this._vt = setTimeout(() => this.opts.onView(this.view()), 300);
+      // a view passed through mid-flight is never reported; the flight reports where it lands
+      this._vt = setTimeout(() => { if (!this._fly) this.opts.onView(this.view()); }, 300);
     }
     setView(x, y, s) {
       this._fly = null;
@@ -292,6 +294,7 @@
       const ty = y + offsetY / s1, tx = x - offsetX / s1;
       const t0 = performance.now(), dur = matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 900;
       const id = this._fly = {};
+      clearTimeout(this._vt);
       const step = (t) => {
         if (this._fly !== id) return;
         const k = Math.min(1, (t - t0) / dur), e = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
@@ -579,19 +582,21 @@
       };
       // the streets around a focus point (a pet's pin, an incident, a corner) come first
       if (this.focus && s >= 0.8) this._focusLabels(ctx, fits, drawn, lab, halo);
-      // towns
-      this.townBoxes = [];
+      // towns: a name that would sit on one already drawn (Arnold on New Kensington at the whole-ZIP view) tries a
+      // little above or below its point before it is left out
+      this.townBoxes = []; this.drawnTowns = [];
       for (const l of this.W.base.labels) {
         if (l.k !== "town") continue;
         const [x, y] = this.toScreen(l.x, l.y);
         const f = this.w < 700 ? 14 : s < .3 ? 20 : 14;
         if (s > 1.5) continue;
         ctx.font = `800 ${f}px ${css("--f-display")}`;
-        const w = ctx.measureText(l.n.toUpperCase()).width;
-        if (fits(x - w / 2, y - f / 2, w, f)) {
-          this._text(ctx, l.n.toUpperCase(), x, y, ctx.font, lab, halo);
-          this.townBoxes.push([x - w / 2 - 4, y - f / 2 - 3, w + 8, f + 6]);
-        }
+        const t = l.n.toUpperCase(), w = ctx.measureText(t).width;
+        const dy = [0, -0.6, 0.6, -1.2, 1.2].map((k) => k * f).find((d) => fits(x - w / 2, y + d - f / 2, w, f));
+        if (dy == null) continue;
+        this._text(ctx, t, x, y + dy, ctx.font, lab, halo);
+        this.townBoxes.push([x - w / 2 - 4, y + dy - f / 2 - 3, w + 8, f + 6]);
+        this.drawnTowns.push(l.n);
       }
       // streets (by rank, visible at zoom)
       if (this.streetsByRank.length && s > 0.09) {

@@ -546,7 +546,7 @@ table.dir td small { font-size: 12px; margin-left: 0; }
 /* ---------- compact rows: home box, town pages, search ---------- */
 .petrows { list-style: none; margin: 0; padding: 0; }
 .listing-row + .listing-row { border-top: 1px solid var(--line); }
-.listing-row a { display: block; padding: 8px 0; color: var(--ink); text-decoration: none; font: 400 15px/1.38 var(--f-sans); }
+.listing-row a { display: block; padding: 8px 0; color: var(--ink); text-decoration: none; font: 400 15px/1.38 var(--f-sans); overflow-wrap: anywhere; }
 .listing-row a:hover .listing-desc { text-decoration: underline; text-decoration-color: var(--ink-2); }
 .listing-row .listing-st { font: 700 12.5px/1.2 var(--f-sans); text-transform: uppercase; letter-spacing: .03em; margin-right: 2px; }
 .listing-row .listing-where { display: block; color: var(--ink-2); font-size: 13.5px; margin-top: 2px; }
@@ -570,7 +570,8 @@ table.dir td small { font-size: 12px; margin-left: 0; }
 .pets-town .pt-lead a { font-weight: 600; }
 .pets-town .pt-live { max-width: 60ch; }
 .pets-town .petrows { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin: 6px 0 4px; }
-.pets-town .pt-call { font: 400 15px/1.5 var(--f-sans); margin: 14px 0 4px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; }
+.pets-town .pt-next { font: 400 15px/1.5 var(--f-sans); margin: 14px 0 4px; display: flex; flex-wrap: wrap; align-items: center; gap: 0 10px; }
+.pets-town .pt-next .act { display: inline-block; padding: 10px 0; }
 
 /* ---------- /lost-pets/: head, toggles, board summary ---------- */
 .lp { display: grid; gap: 0 40px; grid-template-columns: minmax(0, 1fr); }
@@ -643,12 +644,14 @@ main[data-mode="lost"] #found, main[data-mode="found"] #lost { display: none; }
 .board { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 15.5rem), 1fr)); gap: 14px; align-items: start; }
 .listing {
   margin: 0; background: var(--surface); border: 1px solid var(--rule); padding: 10px 12px;
-  font: 14.5px/1.42 var(--f-sans); display: grid; gap: 5px; min-width: 0;
+  font: 14.5px/1.42 var(--f-sans); display: grid; grid-template-columns: minmax(0, 1fr); gap: 5px; min-width: 0;
 }
 .listing img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; background: var(--raised); }
 .listing .listing-st { font: 700 15px/1.1 var(--f-sans); font-stretch: 80%; text-transform: uppercase; letter-spacing: .02em; }
 .listing h3 { font: 700 19px/1.2 var(--f-head); }
 .listing-near { font-weight: 600; }
+/* a pasted URL or other long word wraps instead of pushing the card (and the page) sideways */
+.listing h3, .listing-desc, .listing-near { overflow-wrap: anywhere; }
 .listing-dist { color: var(--ink); font-weight: 700; }
 .listing-date { color: var(--ink-2); }
 .listing-contact { font-weight: 600; overflow-wrap: anywhere; }
@@ -720,7 +723,8 @@ details.also > summary:hover { text-decoration: underline; }
 .listing-post .petform { margin-top: 8px; }
 
 /* ---------- /lost-pets/gh-N/ ---------- */
-.lpg { display: grid; gap: 24px; margin-top: 20px; }
+.lpg { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; margin-top: 20px; }
+.listing-page h1 { overflow-wrap: anywhere; }
 @media (min-width: 960px) { .lpg { grid-template-columns: minmax(0, 7fr) minmax(0, 4fr); gap: 40px; align-items: start; } }
 .listing-one { font-size: 16px; padding: 14px 16px; max-width: 640px; }
 .listing-one .listing-desc { font: 400 18px/1.45 var(--f-text); }
@@ -738,7 +742,7 @@ details.also > summary:hover { text-decoration: underline; }
 .flyer-page:not(.filled) .fl-foot a { color: var(--ink); }
 .flyer {
   page: flyer; max-width: 8.5in; background: #fff; color: #111; border: 1px solid var(--line);
-  padding: .45in .5in .25in; display: grid; gap: 10px; text-align: center;
+  padding: .45in .5in .25in; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; text-align: center;
 }
 .flyer h1 {
   font: 800 72px/1 var(--f-head); letter-spacing: -.01em; text-transform: uppercase; max-width: none; margin: 0;
@@ -751,6 +755,7 @@ details.also > summary:hover { text-decoration: underline; }
 .fl-photo { width: 100%; max-height: 3.9in; object-fit: contain; display: block; margin: 4px auto; }
 .fl-desc { font: 400 21px/1.4 var(--f-text); max-width: 34em; margin: 0 auto; }
 .fl-seen { font: 700 19px/1.35 var(--f-sans); }
+.fl-q, .fl-desc, .fl-seen { overflow-wrap: anywhere; }
 .fl-contact { font: 800 28px/1.2 var(--f-sans); overflow-wrap: anywhere; }
 .fl-tabs { list-style: none; margin: 6px -.5in 0; padding: 0; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); border-top: 2px dashed #111; height: 1.6in; }
 .fl-tabs li {

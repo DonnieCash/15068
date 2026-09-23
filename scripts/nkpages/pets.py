@@ -1,5 +1,5 @@
-"""Lost & found pets: exact ports of site/assets/pets.js (cleanNear, stripHouse, sanitize, parseIssue, streetKey,
-buildIndex, geocodeNear), the snapshot posts, and the board markup other pages embed.
+"""Lost & found pets: exact ports of site/assets/pets.js (cleanNear, stripHouse, realDay, sanitize, parseIssue,
+streetKey, buildIndex, geocodeNear), the snapshot posts, and the board markup other pages embed.
 
 Cross-builder API (see contracts.md):
     home_box(D, R)            the complete <section id="pets-box"> for the home page
@@ -69,7 +69,11 @@ _ROUTE = re.compile(rf"\b(route|rte|pa|sr|us|i)[{JS_WS}-]*(\d{{1,4}})\b", AI)
 _BLOCK = re.compile(rf"\b(\d{{0,3}}00){S}+block\b", AI)
 _NUM = re.compile(rf"(^|[^\w\u2009])\d{{1,5}}[a-z]?(?:{S}*[-–]{S}*\d{{1,5}}[a-z]?)?(?![\w\u2009])"
                   rf"(?!{S}*(?:st|nd|rd|th)\b)", AI)
-_HOUSE = re.compile(rf"(^|[^\w\u2009-])\d{{1,5}}[a-z]?(?:{S}*[-–]{S}*\d{{1,5}}[a-z]?)?"
+_PHONE_RUN = re.compile(r"\(?\b\d{3}\)?[-. ]?\d{3}[-. ]\d{4}\b", re.A)
+# a number (or range) and the 1-5 words after it; _house_at decides whether those words name a real street
+_HOUSE_AT = re.compile(rf"(^|[^\w\u2009\u2060:./-])(#?\d{{1,5}}[a-z]?(?:{S}*[-–]{S}*\d{{1,5}}[a-z]?)?)"
+                       rf"(?=((?:{S}+(?:\d+(?:st|nd|rd|th)\b|[a-z][a-z'.-]*)){{1,5}}))", AI)
+_HOUSE = re.compile(rf"(^|[^\w\u2009\u2060-])\d{{1,5}}[a-z]?(?:{S}*[-–]{S}*\d{{1,5}}[a-z]?)?"
                     rf"(?={S}+(?:[nsew]\.?{S}+)?(?:\d+(?:st|nd|rd|th)|[a-z]+){S}+"
                     r"(?:street|st|avenue|ave|av|road|rd|drive|dr|boulevard|blvd|lane|ln|way|court|ct|alley|aly|"
                     r"place|pl|terrace|ter|highway|hwy|pike|circle|cir)\b)", AI)
@@ -91,20 +95,55 @@ def clean_near(t):
     return js_trim(t)
 
 
-def strip_house(t):
-    """Port of stripHouse(): remove a house number that comes right before a street name in free text
-    ("found at 1012 Fifth Ave" -> "found at Fifth Ave"); phone numbers, ordinals and routes are kept."""
+def street_keys(streets=None, idx=None):
+    """Port of streetKeys(): {core: {type, ...}} for every named street in streets.json and the road index."""
+    out = {}
+    for s in streets or []:
+        k = street_key(s.get("n")) if isinstance(s, dict) else None
+        if k:
+            out.setdefault(k["core"], set()).add(k["type"])
+    for core, ls in (idx or {}).items():
+        for ln in ls:
+            out.setdefault(core, set()).add(ln["type"])
+    return out
+
+
+def _house_at(keys):
+    def repl(m):
+        """A number is a house number when the 1-4 words after it (after "on"/"of"/"off" for 2+ digits) name a
+        street we know: "412 Leishman", "1507 on Kenneth", "88 Pleasant Valley Rd". Without a street type the
+        number needs 2+ digits, so "has 2 white paws" keeps its 2 (there is a White Street)."""
+        big = re.search(r"[0-9]{2}", m.group(2)) is not None
+        w = re.split(f"{S}+", js_trim(m.group(3)))
+        if big and re.fullmatch(r"on|of|off", w[0], AI):
+            w = w[1:]
+        for n in range(1, min(4, len(w)) + 1):
+            k = street_key(" ".join(w[:n]))
+            types = keys.get(k["core"]) if k else None
+            if types and ((k["type"] in types or None in types) if k["type"] else big):
+                return m.group(1)
+        return m.group(0)
+    return repl
+
+
+def strip_house(t, keys=None):
+    """Port of stripHouse(): remove a house number from free text. A number goes when the words after it name a
+    real street (keys: street_keys(); "found at 412 Leishman" -> "found at Leishman"), or, as a fallback, when one
+    word and a street type follow ("1012 Fifth Ave"); phone numbers, ordinals, routes and counts are kept."""
     t = _protect_routes(js_str(t))
+    t = _PHONE_RUN.sub(lambda m: re.sub(r"[0-9]+", lambda d: "\u2060" + d.group(0), m.group(0)), t)
+    if keys:
+        t = _HOUSE_AT.sub(_house_at(keys), t)
     t = _HOUSE.sub(lambda m: m.group(1), t)
-    t = t.replace("\u2009", " ")
-    t = re.sub(" {2,}", " ", t)
+    t = t.replace("\u2009", " ").replace("\u2060", "")
+    t = re.sub(r"([(\[]) ", r"\1", re.sub(" {2,}", " ", t))
     return js_trim(t)
 
 
 # --------------------------------------------------------------------------- sanitize / parseIssue
 
 _ISO_DAY = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}")
-_ISO_TIME = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9:.]+Z")
+_ISO_TIME = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]{1,3})?Z")
 _GH_IMG = re.compile(r"https://(user-images\.githubusercontent\.com|github\.com/user-attachments)/")
 
 
@@ -112,20 +151,39 @@ def _num(v):
     return isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v)
 
 
-def sanitize(p, source, repo=REPO):
-    """Port of sanitize(): rebuild a post from an allow-list (posts are untrusted)."""
+def real_day(s):
+    """Port of realDay(): 'YYYY-MM-DD' that is a real calendar day ('2026-09-31', '0000-01-01' are not)."""
+    if not isinstance(s, str) or not _ISO_DAY.fullmatch(s):
+        return False
+    try:
+        dt.date.fromisoformat(s)
+    except ValueError:
+        return False
+    return True
+
+
+def real_time(s):
+    """Port of realTime(): a UTC timestamp like GitHub's '2026-09-21T14:00:00Z' on a real day and a real time."""
+    return (isinstance(s, str) and _ISO_TIME.fullmatch(s) is not None and real_day(s[:10])
+            and int(s[11:13]) < 24 and int(s[14:16]) < 60 and int(s[17:19]) < 60)
+
+
+def sanitize(p, source, repo=REPO, keys=None):
+    """Port of sanitize(): rebuild a post from an allow-list (posts are untrusted). keys: street_keys(), which
+    lets strip_house() find house numbers before bare street names ("412 Leishman")."""
     if not isinstance(p, dict) or not re.fullmatch(r"lost|found|spotted", js_str(p.get("status"))):
         return None
     animal = p.get("animal")
+    text = lambda k: clip(strip_house(js_str(p.get(k)), keys), k)  # noqa: E731
     out = {
         "id": clip(p.get("id"), "name"), "status": p["status"],
         "animal": animal.lower() if isinstance(animal, str) and re.fullmatch(r"dog|cat|other", animal, AI) else "other",
-        "name": clip(p.get("name"), "name"), "desc": strip_house(clip(p.get("desc"), "desc")),
+        "name": text("name"), "desc": text("desc"),
         "near": clean_near(clip(p.get("near"), "near")),
         "town": p["town"] if p.get("town") in TOWNS else "",
-        "date": p["date"] if isinstance(p.get("date"), str) and _ISO_DAY.fullmatch(p["date"]) else "",
-        "contact": strip_house(clip(p.get("contact"), "contact")),
-        "created": p["created"] if isinstance(p.get("created"), str) and _ISO_TIME.fullmatch(p["created"]) else "",
+        "date": p["date"] if real_day(p.get("date")) else "",
+        "contact": text("contact"),
+        "created": p["created"] if real_time(p.get("created")) else "",
         "source": source,
     }
     x, y = p.get("x"), p.get("y")
@@ -155,7 +213,7 @@ def is_pet_issue(issue):
     return isinstance(issue, dict) and not issue.get("pull_request") and FORM_MARK in js_str(issue.get("body"))
 
 
-def parse_issue(issue, repo=REPO):
+def parse_issue(issue, repo=REPO, keys=None):
     """Port of parseIssue(): a GitHub issue made with the lost-found-pet form -> a sanitized post, or None."""
     body = js_str(issue.get("body")) or ""
     field = lambda label: _field(body, label)  # noqa: E731
@@ -172,7 +230,7 @@ def parse_issue(issue, repo=REPO):
         "date": field("Date") or js_str(issue.get("created_at"))[:10], "contact": field("How to reach you"),
         "photo": im.group(1) if im else "",
         "created": issue.get("created_at"),
-    }, "github", repo)
+    }, "github", repo, keys)
 
 
 # --------------------------------------------------------------------------- street matching and geocoding
@@ -253,6 +311,13 @@ def index(D):
     return D["_pets_idx"]
 
 
+def keys_of(D):
+    """street_keys() for the build: streets.json and the road index."""
+    if "_pets_keys" not in D:
+        D["_pets_keys"] = street_keys(D.get("streets"), index(D))
+    return D["_pets_keys"]
+
+
 def newest_first(posts):
     """publish()'s order: date (else created), newest first, stable."""
     return sorted(posts, key=lambda p: js_str(p.get("date") or p.get("created")), reverse=True)
@@ -260,13 +325,13 @@ def newest_first(posts):
 
 def snapshot_posts(issues, idx, streets, repo=REPO):
     """What scripts/snapshot_pets.py writes: form issues -> parsed, sanitized, geocoded posts (open ones only)."""
-    out = []
+    out, keys = [], street_keys(streets, idx)
     for i in issues or []:
         if not is_pet_issue(i) or i.get("state", "open") != "open":
             continue
-        p = parse_issue(i, repo)
+        p = parse_issue(i, repo, keys)
         if p:
-            out.append(sanitize(place(p, idx, streets), "github", repo))
+            out.append(sanitize(place(p, idx, streets), "github", repo, keys))
     return newest_first(out)
 
 
@@ -275,12 +340,12 @@ def open_posts(D):
     if D.get("board") is None:
         return []
     if "_pets_open" not in D:
-        repo = D["cfg"].get("repo") or REPO
+        repo, keys = D["cfg"].get("repo") or REPO, keys_of(D)
         posts = []
         for p in (D["board"].get("posts") or []):
-            s = sanitize(p, "github", repo)
+            s = sanitize(p, "github", repo, keys)
             if s and "x" not in s:
-                s = sanitize(place(s, index(D), D["streets"]), "github", repo)
+                s = sanitize(place(s, index(D), D["streets"]), "github", repo, keys)
             if s:
                 posts.append(s)
         D["_pets_open"] = newest_first(posts)
@@ -308,16 +373,17 @@ def eastern(iso):
 
 def checked(iso, today):
     """'9:15 a.m.' when the board was read today, else 'Sept. 22, 9:15 a.m.'."""
-    if not iso:
+    try:
+        t = eastern(iso)
+    except (TypeError, ValueError, OverflowError):
         return ""
-    t = eastern(iso)
     tm = fmt.ap_time(t)
     return tm if t.date() == today else f"{short_date(t.date().isoformat(), today)}, {tm}"
 
 
 def short_date(iso, today):
     """'Sept. 22' in the current year, 'Sept. 22, 2025' otherwise."""
-    if not iso:
+    if not real_day(str(iso or "")[:10]):
         return ""
     d = dt.date.fromisoformat(iso[:10])
     s = fmt.ap_date(d.isoformat())
@@ -407,7 +473,7 @@ def row_html(post, R, today=None):
 
 def date_line(p, today):
     d = p.get("date") or (p.get("created") or "")[:10]
-    if not d:
+    if not real_day(d):
         return ""
     ago = ""
     n = (today - dt.date.fromisoformat(d)).days
@@ -536,7 +602,9 @@ def home_box(D, R):
 
 def town_section(D, R, town):
     """'Lost and found pets in {town}' for a town page: static text, the snapshot's rows for that town, and an
-    empty [data-pets-town] host that pets.js renderTownList() fills with live posts."""
+    empty [data-pets-town] host that pets.js renderTownList() fills with live posts. No phone numbers here: the
+    section sits below the page's ads, and every pets contact must come before any ad (the Animal Protectors
+    number is in the header strip and on /lost-pets/)."""
     state, posts, fetched = board_state(D)
     mine = [p for p in posts if p.get("town") == town]
     lp = rel(R, "/lost-pets/")
@@ -548,16 +616,13 @@ def town_section(D, R, town):
         note = f'<p class="pb-msg">None of the board&rsquo;s open listings are in {esc(town)} right now (checked {checked(fetched, D["today"])}).</p>'
     else:
         note = ""
-    sh = shelter(D)
     return (f'<section class="sec pets-town" id="{sid}" aria-labelledby="{sid}-h">'
             f'<h2 id="{sid}-h">Lost and found pets in {esc(town)}</h2>'
             f'<p class="pt-lead">Open listings for {esc(town)} are on the <a href="{lp}#board">lost and found board ›</a></p>'
             f'<div class="pt-live" data-pets-town="{esc(town)}"{data_attrs(D)}>{note}'
             + (f'<ul class="petrows">{rows}</ul>' if rows else "") + '</div>'
-            f'<p class="pt-call">Lost or found a pet? Call {esc(short_name(sh))} {tel_btn(sh["phone"])} '
-            f'<a class="act" href="{lp}">What to do first ›</a></p>'
-            + credit_line([sh["source"]])
-            + '</section>')
+            f'<p class="pt-next">Lost or found a pet? <a class="act" href="{lp}">What to do first ›</a></p>'
+            '</section>')
 
 
 def data_attrs(D):

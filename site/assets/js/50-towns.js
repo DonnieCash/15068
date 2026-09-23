@@ -163,12 +163,12 @@
   }
 
   /* street names: the same key pets.js and nkpages.fmt use ('Fifth Avenue' and '5th Ave' -> {core: '5', type: 'ave'}) */
-  const ORD = { first: "1", second: "2", third: "3", fourth: "4", fifth: "5", sixth: "6", seventh: "7", eighth: "8", ninth: "9", tenth: "10",
+  const ORD = Object.assign(Object.create(null), { first: "1", second: "2", third: "3", fourth: "4", fifth: "5", sixth: "6", seventh: "7", eighth: "8", ninth: "9", tenth: "10",
     eleventh: "11", twelfth: "12", thirteenth: "13", fourteenth: "14", fifteenth: "15", sixteenth: "16", seventeenth: "17", eighteenth: "18",
-    nineteenth: "19", twentieth: "20" };
-  const TYPES = { street: "st", st: "st", avenue: "ave", ave: "ave", av: "ave", road: "rd", rd: "rd", drive: "dr", dr: "dr", boulevard: "blvd",
+    nineteenth: "19", twentieth: "20" });
+  const TYPES = Object.assign(Object.create(null), { street: "st", st: "st", avenue: "ave", ave: "ave", av: "ave", road: "rd", rd: "rd", drive: "dr", dr: "dr", boulevard: "blvd",
     blvd: "blvd", lane: "ln", ln: "ln", court: "ct", ct: "ct", place: "pl", pl: "pl", way: "way", alley: "aly", aly: "aly", terrace: "ter",
-    ter: "ter", highway: "hwy", hwy: "hwy", pike: "pike", circle: "cir", cir: "cir" };
+    ter: "ter", highway: "hwy", hwy: "hwy", pike: "pike", circle: "cir", cir: "cir" });
   function streetKey(name) {
     if (window.NKPets && window.NKPets.streetKey) return window.NKPets.streetKey(name);
     let t = String(name || "").toLowerCase().replace(/[.,#']/g, " ").split(/\s+/).filter(Boolean);

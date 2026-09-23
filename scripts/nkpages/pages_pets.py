@@ -258,9 +258,9 @@ def status_text(D, state, fetched, R):
 def summary(D, state, posts, fetched):
     if state == "listed":
         n = len(posts)
-        newest = max((p.get("date") or p.get("created") or "")[:10] for p in posts)
-        return (f'<a href="#board">The board: {n} open listing{"s" if n != 1 else ""}, newest '
-                f'{esc(P.short_date(newest, D["today"]))}. <span class="bs-go">See the listings ›</span></a>')
+        newest = P.short_date(max((p.get("date") or p.get("created") or "")[:10] for p in posts), D["today"])
+        return (f'<a href="#board">The board: {n} open listing{"s" if n != 1 else ""}'
+                + (f', newest {esc(newest)}' if newest else "") + '. <span class="bs-go">See the listings ›</span></a>')
     if state == "empty":
         return (f'<a href="#board">The board: no open listings right now (checked {P.checked(fetched, D["today"])}). '
                 '<span class="bs-go">See the board ›</span></a>')
@@ -425,15 +425,15 @@ def listing_route(D, p):
     h1 = P.headline(p)
     title = h1 + (f", near {p['near']}" if p.get("near") else "") + " · NK15068"
     verb, who = VERB[p["status"]]
-    d = p.get("date") or (p.get("created") or "")[:10]
+    d = P.short_date(p.get("date") or (p.get("created") or "")[:10], D["today"])
     desc = (f"{P.STATUS[p['status']]} {P.animal_word(p)}" + (f" in {p['town']}" if p.get("town") else " in 15068")
-            + (f", {verb} {P.short_date(d, D['today'])}" if d else "") + f". How to reach the {who} and who to call.")
+            + (f", {verb} {d}" if d else "") + f". How to reach the {who} and who to call.")
     return dynamic(P.post_path(p), "lost-pets-listing", title, desc, h1, index="N", scripts=("pubs", "pets", "app"),
                    dates=("pets",), nav="lost-pets")
 
 
 def listing(D, R, p):
-    posted = (p.get("created") or "")[:10]
+    posted = (p.get("created") or "")[:10] if P.real_day((p.get("created") or "")[:10]) else ""
     fetched = D["board"].get("fetched")
     line = " · ".join(x for x in ((f"Posted {fmt.ap_date(posted)}" if posted else ""),
                                   (f"Board checked {P.checked(fetched, D['today'])}" if fetched else "")) if x)
@@ -454,6 +454,16 @@ def listing(D, R, p):
     return res
 
 
+def rfc822(iso):
+    """'Mon, 21 Sep 2026 10:00:00 -0400', or '' for a missing or impossible time (a bad post never fails the build)."""
+    if not iso:
+        return ""
+    try:
+        return P.eastern(iso).strftime("%a, %d %b %Y %H:%M:%S %z")
+    except (TypeError, ValueError, OverflowError):
+        return ""
+
+
 def feed_xml(D, posts):
     su = site_url(D)
     items = []
@@ -461,15 +471,12 @@ def feed_xml(D, posts):
         u = su + P.post_path(p)
         body = " ".join(x for x in (p.get("desc"), P.near_line(p) + "." if P.near_line(p) else "",
                                     f"Contact: {p['contact']}." if p.get("contact") else "") if x)
-        pub = ""
-        if p.get("created"):
-            t = P.eastern(p["created"])
-            pub = f"<pubDate>{t.strftime('%a, %d %b %Y %H:%M:%S %z')}</pubDate>"
+        t = rfc822(p.get("created"))
+        pub = f"<pubDate>{t}</pubDate>" if t else ""
         items.append(f"<item><title>{esc(og_title(p))}</title><link>{esc(u)}</link>"
                      f'<guid isPermaLink="true">{esc(u)}</guid>{pub}<description>{esc(body)}</description></item>')
-    built = ""
-    if D["board"].get("fetched"):
-        built = f"<lastBuildDate>{P.eastern(D['board']['fetched']).strftime('%a, %d %b %Y %H:%M:%S %z')}</lastBuildDate>"
+    built = rfc822(D["board"].get("fetched"))
+    built = f"<lastBuildDate>{built}</lastBuildDate>" if built else ""
     return ('<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0"><channel>'
             f"<title>NK15068 lost and found pets</title><link>{esc(su)}/lost-pets/</link>"
             "<description>Open lost and found pet listings for New Kensington, Arnold and Lower Burrell (ZIP 15068).</description>"

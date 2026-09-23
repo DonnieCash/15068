@@ -19,6 +19,10 @@
   const readJSON = (sel) => { try { return JSON.parse($(sel)?.textContent || "null"); } catch (e) { return null; } };
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   const flash = (btn, text) => { const was = btn.textContent; btn.textContent = text; setTimeout(() => { btn.textContent = was; }, 1800); };
+  /* a value from the URL used as a key: only the object's own keys count ("constructor" is not a category) */
+  const own = (o, k) => o != null && k != null && Object.prototype.hasOwnProperty.call(o, k);
+  /* a place's website or social link, or "" when the data holds no usable address (search.js has the rule) */
+  const webURL = (v) => (window.NKSearch ? window.NKSearch.webURL(v) : /^https?:\/\//i.test(v || "") ? v : "");
 
   /* ---------------- places: the directory's de-duplication, town labels, map links (same rules as pages_map.py) ---------------- */
   const normName = (s) => String(s || "").toLowerCase().replace(/\b(new kensington|lower burrell|arnold|the|pa)\b/g, "").replace(/[^a-z0-9]/g, "");
@@ -32,12 +36,8 @@
     const keep = new Set(best.values());
     return places.filter((p) => keep.has(p));
   }
-  const FIX_CITY = { "new kensington": "New Kensington", "new kensingtn": "New Kensington", "new kinsington": "New Kensington",
-    "lower burrell": "Lower Burrell", arnold: "Arnold" };
-  function townLabel(p) {
-    const parts = String(p.a || "").split(",").map((s) => s.trim());
-    return (parts.length >= 2 && FIX_CITY[parts[1].toLowerCase().replace(/-/g, " ")]) || p.t || "";
-  }
+  /* the municipality the place is in (from the town boundaries), the same field the town pages count */
+  const townLabel = (p) => p.t || "";
   const slug = (s) => String(s || "").normalize("NFKD").replace(/[^\x00-\x7f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
   const placeParam = (p) => `${slug(p.n)}~${Math.round(p.x)},${Math.round(p.y)}`;
   const mapURL = (k, v) => `${S.url("map/")}?${k}=${encodeURIComponent(v).replace(/%2C/g, ",").replace(/%7E/g, "~").replace(/%20/g, "+")}`;
@@ -78,19 +78,29 @@
     }
     places.forEach((p, i) => { p.id = i; });
     const police = (readJSON("#map-data") || {}).police || {};
+    /* a "Use my location" spot: while it is on screen the view never goes into ?at= (it would give the position away) */
+    let located = null;
     const map = new NK.Map2D(canvas, W, {
       initial: [-5200, -1700, -1400, 1700], scaleEl: $("#scale"), hold: true,
       onSelect: (p) => pick(p),
-      onView: (v) => S.setQS({ at: `${Math.round(v.x)},${Math.round(v.y)},${+v.s.toFixed(3)}` }),
+      onView: (v) => {
+        if (located) {
+          const [sx, sy] = map.toScreen(located.x, located.y);
+          if (sx >= 0 && sy >= 0 && sx <= map.w && sy <= map.h) return;
+          located = null; // panned or zoomed away from it by hand
+        }
+        S.setQS({ at: `${Math.round(v.x)},${Math.round(v.y)},${+v.s.toFixed(3)}` });
+      },
     });
     map.hold = true;
     map.setData(places, streets);
     NK.getTerrain(meta).then((T) => { map.terrain = T; map.dirty = true; }).catch((e) => console.warn(e));
     NK.loadBuildings(W).then((b) => { map.bld = b; map.dirty = true; }).catch((e) => console.warn(e));
     const L = map.layers;
-    let settled = false, arriving = true, atSet = false;
+    let settled = false, arriving = true, atSet = false, acted = false; // acted: the person picked something before the arrival finished
     window.NKdebug = {
       get labels() { return settled ? map.drawnLabels.slice() : []; },
+      get towns() { return settled ? map.drawnTowns.slice() : []; },
       get highlight() { return map.hl ? map.hl.name : null; },
       petDots: (id) => map.petDrawn.get(id) || 0,
       pin(id) {
@@ -196,21 +206,39 @@
     /* ---------- incident filters from the blotter's "Show these on the map" link ---------- */
     const layerParam = Q.has("layer") ? Q.get("layer").split(",") : [];
     const withInc = layerParam.includes("incidents");
-    const F = { t: withInc ? Q.get("town") || "" : "", y: withInc ? Q.get("year") || "" : "", st: withInc ? (Q.get("street") || "").slice(0, 60) : "", c: withInc ? Q.get("c") || "" : "" };
+    const CAT = (window.NKSafety && window.NKSafety.CAT) || {};
+    const F = { t: withInc ? Q.get("town") || "" : "", y: withInc ? Q.get("year") || "" : "", st: withInc ? (Q.get("street") || "").slice(0, 60) : "",
+      c: withInc && own(CAT, Q.get("c")) ? Q.get("c") : "" };
     function incFilter() {
       const k = F.st ? streetKey(F.st) : null;
       return (i) => (!F.c || i.c === F.c) && (!F.t || i.t === F.t) && (!F.y || String(i.d).slice(0, 4) === F.y) && (!F.st || (k && incNames(i, k)));
     }
     const filtered = () => !!(F.c || F.t || F.y || F.st);
+    let filterStreet = null; // the street the blotter's street filter marks on the map
+    /* of the streets that share the filter's name (Fifth Avenue in Arnold, 5th Avenue in New Kensington), the one most
+       of the shown incidents are on */
+    function streetOf(name, list) {
+      const k = streetKey(name);
+      let best = null, most = 0;
+      for (const s of k ? streets : []) {
+        const x = streetKey(s.n);
+        if (!x || x.core !== k.core || !typeOk(k.type, x.type)) continue;
+        const lines = W.lines.filter((l) => l.n === s.n);
+        const n = list.filter((i) => lines.some((l) => NK.lineDist(i.x, i.y, l.pts) <= 30)).length;
+        if (n > most) { most = n; best = s; }
+      }
+      return best;
+    }
     function showFilterNote() {
       const lg = $("#inc-legend");
       if (!lg || !filtered()) return;
-      const CAT = (window.NKSafety && window.NKSafety.CAT) || {};
-      const what = [F.c && CAT[F.c], F.t, F.y, F.st].filter(Boolean).join(" · ");
+      const what = [own(CAT, F.c) && CAT[F.c], F.t, F.y, F.st].filter(Boolean).join(" · ");
       lg.insertAdjacentHTML("beforeend", `<p class="lg-filter" data-l="inc">Showing ${esc(what)} <button type="button" class="linkbtn" id="inc-all">Show all</button></p>`);
       $("#inc-all").addEventListener("click", () => {
         F.c = F.t = F.y = F.st = "";
         map.incVisible = () => true; map.dirty = true;
+        if (filterStreet && map.hl && map.hl.name === filterStreet) map.highlightStreet(null);
+        filterStreet = null;
         $(".lg-filter", lg)?.remove();
         S.setQS({ town: null, year: null, street: null, c: null });
       });
@@ -225,7 +253,7 @@
         Object.entries(meta.groups).filter(([k]) => counts[k]).map(([k, v]) =>
           `<button class="chip" type="button" data-g="${k}" aria-pressed="false"><i style="background:${NK.GROUP_COLORS[k]}"></i>${esc(v)}</button>`).join("");
       const setCat = (g, write) => {
-        if (g !== "*" && !meta.groups[g]) g = "*";
+        if (g !== "*" && !own(meta.groups, g)) g = "*";
         $$(".chip", chips).forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.g === g)));
         map.filter = new Set(g === "*" ? Object.keys(NK.GROUP_COLORS) : [g]);
         map.dirty = true;
@@ -260,8 +288,9 @@
       if (g) { g.setAttribute("aria-expanded", String(state === "full")); g.setAttribute("aria-label", state === "full" ? "Show less" : "Show more"); }
       syncSheet();
     }
+    let cardLink = null; // what Copy link copies when it isn't this page's URL
     function showCard(html, { top = "var(--ink)", kind = "msg" } = {}) {
-      cardKind = kind;
+      cardKind = kind; cardLink = null;
       card.dataset.kind = kind;
       card.style.setProperty("--card-top", top);
       card.innerHTML = `<button class="sheet-grip" type="button" aria-expanded="false" aria-label="Show more"><span></span></button>`
@@ -282,7 +311,7 @@
       if (e.target.closest(".close")) { closeCard(); return; }
       if (e.target.closest(".sheet-grip")) { setSheet(card.dataset.sheet === "full" ? "peek" : "full"); return; }
       const cp = e.target.closest("[data-copy]");
-      if (cp) { const ok = await S.copy(location.href); flash(cp, ok ? "Link copied" : "Couldn't copy"); return; }
+      if (cp) { const ok = await S.copy(cardLink || location.href); flash(cp, ok ? "Link copied" : "Couldn't copy"); return; }
       const inc = e.target.closest("[data-inc]");
       if (inc) { const i = safety && safety.incidents.find((x) => x.id === inc.dataset.inc); if (i) focusIncident(i); return; }
       const pl = e.target.closest("[data-place]");
@@ -290,6 +319,8 @@
     });
     /* keyboard focus inside a peeking sheet opens it, so nothing focused is out of sight */
     card.addEventListener("focusin", (e) => {
+      /* only keyboard focus: a tap also focuses, and growing the sheet under the finger would swallow the tap */
+      if (!e.target.matches(":focus-visible")) return;
       if (isPhone() && card.dataset.sheet === "peek" && !e.target.closest(".sheet-grip, .close")) setSheet("full");
     });
     card.addEventListener("change", (e) => {
@@ -315,10 +346,11 @@
       const acts = [];
       if (p.ph && S.tels(p.ph).length) acts.push(S.telLink(p.ph, "Call {n}"));
       acts.push(`<a class="cbtn" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.n + " " + p.lat + "," + p.lon)}" target="_blank" rel="noopener">Directions</a>`);
-      if (p.w) acts.push(`<a class="cbtn" href="${esc(p.w)}" target="_blank" rel="noopener">Website</a>`);
+      const web = webURL(p.w), soc = webURL(p.s);
+      if (web) acts.push(`<a class="cbtn" href="${esc(web)}" target="_blank" rel="noopener">Website</a>`);
       acts.push(copyBtn());
-      const more = [townLabel(p), p.s ? `<a href="${esc(p.s)}" target="_blank" rel="noopener">${esc(social(p.s))}</a>` : ""].filter(Boolean);
-      showCard(`<p class="kicker"><span class="sw" style="background:${col}"></span>${esc(S.cap(p.c || ""))}${meta.groups[p.g] ? " · " + esc(meta.groups[p.g]) : ""}</p>
+      const more = [townLabel(p), soc ? `<a href="${esc(soc)}" target="_blank" rel="noopener">${esc(social(soc))}</a>` : ""].filter(Boolean);
+      showCard(`<p class="kicker"><span class="sw" style="background:${col}"></span>${esc(S.cap(p.c || ""))}${own(meta.groups, p.g) ? " · " + esc(meta.groups[p.g]) : ""}</p>
         <h3>${esc(p.n)}</h3>${p.a ? `<p class="c-addr">${esc(p.a)}</p>` : ""}
         <p class="c-acts">${acts.join("")}</p>${more.length ? `<p class="meta">${more.join(" · ")}</p>` : ""}`, { top: col, kind: "place" });
     }
@@ -470,6 +502,13 @@
         <p class="c-acts">${copyBtn()}</p>
         <div class="near">${incHTML}${petsLine(dFn)}${nearbyHTML(dFn)}${policeLine(town ? [town] : [])}</div>
         ${rememberBox(spot.text || label)}`, { top: "var(--here)", kind: "near" });
+      /* your location's link names the street corner only: never the position, or a view centred on it */
+      if (spot.located) {
+        const u = new URL(location.href);
+        [...SEL, "at"].forEach((k) => u.searchParams.delete(k));
+        if (spot.label) u.searchParams.set("near", spot.label);
+        cardLink = u.href;
+      }
     }
 
     /* ---------- focusing things ---------- */
@@ -495,6 +534,7 @@
       clearMarks();
       map.sel = null;
       map.here = { x: spot.x, y: spot.y }; map.focus = { x: spot.x, y: spot.y };
+      if (spot.located) { located = { x: spot.x, y: spot.y }; setSel(null); S.setQS({ at: null }); }
       go(spot.x, spot.y, zoom);
       if (write) setSel("near", spot.text || spot.label);
       await cornerCard(spot);
@@ -529,6 +569,7 @@
     /* a tap on the map */
     function pick(p) {
       if (!p) { if (cardKind && cardKind !== "street" && cardKind !== "near") closeCard(); return; }
+      acted = true;
       clearMarks();
       if (p.status) { focusPetTap(p); return; }
       if (p.yr != null) { crashCard(p); setSel(null); return; }
@@ -565,9 +606,10 @@
       const keyed = k ? streets.filter((s) => { const x = streetKey(s.n); return x && x.core === k.core && typeOk(k.type, x.type); }) : [];
       return keyed.sort((a, b) => (b.a || 0) - (a.a || 0) || b.m - a.m)[0] || streets.find((s) => s.n.toLowerCase().startsWith(n)) || null;
     }
+    /* the street index is built from the map's own lines when NKPets.init() is called, so geocoding never waits on the
+       board (a GitHub request that doesn't answer) */
     async function geocode(text) {
       if (!P) return null;
-      await boardP;
       return P.geocodeNear(P.cleanNear(text), S.town() || "New Kensington");
     }
     async function arrive() {
@@ -577,14 +619,20 @@
       }
       const want = layerParam.filter((k) => OVERLAYS.includes(k));
       for (const k of want) await setLayer(k, true);
+      let vis = [];
       if (want.includes("incidents")) {
         map.incVisible = incFilter();
         showFilterNote();
-        const vis = (safety ? safety.incidents : []).filter(map.incVisible);
+        vis = (safety ? safety.incidents : []).filter(map.incVisible);
         if (filtered() && !vis.length) showMsg("No incidents match those filters.");
         else if (!Q.has("inc")) fitPoints(vis.length ? vis : safety ? safety.incidents : []);
       } else if (want.includes("crashes")) fitPoints((safety && safety.crashes.points) || []);
-      if (Q.get("place")) {
+      if (F.st) {
+        /* ?street= is the blotter's incident filter here, not a street to open: the view stays on the incidents and the
+           street they're on is marked (no card: a same-named street in another town would say "no incidents") */
+        const s = streetOf(F.st, vis);
+        if (s) { filterStreet = s.n; map.highlightStreet(s.n); }
+      } else if (Q.get("place")) {
         const f = findPlace(Q.get("place"));
         if (f.p) focusPlace(f.p, { write: false });
         else if (Number.isFinite(f.x)) { go(f.x, f.y, 2); showMsg("That place isn't in the current map data."); }
@@ -598,7 +646,8 @@
         if (g) await focusCorner({ x: g.x, y: g.y, label: g.label, text: Q.get("near") }, { write: false });
         else showMsg("We couldn't find that corner. Try two street names, like 5th Avenue & 9th Street.");
       } else if (Q.get("pet")) {
-        await boardP;
+        await boardP; // only a listing waits on the board
+        if (acted) return; // the person chose something else while it loaded
         const id = Q.get("pet"), p = P && P.board.posts.find((x) => x.id === id);
         if (p) focusPet(p, { write: false });
         else if (P && P.board.state === "unknown") showMsg("The lost and found board didn't load just now, so that listing can't be shown.", `<p><a class="go" href="${esc(S.url("lost-pets/"))}">Lost and found pets ›</a></p>`);
@@ -611,13 +660,18 @@
       }
     }
     const release = () => { map.hold = false; map.dirty = true; if (loading) loading.hidden = true; };
+    /* a choice made while the arrival still waits (a listing on a slow board) ends it: the map shows and moves at once */
+    const takeOver = () => { acted = true; if (arriving) { arriving = false; release(); } };
     const done = arrive().catch((e) => console.warn(e));
-    await Promise.race([done, wait(4000)]);
-    release();
-    await done;
-    arriving = false;
-    map.drawnLabels = []; map.dirty = true;
-    settled = true;
+    /* the map shows once the arrival view is known (at most 4 s); the search panel below works from the start */
+    (async () => {
+      await Promise.race([done, wait(4000)]);
+      release();
+      await done;
+      arriving = false;
+      map.drawnLabels = []; map.dirty = true;
+      settled = true;
+    })();
 
     /* ---------- the search panel (NKSearch) ---------- */
     const q = $("#q"), res = $("#results");
@@ -666,6 +720,7 @@
     }
     function open(k) {
       if (k === "all") { showAll = true; drawResults(); return; }
+      takeOver();
       if (k === "loc") { askLocation(); return; }
       q.blur();
       if (k === "saved") { geocode(saved).then((g) => g && focusCorner({ x: g.x, y: g.y, label: g.label, text: saved })); hideResults(); return; }
@@ -702,11 +757,10 @@
       $("#loc-no").addEventListener("click", hideResults);
       $("#loc-go").addEventListener("click", () => {
         res.innerHTML = `<p class="none">Finding your nearest street…</p>`;
-        navigator.geolocation.getCurrentPosition(async (pos) => {
+        navigator.geolocation.getCurrentPosition((pos) => {
           const x = (pos.coords.longitude - meta.origin[0]) * meta.kx, y = (meta.origin[1] - pos.coords.latitude) * meta.ky;
           const [x0, y0, x1, y1] = meta.bounds;
           if (x < x0 || x > x1 || y < y0 || y > y1) { res.innerHTML = `<p class="none">You look to be outside 15068. Type a corner instead.</p>`; return; }
-          await boardP;
           const names = P ? P.nearestStreets(x, y, 150) : [];
           if (!names.length) { res.innerHTML = `<p class="none">We couldn't find a street near you. Type a corner instead.</p>`; return; }
           hideResults();
@@ -742,13 +796,31 @@
     if (labelsEl) labelsEl.innerHTML = towns.map((l) => `<span data-town="${esc(l.n)}">${esc(l.n.toUpperCase())}</span>`).join("");
     const spans = labelsEl ? $$("span", labelsEl) : [];
     let labelsOn = true, m3 = null;
+    /* where each town's name goes on screen (null when out of view); a name near a side edge stays whole, and one that
+       would sit on a name placed before it (Arnold on New Kensington at the whole-ZIP view) moves up just clear of it */
+    function labelSpots(m) {
+      const placed = [], W = host.clientWidth;
+      return towns.map((l, i) => {
+        const p = m.project(l.x, l.y, 90), w = spans[i].offsetWidth, h = spans[i].offsetHeight;
+        if (!(p.visible && p.x > -80 && p.y > -20 && p.x < W + 80 && p.y < host.clientHeight + 20)) return null;
+        const x = w + 8 < W ? Math.max(w / 2 + 4, Math.min(W - w / 2 - 4, p.x)) : p.x;
+        let y = p.y;
+        for (let k = 0; k < placed.length; k++) {
+          const hit = placed.find((b) => Math.abs(b.x - x) < (b.w + w) / 2 && Math.abs(b.y - y) < (b.h + h) / 2);
+          if (!hit) break;
+          y = hit.y - (hit.h + h) / 2 - 2;
+        }
+        const spot = { x, y, w, h };
+        placed.push(spot);
+        return spot;
+      });
+    }
     function placeLabels(m) {
       if (!labelsOn || !labelsEl) return;
-      towns.forEach((l, i) => {
-        const p = m.project(l.x, l.y, 90), el = spans[i];
-        const vis = p.visible && p.x > -80 && p.y > -20 && p.x < host.clientWidth + 80 && p.y < host.clientHeight + 20;
-        el.style.visibility = vis ? "visible" : "hidden";
-        if (vis) el.style.transform = `translate(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px) translate(-50%, -50%)`;
+      labelSpots(m).forEach((p, i) => {
+        const el = spans[i];
+        el.style.visibility = p ? "visible" : "hidden";
+        if (p) el.style.transform = `translate(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px) translate(-50%, -50%)`;
       });
     }
     async function build() {
@@ -770,7 +842,7 @@
     });
     ex.addEventListener("click", (e) => {
       const b = e.target.closest("[data-go]");
-      if (b && m3 && VIEWS[b.dataset.go]) m3.goTo(VIEWS[b.dataset.go]);
+      if (b && m3 && own(VIEWS, b.dataset.go)) m3.goTo(VIEWS[b.dataset.go]);
     });
     const tl = $("#p3-town");
     tl?.addEventListener("click", () => {
@@ -808,7 +880,7 @@
           ctx.font = font; ctx.textAlign = align; ctx.textBaseline = "middle"; ctx.lineJoin = "round";
           ctx.lineWidth = 4 * k; ctx.strokeStyle = halo; ctx.strokeText(t, x, y); ctx.fillStyle = ink; ctx.fillText(t, x, y);
         };
-        if (labelsOn) towns.forEach((l) => { const p = m3.project(l.x, l.y, 90); if (p.visible) text(l.n.toUpperCase(), p.x * k, p.y * k, `800 ${15 * k}px ${NK.css("--f-display")}`); });
+        if (labelsOn) labelSpots(m3).forEach((p, i) => { if (p) text(towns[i].n.toUpperCase(), p.x * k, p.y * k, `800 ${15 * k}px ${NK.css("--f-display")}`); });
         if (ex.hasAttribute("data-poster")) {
           text("NK15068", c.width / 2, c.height - 96 * k, `800 ${40 * k}px ${NK.css("--f-display")}`);
           text("New Kensington · Arnold · Lower Burrell", c.width / 2, c.height - 58 * k, `600 ${17 * k}px ${NK.css("--f-body")}`);
@@ -843,7 +915,7 @@
     const Q = S.qs();
     const st = { tab: Q.get("tab") === "streets" ? "streets" : "places", q: (Q.get("q") || "").slice(0, 80), town: Q.get("town") || "", g: Q.get("g") || "", limit: 100 };
     if (st.town && selT && ![...selT.options].some((o) => o.value === st.town)) selT.insertAdjacentHTML("beforeend", `<option value="${esc(st.town)}">${esc(st.town)}</option>`);
-    if (st.g && !meta.groups[st.g]) st.g = "";
+    if (st.g && !own(meta.groups, st.g)) st.g = "";
     tools.hidden = false;
     if (inp) inp.value = st.q;
     if (selT) selT.value = st.town;

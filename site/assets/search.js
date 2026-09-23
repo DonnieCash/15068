@@ -19,17 +19,22 @@
   const TYPES = { street: "st", avenue: "ave", av: "ave", road: "rd", drive: "dr", boulevard: "blvd", lane: "ln", court: "ct",
     place: "pl", alley: "aly", terrace: "ter", highway: "hwy", circle: "cir" };
 
+  /* a word typed or read from a URL is looked up only among a table's own keys ("constructor" is not an ordinal) */
+  const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
+  /* a route number with its prefix ("Route 366", "PA 366", "SR-780", "US Route 22", "Rt. 56") is one word, "rt366" */
+  const ROUTE = /\b(?:(?:state|us|pa)\s+)?(?:route|rte|rt|sr|pa|us)\s*(\d{1,3})\b/g;
   /* lower case, no accents or apostrophes, "&" kept as a word, ordinals as numbers ("Fifth" and "5th" -> "5"),
-     street types short ("Avenue" -> "ave") */
+     street types short ("Avenue" -> "ave"), route numbers as "rt366" */
   function norm(s) {
     return String(s ?? "").toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[’']/g, "")
       .replace(/&/g, " & ").replace(/[^a-z0-9&]+/g, " ").trim()
-      .split(/\s+/).map((w) => ORD[w] || TYPES[w] || w.replace(/^(\d+)(st|nd|rd|th)$/, "$1")).join(" ");
+      .split(/\s+/).map((w) => (own(ORD, w) && ORD[w]) || (own(TYPES, w) && TYPES[w]) || w.replace(/^(\d+)(st|nd|rd|th)$/, "$1"))
+      .join(" ").replace(ROUTE, "rt$1");
   }
-  /* a word (or phrase) at the start of a word in h; numbers match whole words only */
+  /* a word (or phrase) at the start of a word in h; numbers and route numbers match whole words only */
   function has(h, w) {
     if (!w) return true;
-    if (/^\d+$/.test(w) || w.length === 1) return (" " + h + " ").includes(" " + w + " ");
+    if (/^(rt)?\d+$/.test(w) || w.length === 1) return (" " + h + " ").includes(" " + w + " ");
     if ((" " + h).includes(" " + w)) return true;
     const stem = w.length > 4 ? w.replace(/(es|s)$/, "") : w;
     return stem !== w && (" " + h).includes(" " + stem);
@@ -41,9 +46,9 @@
   function streetKey(name) {
     if (!name) return null;
     let t = String(name).toLowerCase().replace(/[.,#']/g, " ").split(/\s+/).filter(Boolean);
-    t = t.map((w) => ORD[w] || w.replace(/^(\d+)(st|nd|rd|th)$/, "$1"));
+    t = t.map((w) => (own(ORD, w) && ORD[w]) || w.replace(/^(\d+)(st|nd|rd|th)$/, "$1"));
     let type = null;
-    while (t.length && KTYPES[t[t.length - 1]]) { type = type || KTYPES[t[t.length - 1]]; t.pop(); }
+    while (t.length && own(KTYPES, t[t.length - 1])) { type = type || KTYPES[t[t.length - 1]]; t.pop(); }
     if (t.length > 1 && /^(n|s|e|w|north|south|east|west)$/.test(t[0])) t.shift();
     const core = t.join(" ");
     return core ? { core, type } : null;
@@ -88,6 +93,16 @@
   /* the same slug as nkpages.fmt.slug (accents dropped, not turned into dashes) */
   const placeSlug = (s) => String(s || "").normalize("NFKD").replace(/[^\x00-\x7f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
   const placeParam = (p) => `${placeSlug(p.n)}~${Math.round(p.x)},${Math.round(p.y)}`;
+  /* a place's website or social link as the data gives it: an http(s) URL as it is, a bare host name ("www.example.com",
+     "example.com/menu") with https:// in front, anything else (a handle like "EdwardJones", an address cut off with
+     "...") no link at all */
+  function webURL(v) {
+    const s = String(v ?? "").trim();
+    if (!s || /\s|(\.\.\.|\u2026)$/.test(s)) return "";
+    if (/^https?:\/\/[^/?#:]+\.[^/?#:]+/i.test(s)) return s;
+    if (/^([a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}(:\d+)?([/?#]|$)/i.test(s)) return "https://" + s;
+    return "";
+  }
 
   /* ---------------- data ---------------- */
   let loading = null;
@@ -115,7 +130,9 @@
     });
     const seen = new Set();
     d.streets = (d.streets || []).filter((s) => !seen.has(s.n) && seen.add(s.n));
-    d.streets.forEach((s) => { s._h = norm(s.n + " " + (s.ref || []).join(" ")); s._k = streetKey(s.n); s._inc = incBy.get(s.n) || null; });
+    /* a street's route numbers match as typed ("366") and with a prefix ("Route 366", "PA 366") */
+    const refs = (s) => (s.ref || []).flatMap((r) => (/^\d+$/.test(r) ? [r, "route " + r] : [r]));
+    d.streets.forEach((s) => { s._h = norm([s.n, ...refs(s)].join(" ")); s._k = streetKey(s.n); s._inc = incBy.get(s.n) || null; });
     (d.numbers || []).forEach((r) => { r._h = norm([r.n, r.t, r.k].join(" ")); });
     (d.pages || []).forEach((r) => { r._h = norm([r.t, r.k, r.u.replace(/[/-]/g, " ")].join(" ")); });
     (d.events || []).forEach((r) => { r._h = norm(r.n); }); // not the label: its times ("5–9 p.m.") match stray words
@@ -258,5 +275,5 @@
     return out;
   }
 
-  window.NKSearch = { load, prepare, match, parse, norm, streetKey, dedupe, dedupeKey, townLabel, placeParam, placeSlug, TOWNS };
+  window.NKSearch = { load, prepare, match, parse, norm, streetKey, dedupe, dedupeKey, townLabel, placeParam, placeSlug, webURL, TOWNS };
 })();

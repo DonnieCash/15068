@@ -96,7 +96,7 @@ LEGEND = (
 def map_data(D):
     """Numbers the map's cards need, computed here so the page never guesses: each town's police line."""
     pol = {t: {"ph": v["primary"], "alt": v["alt"]} for t, v in S.police_numbers(D).items()}
-    return json.dumps({"police": pol}, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
+    return fmt.json_script({"police": pol})
 
 
 def map_page(D, R):
@@ -200,14 +200,8 @@ def dedupe(places):
 
 
 def town_label(p):
-    """The address's city when it is one of the three (misspellings fixed), otherwise the map's town."""
-    parts = [x.strip() for x in str(p.get("a") or "").split(",")]
-    if len(parts) >= 2:
-        low = parts[1].lower().replace("-", " ")
-        fixed = {"new kensington": "New Kensington", "new kensingtn": "New Kensington",
-                 "new kinsington": "New Kensington", "lower burrell": "Lower Burrell", "arnold": "Arnold"}.get(low)
-        if fixed:
-            return fixed
+    """The municipality the place is in (from the town boundaries): the same field the town pages count. Mailing
+    addresses say "New Kensington" for much of Lower Burrell and Arnold, so the address city isn't used."""
     return p.get("t") or ""
 
 
@@ -254,7 +248,7 @@ def directory(D, R):
         f'<h1>{esc(R.h1)}</h1>'
         f'<p class="dateline">From Overture Maps release {esc(release)}</p>'
         f'<p class="deck">{fmt.num(n)} places and {fmt.num(ns)} named streets in ZIP 15068, as the open map data lists '
-        'them. Each name opens it on the map.</p>'
+        f'them, with {fmt.num(len(D["places"]) - n)} duplicate listings merged. Each name opens it on the map.</p>'
         '<div class="dir-tools" id="dir-tools" hidden>'
         '<div class="tabs" id="dir-tabs" role="tablist" aria-label="Directory lists">'
         f'<button class="tab" type="button" role="tab" data-t="places" aria-selected="true" aria-controls="dir-table">'

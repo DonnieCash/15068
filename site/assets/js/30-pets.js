@@ -398,6 +398,7 @@
       let dr = null;
       try { dr = JSON.parse(S.session.get("nk-flyer-draft") || "null"); } catch (e) { dr = null; }
       if (dr && typeof dr === "object") {
+        if (P.loadStreets) await P.loadStreets(); // so sanitize() can spot a house number before a street name
         post = P.sanitize({ ...dr, id: "draft" }, "board");
         photo = typeof dr.photo === "string" && /^data:image\//.test(dr.photo) ? dr.photo : "";
       }

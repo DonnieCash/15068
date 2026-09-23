@@ -11,6 +11,7 @@ from collections import Counter
 from urllib.parse import quote, urlencode
 
 from . import changelog, charts, fmt, mapsvg
+from . import pages_map as PM
 from . import pets as P
 from . import sentences as S
 from .data import CORE_TOWNS, SLUG_TOWNS, TOWN_SLUGS, updated
@@ -208,7 +209,8 @@ def library(D, town):
 
 
 def places_in(D, town):
-    return [p for p in D["places"] if p.get("t") == town]
+    """The town's places as the directory lists them (duplicates merged), so every count matches its link."""
+    return [p for p in PM.dedupe(D["places"]) if PM.town_label(p) == town]
 
 
 def streets_in(D, town):
