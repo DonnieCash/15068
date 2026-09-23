@@ -191,6 +191,7 @@ h1 + .deck { max-width: 44ch; margin-bottom: 18px; }
 .runin .meta a { color: var(--ink-2); }
 .box { background: var(--raised); padding: 16px 18px; }
 .box + .box, .box + .pets-line { margin-top: 20px; }
+.well-rail > .rail, .safety-grid > .rail { align-self: start; }
 .rail.sticky { position: sticky; top: 60px; align-self: start; }
 
 /* ---------- front ---------- */
@@ -277,7 +278,7 @@ h1 + .deck { max-width: 44ch; margin-bottom: 18px; }
 }
 .layers-pop hr { border: 0; border-top: 1px solid var(--line); margin: 6px 0; }
 .layers-pop .go { font: 700 12.5px/1.2 var(--f-sans); color: var(--muted); padding: 4px 14px 2px; }
-.zoom { right: 14px; bottom: 44px; display: grid; }
+.zoom { right: 14px; bottom: 58px; display: grid; }
 .zoom button { all: unset; cursor: pointer; width: 40px; height: 40px; display: grid; place-items: center; font: 700 20px/1 var(--f-sans); color: var(--ink); }
 .zoom button + button { border-top: 1px solid var(--line); }
 .zoom button:hover, .zoom button:focus-visible { background: var(--raised); }
@@ -296,12 +297,12 @@ h1 + .deck { max-width: 44ch; margin-bottom: 18px; }
 .card .meta { font: 12.5px/1.45 var(--f-sans); color: var(--muted); }
 .card .msg { font: 15px/1.45 var(--f-sans); padding-right: 22px; }
 .card .close { position: absolute; top: 6px; right: 6px; background: none; border: 0; color: var(--muted); font: 22px/1 var(--f-sans); cursor: pointer; padding: 6px 8px; }
-.scale { position: absolute; right: 14px; bottom: 14px; z-index: 4; font: 12px/1 var(--f-sans); color: var(--ink-2); display: grid; gap: 4px; justify-items: end; }
+.scale { position: absolute; right: 14px; bottom: 26px; z-index: 4; font: 12px/1 var(--f-sans); color: var(--ink-2); display: grid; gap: 4px; justify-items: end; }
 .scale i { display: block; height: 6px; border: 2px solid var(--ink-2); border-top: 0; }
-.attrib { position: absolute; right: 64px; bottom: 14px; z-index: 4; font: 11px/1.3 var(--f-sans); color: var(--muted); text-align: right; max-width: 40%; display: none; }
+.attrib { position: absolute; right: 14px; bottom: 6px; z-index: 4; font: 11px/1.3 var(--f-sans); color: var(--muted); text-align: right; max-width: 40%; display: none; }
 .loading { position: absolute; inset: 0; display: grid; place-items: center; font: 14px var(--f-sans); color: var(--muted); z-index: 3; pointer-events: none; }
 .map-credit { font: 12px/1.4 var(--f-sans); color: var(--muted); margin-top: 8px; }
-@media (min-width: 720px) { .attrib { display: none; } }
+@media (min-width: 720px) { .attrib { display: block; } }
 @media (max-width: 719px) {
   .search-panel { right: 72px; width: auto; left: 10px; top: 10px; }
   .layers { top: 10px; right: 10px; }
@@ -310,9 +311,10 @@ h1 + .deck { max-width: 44ch; margin-bottom: 18px; }
   .search-panel .chips .chip { flex: none; }
   .search-panel label { display: none; }
   .card { bottom: 10px; left: 10px; right: 60px; width: auto; }
-  .zoom { right: 10px; bottom: 40px; }
+  .zoom { right: 10px; bottom: 44px; }
+  .scale { right: 10px; bottom: 12px; }
 }
-.map-legend { position: absolute; right: 64px; bottom: 44px; z-index: 4; padding: 8px 10px; display: grid; gap: 4px; font: 12.5px/1.3 var(--f-sans); }
+.map-legend { position: absolute; right: 64px; bottom: 58px; z-index: 4; padding: 8px 10px; display: grid; gap: 4px; font: 12.5px/1.3 var(--f-sans); }
 .map-legend div { display: flex; align-items: center; gap: 6px; }
 .map-legend small { color: var(--muted); font: 12px/1.3 var(--f-sans); max-width: 24ch; }
 .map-legend [hidden] { display: none !important; }
@@ -459,7 +461,7 @@ details.tableview[open] summary { margin-bottom: 10px; }
 .blotter-h { margin-top: 48px; }
 .depts .dept + .dept { border-top: 1px dotted var(--line); padding-top: 12px; margin-top: 12px; }
 .dept h4 { font: 700 17px/1.25 var(--f-head); margin-bottom: 4px; }
-.dept p { font: 14.5px/1.45 var(--f-sans); }
+.dept p:not(.credit) { font: 14.5px/1.45 var(--f-sans); }
 .dept p.notes { font: 15px/1.45 var(--f-text); margin-top: 6px; }
 .dept .credit { margin-top: 6px; }
 .about p { font: 14px/1.45 var(--f-sans); }
@@ -488,7 +490,7 @@ details.tableview[open] summary { margin-bottom: 10px; }
 .tl-item .credit { white-space: nowrap; }
 @media (max-width: 599px) { .tl-item { grid-template-columns: 1fr; gap: 2px; } .tl-item .yr { text-align: left; font-size: 17px; } }
 #pop-chart svg { display: block; width: 100%; height: auto; }
-.runin .entry p { font: 16px/1.5 var(--f-text); }
+.runin .entry p:not(.meta) { font: 16px/1.5 var(--f-text); }
 
 /* ---------- eat & drink ---------- */
 .bucket { columns: 2 17rem; column-gap: 32px; }
@@ -507,7 +509,8 @@ details.tableview[open] summary { margin-bottom: 10px; }
 @media (max-width: 479px) { .dine .l1 { flex-wrap: wrap; } .dine .l1 .lead-dots { display: none; } .dine .l1 .addr { flex-basis: 100%; } }
 .event + .event { border-top: 1px dotted var(--line); padding-top: 12px; margin-top: 12px; }
 .event .when { font: 700 13.5px/1.3 var(--f-sans); color: var(--press); }
-.event p { font: 14px/1.45 var(--f-sans); margin-top: 3px; }
+.event p:not(.credit) { font: 14px/1.45 var(--f-sans); margin-top: 3px; }
+.event .credit { margin-top: 3px; }
 .event .where { font-size: 13px; color: var(--ink-2); }
 
 /* ---------- people ---------- */
@@ -547,7 +550,14 @@ details.tableview[open] summary { margin-bottom: 10px; }
 /* ---------- print ---------- */
 @media print {
   .secbar, .utility, #map, .explorer, .layers, .zoom, #pets-form, .filters, button, .ad-place { display: none !important; }
+  :root, :root[data-theme="dark"], :root:not([data-theme="light"]) {
+    --ground: #fff; --surface: #fff; --raised: #eeefeb; --tint: #ecf0f3; --ink: #191a1b; --ink-2: #3b3d40; --muted: #66696c;
+    --line: #d5d6d2; --rule: #191a1b; --grid: #dcddd9; --press: #8a1c2b; --river: #2463a0; --river-peak: #163f69;
+    --inc-violent: #eb6834; --inc-property: #2a78d6; --inc-police: #1baf7a; color-scheme: light;
+  }
   body { font: 11pt/1.45 var(--f-text); background: #fff; color: #000; }
+  details::details-content { content-visibility: visible; display: contents; }
+  details > summary { display: none; }
   a[href^="http"].cr::after { content: " (" attr(href) ")"; font-size: 9pt; word-break: break-all; }
   details > *:not(summary) { display: block !important; }
   .river, .profiles, .well-rail, .safety-grid, .foot { display: block !important; }

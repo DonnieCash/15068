@@ -136,15 +136,28 @@
     let t;
     addEventListener("resize", () => { clearTimeout(t); t = setTimeout(fit, 150); });
     setTimeout(fit, 1500);
+    refitRails = fit;
   }
+  let refitRails = () => {};
   /* wide tables fade at the right edge while they overflow */
   function fadeWide() {
     $$(".dir-table-wrap").forEach((w) => {
       const upd = () => w.classList.toggle("fade", w.scrollWidth > w.clientWidth + 2 && w.scrollLeft + w.clientWidth < w.scrollWidth - 2);
       upd();
-      if (!w.dataset.fade) { w.dataset.fade = 1; w.addEventListener("scroll", upd, { passive: true }); new ResizeObserver(upd).observe(w); }
+      if (!w.dataset.fade) {
+        w.dataset.fade = 1;
+        w.addEventListener("scroll", upd, { passive: true });
+        const ro = new ResizeObserver(upd);
+        ro.observe(w);
+        const t = w.querySelector("table");
+        if (t) ro.observe(t);
+      }
     });
   }
+  /* open every <details> for printing, then put them back */
+  let printOpened = [];
+  addEventListener("beforeprint", () => { printOpened = $$("details:not([open])"); printOpened.forEach((d) => { d.open = true; }); });
+  addEventListener("afterprint", () => { printOpened.forEach((d) => { d.open = false; }); printOpened = []; });
 
   /* ---------------- lead art: a still drawing of the roads of 15068 ---------------- */
   let hero = null;
@@ -487,7 +500,8 @@
   }
 
   /* ---------------- lost & found pets ---------------- */
-  const LIMITS = { name: 40, desc: 500, near: 120, contact: 120 };
+  const LIMITS = window.NKPets?.LIMITS || { name: 40, desc: 500, near: 120, contact: 120 };
+  const localToday = () => { const d = new Date(); return new Date(d - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10); };
   function nearestStreet(x, y) {
     let best = null, bd = 150 * 150;
     for (const l of W.lines) {
@@ -519,7 +533,7 @@
     const box = document.createElement("div");
     box.className = "ad ad-place";
     if (mode === "db") {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = localToday();
       box.innerHTML = `<h3>Place a free listing</h3>
         <p>Lost, found or spotted a pet in 15068? Post it here and it goes on the map for everyone who opens this page.</p>
         <button type="button" class="btn-line" id="pets-open" aria-expanded="false" aria-controls="pets-form">Write a listing</button>
@@ -556,7 +570,7 @@
         e.preventDefault();
         const f = new FormData(form), post = {};
         for (const k of ["status", "animal", "name", "desc", "near", "town", "date", "contact"]) post[k] = String(f.get(k) || "").trim().slice(0, LIMITS[k] || 40);
-        post.near = post.near.replace(/^\s*\d+[a-z]?\s+(?=\D)/i, "");
+        post.near = P.cleanNear(post.near);
         if (picked) Object.assign(post, picked, { prec: "picked" });
         else {
           const g = P.geocodeNear(post.near, post.town);
@@ -565,10 +579,13 @@
         msg.textContent = "Posting…";
         try {
           await P.addPost(post);
-          form.reset(); form.date.value = today; picked = null;
+          form.reset(); form.date.value = form.date.max = localToday(); picked = null;
           box.querySelector("#pets-picked").textContent = "";
           msg.textContent = typeof post.x === "number" ? "Posted. It's on the map." : "Posted. That street wasn't found on the map, so the listing has no pin.";
-        } catch (err) { msg.textContent = err.message || "It didn't post. Try again in a minute."; }
+        } catch (err) {
+          msg.textContent = err.message || "It didn't post. Try again in a minute.";
+          if (P.board.readOnly) { form.querySelectorAll("input, select, textarea, button").forEach((el) => { el.disabled = true; }); }
+        }
       };
     } else {
       box.innerHTML = `<h3>Place a free listing</h3>
@@ -586,7 +603,8 @@
       : B.mode === "db" ? "Listings posted here are shared with everyone who opens this page. Mark yours reunited when your pet is home."
       : "Listings come from lost and found posts on the NK15068 GitHub project and stay up until they're closed.");
     const list = $("#pets-list");
-    list.innerHTML = posts.map((p, i) => `<article class="ad" data-status="${esc(p.status)}">
+    list.querySelectorAll(":scope > .ad:not(.ad-place)").forEach((n) => n.remove());
+    const cards = posts.map((p, i) => `<article class="ad" data-status="${esc(p.status)}">
         ${p.photo ? `<img src="${esc(p.photo)}" alt="Photo of ${esc(p.name || "the " + (p.animal || "pet"))}" loading="lazy">` : ""}
         <p class="ad-st">${esc(PET_STATUS[p.status])} · ${esc(p.animal || "pet")}</p>
         ${p.name ? `<h3>“${esc(p.name)}”</h3>` : ""}
@@ -598,9 +616,11 @@
           ${p.url ? `<a class="linkbtn" href="${esc(p.url)}" target="_blank" rel="noopener">Post on GitHub</a>` : ""}
           ${p.owner ? `<button type="button" class="linkbtn" data-reunite="${esc(p.id)}">Mark reunited</button>` : ""}</p>
       </article>`).join("") + (n || B.mode === "loading" ? "" : `<div class="ad empty-ad"><p>No open listings right now.</p></div>`);
+    if (placeBox && placeBox.parentNode === list) placeBox.insertAdjacentHTML("beforebegin", cards);
+    else list.insertAdjacentHTML("afterbegin", cards);
     if (B.mode !== "loading") {
-      if (placeMode !== B.mode) { placeBox = buildPlaceBox(B.mode); placeMode = B.mode; }
-      list.appendChild(placeBox);
+      const want = B.mode === "db" && B.canPost ? "db" : "github";
+      if (placeMode !== want) { placeBox?.remove(); placeBox = buildPlaceBox(want); placeMode = want; list.appendChild(placeBox); }
     }
     const line = $("#pets-line");
     line.hidden = !n;
@@ -618,7 +638,7 @@
     const r = e.target.closest("[data-reunite]");
     if (r) {
       r.disabled = true;
-      try { await window.NKPets.markReunited(r.dataset.reunite); } catch (err) { r.disabled = false; $("#pets-status").textContent = "That didn't save. Try again in a minute."; }
+      try { await window.NKPets.markReunited(r.dataset.reunite); } catch (err) { r.disabled = false; $("#pets-status").textContent = err.message || "That didn't save. Try again in a minute."; }
     }
   });
 
@@ -714,7 +734,7 @@
       $("#tl-more").hidden = sorted.length <= 14;
     };
     draw();
-    $("#tl-more").onclick = () => { open = !open; draw(); if (!open) $("#story").scrollIntoView({ behavior: reduced ? "auto" : "smooth" }); };
+    $("#tl-more").onclick = () => { open = !open; draw(); refitRails(); if (!open) $("#story").scrollIntoView({ behavior: reduced ? "auto" : "smooth" }); };
     const gloss = (title, list) => {
       if (!list.length) return "";
       return `<h3 class="sub-h">${title}</h3><div class="runin${list.length < 3 ? " few" : ""}">${list.map((l) => {
