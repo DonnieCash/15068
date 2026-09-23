@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NK15068</title>
+<meta name="description" content="New Kensington, Arnold and Lower Burrell — every street, building and business in ZIP 15068, mapped from open data.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:ital,wght@0,400;0,600;0,700;1,500&display=swap">
+<link rel="stylesheet" href="assets/nk.css">
+
+</head>
+<body>
+<header class="bar">
+  <div class="wrap">
+    <a class="logo" href="#top">NK<span>15068</span></a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#map">Map</a>
+      <a href="#towns">Towns</a>
+      <a href="#story">Story</a>
+      <a href="#eat">Eat &amp; Drink</a>
+      <a href="#directory">Directory</a>
+      <a href="#people">People</a>
+      <a href="#news">News</a>
+      <a href="#sources">Sources</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero" aria-label="Introduction">
+    <canvas id="hero-canvas" aria-hidden="true"></canvas>
+    <div class="wrap">
+      <p class="eyebrow">Allegheny River · Westmoreland County · Pennsylvania</p>
+      <h1>15<em>0</em>68</h1>
+      <p class="lede">New Kensington, Arnold and Lower Burrell. Every street, building and storefront in the ZIP, mapped from open data.</p>
+      <div class="towns"><span>New Kensington</span><span>Arnold</span><span>Lower Burrell</span></div>
+      <div class="cta">
+        <a class="btn" href="#map">Explore the map</a>
+        <a class="btn ghost" href="#story">Read the story</a>
+      </div>
+      <div class="coords mono">
+        <span>40.5695° N, 79.7647° W · downtown New Kensington</span>
+        <span id="hero-elev">River pool ≈ 220 m · ridgetops ≈ 430 m</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="ledger" aria-labelledby="ledger-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">By the numbers</p>
+        <h2 id="ledger-h">Counted, not estimated</h2>
+        <p>Every number below comes from building footprints, road centerlines, address points and business listings inside the 15068 boundary.</p>
+      </div>
+      <div class="ledger" id="ledger-grid"></div>
+      <p class="ledger-note" id="ledger-note"></p>
+    </div>
+  </section>
+
+  <section id="map" aria-label="Interactive map of 15068">
+    <div class="explorer" id="explorer">
+      <canvas class="stage" id="map-canvas" aria-label="Map of ZIP 15068. Drag to pan, scroll or pinch to zoom, arrow keys also work."></canvas>
+      <div class="gl" id="gl-host" hidden></div>
+      <div class="loading" id="map-loading">Loading 15068…</div>
+      <div class="panel search-panel">
+        <label class="eyebrow" for="q">Search 15068</label>
+        <input id="q" type="search" placeholder="A business, street or landmark" autocomplete="off">
+        <div class="results" id="results" role="listbox" aria-label="Search results"></div>
+        <div class="chips" id="chips" aria-label="Filter places by type"></div>
+      </div>
+      <div class="panel tools" role="toolbar" aria-label="Map tools">
+        <button type="button" id="zin" title="Zoom in" aria-label="Zoom in">+</button>
+        <button type="button" id="zout" title="Zoom out" aria-label="Zoom out">−</button>
+        <button type="button" id="home" title="Show all of 15068" aria-label="Show all of 15068">ZIP</button>
+        <button type="button" id="dt" title="Downtown New Kensington" aria-label="Zoom to downtown New Kensington">DT</button>
+        <button type="button" id="t3d" title="3D terrain view" aria-pressed="false">3D</button>
+        <button type="button" id="tbld" title="Buildings" aria-pressed="true">BLD</button>
+        <button type="button" id="trel" title="Terrain relief" aria-pressed="true">REL</button>
+        <button type="button" id="ttheme" title="Switch light or dark" aria-label="Switch light or dark">◐</button>
+      </div>
+      <div class="panel card" id="card" hidden aria-live="polite"></div>
+      <div class="scale" id="scale"></div>
+      <div class="attrib">© OpenStreetMap contributors · Overture Maps · US Census · AWS Terrain Tiles</div>
+    </div>
+  </section>
+
+  <section class="block" id="towns" aria-labelledby="towns-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">Three towns · one ZIP</p>
+        <h2 id="towns-h">Where 15068 draws its line</h2>
+        <p>The ZIP code takes in three cities: New Kensington's grid on the river flat, Arnold just upriver, and Lower Burrell on the hills above. It also clips small edges of Upper Burrell, Plum and Allegheny Township.</p>
+      </div>
+      <div class="towns-grid" id="towns-grid"></div>
+    </div>
+  </section>
+
+  <section class="block" id="story" aria-labelledby="story-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">1769 → today</p>
+        <h2 id="story-h">Aluminum, river, hillside</h2>
+        <p id="story-lede">From the Parnassus land grant and Fort Crawford to the first Alcoa works, the 1950 peak and the Fifth Avenue revival. Each entry links to its source.</p>
+      </div>
+      <div id="pop-chart"></div>
+      <div class="timeline" id="timeline"></div>
+      <button class="btn ghost more" type="button" id="tl-more">Show the full timeline</button>
+      <div class="sec-head" style="margin-top:72px">
+        <p class="eyebrow">Neighborhoods &amp; landmarks</p>
+        <h2>Places with a past</h2>
+      </div>
+      <div class="cols" id="landmarks"></div>
+    </div>
+  </section>
+
+  <section class="block" id="eat" aria-labelledby="eat-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">Local picks</p>
+        <h2 id="eat-h">Eat, drink, hang out</h2>
+        <p>The spots locals talk about, from breweries to bakeries. Select any spot to find it on the map.</p>
+      </div>
+      <div class="cols" id="eat-list"></div>
+      <div class="sec-head" style="margin-top:64px">
+        <p class="eyebrow">On the calendar</p>
+        <h2>Every year in 15068</h2>
+      </div>
+      <div class="cols" id="events"></div>
+    </div>
+  </section>
+
+  <section class="block" id="directory" aria-labelledby="dir-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">Directory</p>
+        <h2 id="dir-h">Everything in 15068</h2>
+        <p>Every business, street and public office in the ZIP. Select a row to find it on the map.</p>
+      </div>
+      <div class="tabs chips" id="dir-tabs" role="tablist"></div>
+      <div class="dir-controls">
+        <input id="dir-q" type="search" placeholder="Filter by name, type, town or address" autocomplete="off">
+        <span class="dir-count" id="dir-count"></span>
+      </div>
+      <div class="dir-table-wrap"><table class="dir" id="dir-table"></table></div>
+      <button class="btn ghost more" type="button" id="dir-more">Show more</button>
+    </div>
+  </section>
+
+  <section class="block" id="people" aria-labelledby="people-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">From here</p>
+        <h2 id="people-h">People of the valley</h2>
+      </div>
+      <div class="cols" id="people-list"></div>
+    </div>
+  </section>
+
+  <section class="block" id="news" aria-labelledby="news-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">2025 – 2026</p>
+        <h2 id="news-h">What's changing</h2>
+      </div>
+      <div class="news" id="news-list"></div>
+    </div>
+  </section>
+</main>
+
+<footer id="sources">
+  <div class="wrap">
+    <p class="eyebrow">Sources &amp; method</p>
+    <p style="max-width:70ch">The map data is pulled straight from open datasets and clipped to the Census boundary for ZIP 15068: Overture Maps for buildings, roads, places and addresses, and AWS Terrain Tiles for elevation. Nothing on the map is hand-placed. The history, civic and news sections were compiled from published sources, and each entry links to its source. Business listings can go stale, so call ahead.</p>
+    <div class="srcs" id="src-list"></div>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="assets/nkmap.js"></script>
+<script src="assets/nk3d.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+# Raw Overture / terrain pulls (~70 MB) — regenerate with scripts/fetch_*.py
+data/raw/*
+!data/raw/zcta15068.geojson
+__pycache__/
+*.pyc
+.DS_Store

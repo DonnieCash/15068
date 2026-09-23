@@ -1,0 +1,3 @@
+# Only needed to rebuild the data; the site itself is static.
+pyarrow>=15
+shapely>=2
