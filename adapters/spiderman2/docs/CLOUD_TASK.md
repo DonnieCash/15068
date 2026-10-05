@@ -1,4 +1,4 @@
-> **Status (see STATUS.md):** items 1–3 are done on synthetic data. Items 4–6 are open. The user reports the Windows exporter now works under native .NET 4.8 (one model exported and structurally validated); reimport is untested, so item 6's unchanged-round-trip gate is the next step.
+> **Status (see STATUS.md):** items 1–3 are done on synthetic data; item 6's single-section workflow is specified in LOCAL_HANDOFF.md, and item 4 is researched in RESEARCH.md. Item 5 (converter runner) is open. The user reports the Windows exporter now works under native .NET 4.8 (one model exported and structurally validated); reimport is untested, so item 6's unchanged-round-trip gate is the next step.
 
 # First cloud task
 

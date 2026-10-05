@@ -20,7 +20,7 @@ Results below come from the local Mac sessions and the user's reports; none were
 
 ## Setup
 
-Python 3.9+ (tested on 3.11). Only `lz4` is needed, and only to decode LZ4 blocks.
+Python 3.9+ (tested on 3.9, 3.11 and 3.13; CI runs 3.9 and 3.12). Only `lz4` is needed, and only to decode LZ4 blocks.
 
 ```sh
 python3 -m venv .venv && . .venv/bin/activate
@@ -28,11 +28,13 @@ pip install -r requirements.txt
 python -m unittest discover -s tests -v     # synthetic fixtures only; no game files needed
 ```
 
-The tests also run from elsewhere: `python -m unittest discover -s adapters/spiderman2/tests` from the repository root.
+CI: `.github/workflows/adapter-spiderman2.yml` runs these tests on every PR touching this directory. The tests also run from elsewhere: `python -m unittest discover -s adapters/spiderman2/tests` from the repository root.
 
 ## Layout
 
 - `sm2adapter/` — reusable parsers: `dat1.py` (section container), `toc.py`, `dsar.py` (block archives, LZ4 only; raw archives too), `stg.py` (container pack/parse), `candidates.py` (hashes dictionary → candidates), `paths.py` (containment), `limits.py` (parse bounds), `cli.py`.
+- `sm2adapter/manifest.py`, `stage.py`, `gamestate.py`, `sections.py` — the NK → MSM2 manifest, Overstrike stage-v2 builder/verifier, read-only game snapshots for rollback checks, and known section names.
+- `docs/RESEARCH.md` (what public sources say about placement, collision and streaming), `docs/MANIFEST.md` (manifest fields), `examples/` (synthetic manifest), `LOCAL_HANDOFF.md` (the local run sheet).
 - `tools/` — thin wrappers with the original prototype names, plus `generate_candidates.py`.
 - `tests/` — synthetic valid and malformed TOC / DSAR / STG fixtures (`tests/fixtures.py` builds them).
 
@@ -48,9 +50,17 @@ python -m sm2adapter extract    /path/to/game artifacts/candidates.json artifact
 python -m sm2adapter package    artifacts/probe artifacts/probe/probe.model
 python -m sm2adapter unpack     reimported.model artifacts/probe_after   # split an STG (or bare DAT1) file
 python -m sm2adapter compare    artifacts/probe artifacts/probe_after    # unchanged-reimport check, below
+python -m sm2adapter sections   artifacts/probe/probe.payload.bin        # section tags, with known names
+python -m sm2adapter snapshot   /path/to/game artifacts/before.json --backup-dir artifacts/backup
+python -m sm2adapter manifest-check section.json --game /path/to/game
+python -m sm2adapter stage      section.json artifacts/staging artifacts/nk-section.stage --game /path/to/game
+python -m sm2adapter verify-stage artifacts/nk-section.stage --game /path/to/game
+python -m sm2adapter check-restored /path/to/game artifacts/before.json  # after uninstalling the mod
 ```
 
-Failures print `error: ...` and exit 1; outputs are written through a temporary file (or after every check passes), so a failed run leaves no partial result. `inventory` is the exception by design: a bad archive is recorded in the JSON (`error`) and the exit status is 1 once the whole report is written. `compare` exits 0 only for a byte-identical payload and header, 3 for any difference.
+The full single-section workflow, with gates and expected outputs, is in `LOCAL_HANDOFF.md`.
+
+Failures print `error: ...` and exit 1 (`compare` and `check-restored` use 3 for "differs"); outputs are written through a temporary file (or after every check passes), so a failed run leaves no partial result. `inventory` is the exception by design: a bad archive is recorded in the JSON (`error`) and the exit status is 1 once the whole report is written. `compare` exits 0 only for a byte-identical payload and header, 3 for any difference.
 
 ### Hashes dictionary
 

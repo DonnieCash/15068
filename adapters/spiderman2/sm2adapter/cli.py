@@ -1,4 +1,5 @@
-"""Command line: inventory | candidates | extract | package | unpack | compare. Game files are only read."""
+"""Command line: inventory | candidates | extract | package | unpack | compare | sections |
+manifest-check | stage | verify-stage | snapshot | check-restored. Game files are only read."""
 import argparse
 import collections
 import hashlib
@@ -7,7 +8,7 @@ import sys
 from pathlib import Path
 
 from . import candidates as cand
-from . import dsar
+from . import dsar, gamestate, manifest, sections, stage
 from .dat1 import looks_like_dat1, parse_dat1
 from .errors import FormatError
 from .paths import require_outside, safe_join
@@ -191,6 +192,56 @@ def cmd_compare(a):
     return 0 if identical else 3
 
 
+def cmd_sections(a):
+    typ, rows = sections.describe(Path(a.file).read_bytes())
+    print(json.dumps({'dat1_type': '0x%08X' % typ,
+                      'sections': [{'tag': t, 'name': n, 'bytes': b} for t, n, b in rows]}, indent=2))
+
+
+def cmd_manifest_check(a):
+    doc, summary = manifest.load(a.manifest)
+    if a.game:
+        summary['in_toc'] = manifest.check_against_toc(doc, load_toc(a.game))
+    print(json.dumps(summary, indent=2))
+
+
+def cmd_stage(a):
+    game = Path(a.game)
+    out = require_outside(a.output, game)
+    require_outside(a.staging, game)
+    raw = Path(a.manifest).read_bytes()
+    doc, _ = manifest.load(a.manifest)
+    plan = stage.build(doc, a.staging, load_toc(game), out, name=a.name, author=a.author,
+                       manifest_sha256=hashlib.sha256(raw).hexdigest())
+    print(json.dumps(plan, indent=2))
+
+
+def cmd_verify_stage(a):
+    print(json.dumps(stage.verify(a.stage, load_toc(a.game) if a.game else None), indent=2))
+
+
+def cmd_snapshot(a):
+    game = Path(a.game)
+    out = require_outside(a.output, game)
+    snap = gamestate.snapshot(game)
+    if a.backup_dir:
+        snap['toc_backup'], _ = gamestate.backup_toc(game, a.backup_dir)
+    _write_json(out, snap)
+    print(json.dumps({'toc_sha1': snap['toc']['sha1'], 'toc_bak': bool(snap['toc_bak']),
+                      'mods_files': None if snap['mods'] is None else len(snap['mods']),
+                      'toc_backup': snap.get('toc_backup')}, indent=2))
+
+
+def cmd_check_restored(a):
+    try:
+        before = json.loads(Path(a.snapshot).read_text())
+    except ValueError as e:
+        raise FormatError('snapshot is not valid JSON: %s' % e) from None
+    blocking, notes = gamestate.compare(before, gamestate.snapshot(a.game))
+    print(json.dumps({'restored': not blocking, 'blocking': blocking, 'notes': notes}, indent=2))
+    return 0 if not blocking else 3
+
+
 def build_parser():
     p = argparse.ArgumentParser(prog='sm2adapter', description=__doc__)
     sub = p.add_subparsers(dest='cmd', required=True)
@@ -209,6 +260,21 @@ def build_parser():
     s.add_argument('probe'); s.add_argument('output'); s.set_defaults(fn=cmd_package)
     s = sub.add_parser('unpack', help='split an STG (or bare DAT1) model file into probe files')
     s.add_argument('model'); s.add_argument('output'); s.set_defaults(fn=cmd_unpack)
+    s = sub.add_parser('sections', help='list DAT1 sections (with known names) of a model/STG file')
+    s.add_argument('file'); s.set_defaults(fn=cmd_sections)
+    s = sub.add_parser('manifest-check', help='validate an adapter manifest (and its targets against a game)')
+    s.add_argument('manifest'); s.add_argument('--game'); s.set_defaults(fn=cmd_manifest_check)
+    s = sub.add_parser('stage', help='build an Overstrike stage-v2 zip for one section (outside the game)')
+    s.add_argument('manifest'); s.add_argument('staging'); s.add_argument('output')
+    s.add_argument('--game', required=True); s.add_argument('--name'); s.add_argument('--author', default='NK adapter')
+    s.set_defaults(fn=cmd_stage)
+    s = sub.add_parser('verify-stage', help='check a stage zip (optionally against a game TOC)')
+    s.add_argument('stage'); s.add_argument('--game'); s.set_defaults(fn=cmd_verify_stage)
+    s = sub.add_parser('snapshot', help='record toc/toc.BAK/d/mods/archive state (read-only)')
+    s.add_argument('game'); s.add_argument('output'); s.add_argument('--backup-dir')
+    s.set_defaults(fn=cmd_snapshot)
+    s = sub.add_parser('check-restored', help='compare the game against a snapshot after rollback')
+    s.add_argument('game'); s.add_argument('snapshot'); s.set_defaults(fn=cmd_check_restored)
     s = sub.add_parser('compare', help='compare two extracted probe directories byte for byte')
     s.add_argument('before'); s.add_argument('after'); s.set_defaults(fn=cmd_compare)
     return p

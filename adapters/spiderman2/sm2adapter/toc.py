@@ -40,8 +40,9 @@ class Asset:
 class Toc:
     """Validated, lazily decoded TOC. Entry tables stay as memoryviews."""
 
-    def __init__(self, sha256, ids, meta, spans, archive_names, headers, section_tags):
+    def __init__(self, sha256, ids, meta, spans, archive_names, headers, section_tags, sha1=None):
         self.sha256 = sha256
+        self.sha1 = sha1  # Overstrike identifies game versions by the toc's SHA-1
         self._ids = ids
         self._meta = meta
         self.spans = spans
@@ -49,6 +50,16 @@ class Toc:
         self.headers = headers
         self.section_tags = section_tags
         self.count = len(ids) // _ID.size
+
+    def find(self, span, asset_id):
+        """Entry index of (span, asset_id), or None."""
+        if not 0 <= span < len(self.spans):
+            return None
+        start, n = self.spans[span]
+        for i in range(start, start + n):
+            if _ID.unpack_from(self._ids, i * _ID.size)[0] == asset_id:
+                return i
+        return None
 
     def asset(self, index):
         if not 0 <= index < self.count:
@@ -157,7 +168,7 @@ def parse_toc(data, limits=DEFAULT_LIMITS):
             seen.add(head)
             read_asset_header(headers, head, limits)
     return Toc(hashlib.sha256(data).hexdigest(), ids, meta, spans, names, headers,
-               ['0x%08x' % t for t in sec])
+               ['0x%08x' % t for t in sec], hashlib.sha1(data).hexdigest())
 
 
 def load_toc(game, limits=DEFAULT_LIMITS):

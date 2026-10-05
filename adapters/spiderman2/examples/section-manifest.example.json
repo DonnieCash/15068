@@ -1,0 +1,86 @@
+{
+  "format": "nk-sm2-manifest/1",
+  "section_id": "example-section-01",
+  "nk": {
+    "release": "SYNTHETIC-EXAMPLE (replace with the NK release id from the source audit)",
+    "audit_sha256": null,
+    "frame": {
+      "units": {
+        "status": "hypothesis",
+        "value": "metres",
+        "note": "NK site pipeline uses metres; confirm against the NK release audit"
+      },
+      "axes": {
+        "status": "unknown",
+        "value": null
+      },
+      "origin": {
+        "status": "unknown",
+        "value": null
+      }
+    }
+  },
+  "target": {
+    "game": "MSM2",
+    "game_version": "v1.526.0.0",
+    "toc_sha1": "6829BC78E277997D21483975545E0A27F7C0191A",
+    "toc_sha256": null,
+    "frame": {
+      "units": {
+        "status": "unknown",
+        "value": null
+      },
+      "axes": {
+        "status": "unknown",
+        "value": null
+      },
+      "handedness": {
+        "status": "unknown",
+        "value": null
+      }
+    }
+  },
+  "nk_to_game": {
+    "status": "unknown",
+    "matrix": null
+  },
+  "components": [
+    {
+      "nk": {
+        "tile_id": "tile-000",
+        "component_id": "building-0001",
+        "kind": "building",
+        "source": "tiles/tile-000/building-0001.glb",
+        "source_sha256": "d5fd20e081e5a152ac41c4e0111055d73171e91d42603eb49eefbb7a7cf2f876"
+      },
+      "target": {
+        "mode": "replace-model",
+        "span": 0,
+        "asset_id": "0x0123456789ABCDEF"
+      },
+      "geometry": {
+        "file": "models/tile-000_building-0001.model",
+        "sha256": "e6f6675b45ef124b1a858882d2ca4c6d95f72fbe9a547a9b8b396ca2923a0aad",
+        "vertices": 60,
+        "triangles": 98,
+        "header_policy": "keep-original"
+      },
+      "transform": {
+        "status": "unknown",
+        "matrix": null
+      },
+      "materials": [
+        {
+          "nk_material": "facade_brick",
+          "status": "unknown",
+          "target_material": null
+        }
+      ],
+      "collision": {
+        "strategy": "keep-original",
+        "status": "hypothesis",
+        "note": "the replaced model keeps its original Havok data, so collision will match the OLD shape"
+      }
+    }
+  ]
+}
