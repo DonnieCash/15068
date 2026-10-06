@@ -76,3 +76,29 @@ def unpack(data):
         out.append({'position': v[0:3], 'rotation': v[3:7], 'hash': v[7], 'flags': v[8], 'lod': v[9],
                     'unknown_int': v[10], 'unknown_float': v[11]})
     return out
+
+
+HEADER_NAMES = ('version', 'inst', 'unused1', 'grge', 'cars', 'cull', 'unused2', 'unused3', 'unused4',
+                'strbig', 'lcul', 'zone', 'unused5', 'unused6', 'unused7', 'unused8', 'blok')
+
+
+def inspect(data):
+    """Header counts and value statistics of the `inst` records of any WPL.
+
+    For copying flags/lod/unknown values from vanilla files: reports only
+    distinct values and counts, never positions, rotations or model hashes.
+    Assumes `inst` records follow the header, as in GTA4Unity's reader.
+    """
+    if len(data) < HEADER.size:
+        raise FormatError('WPL truncated')
+    h = dict(zip(HEADER_NAMES, HEADER.unpack_from(data)))
+    n = h['inst']
+    if n < 0 or len(data) < HEADER.size + n * INST.size:
+        raise FormatError('WPL shorter than its inst count')
+    stats = {k: {} for k in ('flags', 'lod_is_minus_one', 'unknown_int', 'unknown_float')}
+    for i in range(n):
+        v = INST.unpack_from(data, HEADER.size + i * INST.size)
+        for k, x in (('flags', v[8]), ('lod_is_minus_one', v[9] == -1), ('unknown_int', v[10]),
+                     ('unknown_float', round(v[11], 4))):
+            stats[k][str(x)] = stats[k].get(str(x), 0) + 1
+    return {'header': h, 'inst_value_counts': stats}

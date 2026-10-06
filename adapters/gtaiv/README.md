@@ -11,6 +11,7 @@ This directory sits in the NK15068 repo (`adapters/gtaiv/`) on its own branch, s
 | `obj-check`, `manifest-check` | validation reports | tested |
 | `build-section MANIFEST STAGING OUT` | `<section>.ide`, binary `<section>.wpl`, local-frame OBJs, collision bound JSON, `build-report.json` (`game_ready: false`) | tested on synthetic data; formats from public readers, not yet loaded in game |
 | `ofscan FILE` | structure-only summary of an OpenIV openFormats export (no numbers or names) | tested |
+| `wpl-inspect FILE` | header counts and inst flag/lod/unknown value statistics of a vanilla WPL (no positions) | tested |
 | `snapshot`, `check-restored` | game state with exe version, verified backups outside the game, rollback check | tested on a fake game folder |
 | `oiv PLAN FILES OUT`, `verify-oiv` | OpenIV Package 2.2 (`target="IV"`, IMG3 add, text add) from compiled files you list | tested; install not tried |
 | `hash NAME` | GTA IV model-name hashes | tested against standard vectors |

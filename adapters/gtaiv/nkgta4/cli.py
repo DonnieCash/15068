@@ -5,6 +5,7 @@
   manifest-check MANIFEST                validate a section manifest
   build-section MANIFEST STAGING OUT     IDE + WPL + local OBJs + collision intermediates
   ofscan FILE                            structure-only summary of an OpenIV openFormats file
+  wpl-inspect FILE                       header counts + inst value statistics of any WPL
   snapshot GAME OUT [--plan] [--backup-dir]   read-only state (+ verified backup outside the game)
   check-restored GAME SNAPSHOT           compare after rollback (exit 3 if not restored)
   oiv PLAN FILES OUT                     OpenIV Package 2.2 from an install plan
@@ -17,7 +18,7 @@ import zipfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-from . import gamestate, manifest, oiv, ofscan, section
+from . import gamestate, manifest, oiv, ofscan, section, wpl
 from .errors import FormatError
 from .jenkins import gta_hash
 from .objmesh import parse_obj
@@ -53,6 +54,10 @@ def cmd_build_section(a):
 
 def cmd_ofscan(a):
     print('\n'.join(ofscan.scan(Path(a.file).read_text(encoding='utf-8', errors='replace'))))
+
+
+def cmd_wpl_inspect(a):
+    print(json.dumps(wpl.inspect(Path(a.file).read_bytes()), indent=2))
 
 
 def cmd_snapshot(a):
@@ -122,6 +127,7 @@ def build_parser():
     s = sub.add_parser('build-section'); s.add_argument('manifest'); s.add_argument('staging'); s.add_argument('out')
     s.add_argument('--game', help='refuse an output folder inside this game folder'); s.set_defaults(fn=cmd_build_section)
     s = sub.add_parser('ofscan'); s.add_argument('file'); s.set_defaults(fn=cmd_ofscan)
+    s = sub.add_parser('wpl-inspect'); s.add_argument('file'); s.set_defaults(fn=cmd_wpl_inspect)
     s = sub.add_parser('snapshot'); s.add_argument('game'); s.add_argument('output')
     s.add_argument('--plan'); s.add_argument('--backup-dir'); s.set_defaults(fn=cmd_snapshot)
     s = sub.add_parser('check-restored'); s.add_argument('game'); s.add_argument('snapshot'); s.set_defaults(fn=cmd_check_restored)

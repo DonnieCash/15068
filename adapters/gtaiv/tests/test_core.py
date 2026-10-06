@@ -127,6 +127,17 @@ class WplTests(unittest.TestCase):
             with self.subTest(name), self.assertRaises(FormatError):
                 wpl.unpack(blob)
 
+    def test_inspect_reports_values_not_positions(self):
+        data = wpl.pack([self.INST, dict(self.INST, flags=5, lod=3)])
+        extra = struct.pack('<17i', 3, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)  # pretend one grge record follows
+        rep = wpl.inspect(extra + data[68:] + bytes(40))
+        self.assertEqual(rep['header']['grge'], 1)
+        self.assertEqual(rep['inst_value_counts']['flags'], {'0': 1, '5': 1})
+        self.assertEqual(rep['inst_value_counts']['lod_is_minus_one'], {'True': 1, 'False': 1})
+        self.assertNotIn('1.0', str(rep))
+        with self.assertRaises(FormatError):
+            wpl.inspect(data[:80])
+
 
 if __name__ == '__main__':
     unittest.main()
