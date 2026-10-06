@@ -1,0 +1,1 @@
+Read AGENTS.md, README.md, docs/RESEARCH.md and LOCAL_HANDOFF.md. This adapter targets GTA IV, not Spider-Man; it lives on its own branch in adapters/gtaiv/. Codex runs all local game work. Finish bounded milestones with an updated LOCAL_HANDOFF.md; do not spend credits watching CI or PR events.
