@@ -1,0 +1,41 @@
+{
+  "format": "nk-gta4-install/1",
+  "package": {
+    "name": "NK demo section",
+    "author": "NK adapter",
+    "description": "SYNTHETIC test package. Not game-ready.",
+    "major": 0,
+    "minor": 1
+  },
+  "guid": "{6B1C2D3E-4F50-4A61-8B72-93A4B5C6D7E8}",
+  "archive": {
+    "path": "pc\\data\\maps\\nk\\nk_demo.img",
+    "create_if_missing": true
+  },
+  "archive_files": [
+    {
+      "file": "compiled/nk_demo_road_0001.wdr",
+      "sha256": "REPLACE",
+      "name": "nk_demo_road_0001.wdr"
+    },
+    {
+      "file": "out/nk_demo.wpl",
+      "sha256": "REPLACE",
+      "name": "nk_demo.wpl"
+    }
+  ],
+  "loose_files": [
+    {
+      "file": "out/nk_demo.ide",
+      "sha256": "REPLACE",
+      "target": "pc\\data\\maps\\nk\\nk_demo.ide"
+    }
+  ],
+  "text_edits": [
+    {
+      "path": "common\\data\\images.txt",
+      "add": "REPLACE with a line in the exact form of the existing entries",
+      "note": "copy the pattern from the local images.txt; sources disagree on the second column"
+    }
+  ]
+}
