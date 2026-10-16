@@ -1,0 +1,10 @@
+# synthetic road: 20 m x 8 m strip, two quads (NK-style metres, z up)
+v 0 0 0
+v 10 0 0
+v 20 0 0
+v 0 8 0
+v 10 8 0
+v 20 8 0
+usemtl road
+f 1 2 5 4
+f 2 3 6 5

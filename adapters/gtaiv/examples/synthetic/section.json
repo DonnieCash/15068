@@ -1,0 +1,190 @@
+{
+  "format": "nk-gta4-manifest/1",
+  "section_id": "nk_demo",
+  "nk": {
+    "release": "SYNTHETIC (no NK data)",
+    "release_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "audit_sha256": null,
+    "frame": {
+      "units": {
+        "status": "hypothesis",
+        "value": "metres",
+        "note": "NK site pipeline convention; confirm from the NK release audit"
+      },
+      "axes": {
+        "status": "unknown"
+      },
+      "origin": {
+        "status": "unknown"
+      }
+    }
+  },
+  "target": {
+    "game": "GTAIV",
+    "exe_version": "1.0.7.0",
+    "exe_sha256": null,
+    "frame": {
+      "units": {
+        "status": "hypothesis",
+        "value": "metres",
+        "note": "assumed by GTA4Unity (1 unit = 1 Unity metre); confirm in game"
+      },
+      "axes": {
+        "status": "hypothesis",
+        "value": "Z up",
+        "note": "GTA4Unity RageCoordinates.cs: RAGE is right-handed, Z up"
+      },
+      "handedness": {
+        "status": "hypothesis",
+        "value": "right-handed",
+        "note": "GTA4Unity RageCoordinates.cs"
+      }
+    }
+  },
+  "nk_to_game": {
+    "status": "hypothesis",
+    "value": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "note": "SYNTHETIC identity for the dry run; the real section needs a measured transform to an empty test area"
+  },
+  "components": [
+    {
+      "nk": {
+        "tile_id": "tile_demo",
+        "component_id": "road_0001",
+        "layer": "road",
+        "source": "SYNTHETIC/road.obj",
+        "source_sha256": "8ab32b6ac793df65ba1acf883440654204a64bd3c3803df3870b74c09c5d0b4f"
+      },
+      "render": {
+        "obj": "road.obj",
+        "sha256": "8ab32b6ac793df65ba1acf883440654204a64bd3c3803df3870b74c09c5d0b4f"
+      },
+      "model": {
+        "name": "nk_demo_road_0001",
+        "txd": "nk_demo",
+        "draw_distance": 300
+      },
+      "wdd": {
+        "status": "hypothesis",
+        "value": "null",
+        "note": "SYNTHETIC placeholder for the cloud dry run; replace with values copied from a comparable vanilla object (LOCAL_HANDOFF G2)"
+      },
+      "ide_flags": {
+        "status": "hypothesis",
+        "value": [
+          0,
+          0
+        ],
+        "note": "SYNTHETIC placeholder for the cloud dry run; replace with values copied from a comparable vanilla object (LOCAL_HANDOFF G2)"
+      },
+      "placement": {
+        "status": "hypothesis",
+        "value": {
+          "flags": 0,
+          "lod": -1,
+          "unknown_int": 0,
+          "unknown_float": 0.0
+        },
+        "note": "SYNTHETIC placeholder for the cloud dry run; replace with values copied from a comparable vanilla object (LOCAL_HANDOFF G2)"
+      },
+      "lod_parent": {
+        "status": "unknown"
+      },
+      "materials": [
+        {
+          "nk_material": "road",
+          "status": "unknown"
+        }
+      ],
+      "collision": {
+        "source": "render",
+        "surface": {
+          "status": "unknown"
+        },
+        "outcome": {
+          "status": "hypothesis",
+          "value": "player can walk/drive on it",
+          "note": "to be tested in game (LOCAL_HANDOFF G6)"
+        }
+      }
+    },
+    {
+      "nk": {
+        "tile_id": "tile_demo",
+        "component_id": "building_0001",
+        "layer": "bldg_res_cream",
+        "source": "SYNTHETIC/building.obj",
+        "source_sha256": "82114b47a5493aec25879c8eb22d03f1d26a736dcc900528f40e1b409d7c83f8"
+      },
+      "render": {
+        "obj": "building.obj",
+        "sha256": "82114b47a5493aec25879c8eb22d03f1d26a736dcc900528f40e1b409d7c83f8"
+      },
+      "model": {
+        "name": "nk_demo_bldg_0001",
+        "txd": "nk_demo",
+        "draw_distance": 300
+      },
+      "wdd": {
+        "status": "hypothesis",
+        "value": "null",
+        "note": "SYNTHETIC placeholder for the cloud dry run; replace with values copied from a comparable vanilla object (LOCAL_HANDOFF G2)"
+      },
+      "ide_flags": {
+        "status": "hypothesis",
+        "value": [
+          0,
+          0
+        ],
+        "note": "SYNTHETIC placeholder for the cloud dry run; replace with values copied from a comparable vanilla object (LOCAL_HANDOFF G2)"
+      },
+      "placement": {
+        "status": "hypothesis",
+        "value": {
+          "flags": 0,
+          "lod": -1,
+          "unknown_int": 0,
+          "unknown_float": 0.0
+        },
+        "note": "SYNTHETIC placeholder for the cloud dry run; replace with values copied from a comparable vanilla object (LOCAL_HANDOFF G2)"
+      },
+      "lod_parent": {
+        "status": "unknown"
+      },
+      "materials": [
+        {
+          "nk_material": "bldg_res_cream",
+          "status": "unknown"
+        }
+      ],
+      "collision": {
+        "source": "render",
+        "surface": {
+          "status": "unknown"
+        },
+        "outcome": {
+          "status": "hypothesis",
+          "value": "player can walk/drive on it",
+          "note": "to be tested in game (LOCAL_HANDOFF G6)"
+        }
+      }
+    }
+  ]
+}
